@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.log.mapper.LogMapper">
+
+    <select id="count" parameterType="logSearchCondition" resultType="int">
+		/* LogMapper.count */
+        SELECT COUNT(DISTINCT LOG.CALL_KEY)
+        FROM IAAP_STT_LOG LOG
+        WHERE LOG.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+            AND LOG.SERVICE_MODEL_ID = #{serviceModelId}
+        </if>
+        <if test="status != null">
+            AND LOG.STATUS = #{status}
+        </if>
+        <if test="callKey != null and callKey != ''">
+            AND LOG.CALL_KEY LIKE CONCAT('%', #{callKey}, '%')
+        </if>
+        <if test="transcript != null and transcript != ''">
+            AND LOG.TRANSCRIPT LIKE CONCAT('%', #{transcript}, '%')
+        </if>
+        <choose>
+            <when test="cerFrom != null">
+                AND LOG.CER >= #{cerFrom}
+            </when>
+            <otherwise>
+                AND LOG.CER >= 0
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="cerTo != null">
+                <![CDATA[
+                AND LOG.CER <= #{cerTo}
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND LOG.CER <= 100
+                ]]>
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="startAtFrom != null and startAtFrom != ''">
+                AND LOG.START_AT >= CONCAT(#{startAtFrom}, ' ', '00:00:00')
+            </when>
+            <otherwise>
+                AND LOG.START_AT >= '2022-01-01 00:00:00'
+            </otherwise>
+        </choose>
+        <if test="startAtTo != null and startAtTo != ''">
+            <![CDATA[
+            AND LOG.START_AT <= #{startAtTo}
+            ]]>
+        </if>
+    </select>
+
+    <select id="search" parameterType="logSearchCondition" resultType="logListDto">
+		/* LogMapper.search */
+        SELECT
+			A.CALL_KEY AS callKey
+		    , A.NUM_OF_TRANSCRIPT AS numOfTranscript
+		    , A.WORST_CER AS worstCer
+		    , ISSM.SERVICE_MODEL_NAME AS serviceModelName
+		    , START_AT AS startAt
+		    , ( SELECT TRANSCRIPT FROM IAAP_STT_LOG AS log2 WHERE log2.CALL_KEY = A.CALL_KEY AND log2.CER = A.WORST_CER LIMIT 1) AS worstTranscript
+		    , (
+				SELECT
+					CASE WHEN COUNT(STATUS) > 0 THEN 'INCOMPLETE' ELSE 'COMPLETE'
+					END AS STATUS
+					FROM
+						IAAP_STT_LOG AS b
+					WHERE
+						b.CALL_KEY = A.CALL_KEY AND b.STATUS = 'INCOMPLETE'
+				) AS status
+        FROM 
+        	(
+        	SELECT
+				CALL_KEY,
+			    NUM_OF_TRANSCRIPT,
+			    WORST_CER,
+			    START_AT
+			FROM
+				(
+        		SELECT
+        			LOG.CALL_KEY,
+		            COUNT(LOG.ID) NUM_OF_TRANSCRIPT,
+		            MIN(LOG.CER) WORST_CER,
+		            MIN(LOG.START_AT) START_AT
+		        FROM IAAP_STT_LOG AS LOG
+		        WHERE LOG.USE_YN = 'Y'
+		        <if test="serviceModelId != null">
+		            AND LOG.SERVICE_MODEL_ID = #{serviceModelId}
+		        </if>
+		        <if test="status != null">
+		             AND (
+							SELECT
+									CASE WHEN COUNT(STATUS) > 0 THEN 'INCOMPLETE' ELSE 'COMPLETE'
+									END AS STATUS
+							FROM
+									IAAP_STT_LOG AS b
+							WHERE
+									b.CALL_KEY = LOG.CALL_KEY AND b.STATUS = 'INCOMPLETE'
+						) = #{status}
+		        </if>
+		        <if test="callKey != null and callKey != ''">
+		            AND LOG.CALL_KEY LIKE CONCAT('%', #{callKey}, '%')
+		        </if>
+		        <if test="transcript != null and transcript != ''">
+		            AND LOG.TRANSCRIPT LIKE CONCAT('%', #{transcript}, '%')
+		        </if>
+		        <choose>
+		            <when test="cerFrom != null">
+		                AND LOG.CER >= #{cerFrom}
+		            </when>
+		            <otherwise>
+		                AND LOG.CER >= 0
+		            </otherwise>
+		        </choose>
+		        <choose>
+		            <when test="cerTo != null">
+		                <![CDATA[
+		                AND LOG.CER <= #{cerTo}
+		                ]]>
+		            </when>
+		            <otherwise>
+		                <![CDATA[
+		                AND LOG.CER <= 100
+		                ]]>
+		            </otherwise>
+		        </choose>
+		        <choose>
+		            <when test="startAtFrom != null and startAtFrom != ''">
+		                AND LOG.START_AT >= CONCAT(#{startAtFrom}, ' ', '00:00:00')
+		            </when>
+		            <otherwise>
+		                AND LOG.START_AT >= '2022-01-01 00:00:00'
+		            </otherwise>
+		        </choose>
+		        <choose>
+		            <when test="startAtTo != null and startAtTo != ''">
+		                <![CDATA[
+		                AND LOG.START_AT <= CONCAT(#{startAtTo}, ' ', '23:59:59')
+		                ]]>
+		            </when>
+		            <otherwise>
+		                <![CDATA[
+		                AND LOG.START_AT <= NOW()
+		                ]]>
+		            </otherwise>
+		        </choose>
+		        GROUP BY LOG.CALL_KEY
+        	) AS log3
+		) AS A
+        JOIN (
+        	SELECT 
+			    		CALL_KEY
+			    		, SERVICE_MODEL_ID
+			    		, CER
+			    	FROM
+			    		IAAP_STT_LOG
+			    	GROUP BY CALL_KEY, SERVICE_MODEL_ID, CER
+        ) AS ISL
+        ON
+            A.CALL_KEY = ISL.CALL_KEY
+        	AND A.WORST_CER = ISL.CER
+		JOIN
+			IAAP_STT_SERVICE_MODEL AS ISSM
+		ON
+			ISSM.SERVICE_CODE = CAST(ISL.SERVICE_MODEL_ID AS VARCHAR(100))
+		ORDER BY START_AT DESC
+        LIMIT #{size}
+        OFFSET #{start};
+    </select>
+
+    <select id="findByCallKey" resultType="logDto">
+		/* LogMapper.findByCallKey */
+        SELECT
+			ISL.ID,
+			ISL.CALL_KEY,
+			ISL.DIRECTION,
+			ISL.START_AT,
+			ISL.END_AT,
+			ISL.WAV_FILE_PATH,
+			ISL.SERVICE_MODEL_ID,
+			ISSM.SERVICE_MODEL_NAME,
+			ISL.ASSISTANT_ID,
+			ISL.STATUS,
+			ISL.TRANSCRIPT,
+			ISL.TRANSCRIPT_START,
+			ISL.TRANSCRIPT_END,
+			ISL.CER,
+			ISL.USED_AS_DICTATION,
+			CASE WHEN (
+				SELECT
+						COUNT(STATUS)
+				FROM
+						IAAP_STT_LOG AS b
+				WHERE
+						b.CALL_KEY = ISL.CALL_KEY
+					AND b.STATUS != 'COMPLETE' 
+				 	) > 0 THEN 'INCOMPLETE'
+				ELSE 'COMPLETE'
+			END AS status
+		FROM
+			IAAP_STT_LOG AS ISL
+		JOIN
+			IAAP_STT_SERVICE_MODEL AS ISSM
+		ON
+			ISSM.SERVICE_CODE = ISL.SERVICE_MODEL_ID
+		WHERE
+			ISL.USE_YN = 'Y'
+		AND ISL.CALL_KEY = #{callKey}
+    </select>
+
+    <select id="findById" resultType="logDto">
+		/* LogMapper.findById */
+        SELECT
+            ID,
+            CALL_KEY,
+            DIRECTION,
+            START_AT,
+            END_AT,
+            WAV_FILE_PATH,
+            SERVICE_MODEL_ID,
+            ASSISTANT_ID,
+            STATUS,
+            TRANSCRIPT,
+            TRANSCRIPT_START,
+            TRANSCRIPT_END,
+            CER,
+            USED_AS_DICTATION
+        FROM IAAP_STT_LOG
+        WHERE USE_YN = 'Y'
+          AND ID = #{id}
+    </select>
+
+    <select id="findFirstStartAtByCallKey" resultType="string">
+		/* LogMapper.findFirstStartAtByCallKey */
+        SELECT
+            MIN(START_AT)
+        FROM IAAP_STT_LOG
+        WHERE USE_YN = 'Y'
+        GROUP BY CALL_KEY
+        HAVING CALL_KEY = #{callKey}
+    </select>
+
+    <select id="findTranscriptByCallKeyAndCer" resultType="string">
+		/* LogMapper.findTranscriptByCallKeyAndCer */
+        SELECT
+            TRANSCRIPT
+        FROM IAAP_STT_LOG
+        WHERE USE_YN = 'Y'
+        AND CALL_KEY = #{callKey}
+        AND CER = #{cer}
+    </select>
+
+    <select id="findServiceModelNameByCallKey" resultType="string">
+		/* LogMapper.findServiceModelNameByCallKey */
+        SELECT
+            SERVICE_MODEL.SERVICE_MODEL_NAME
+        FROM IAAP_STT_LOG AS LOG
+        JOIN IAAP_STT_SERVICE_MODEL AS SERVICE_MODEL ON SERVICE_MODEL.ID = LOG.SERVICE_MODEL_ID
+        WHERE LOG.USE_YN = 'Y'
+        AND LOG.CALL_KEY = #{callKey}
+        LIMIT 1
+    </select>
+
+    <select id="findByWavFilePath" resultType="logDto">
+		/* LogMapper.findByWavFilePath */
+        SELECT
+            ID,
+            CALL_KEY,
+            DIRECTION,
+            START_AT,
+            END_AT,
+            WAV_FILE_PATH,
+            SERVICE_MODEL_ID,
+            ASSISTANT_ID,
+            STATUS,
+            TRANSCRIPT,
+            TRANSCRIPT_START,
+            TRANSCRIPT_END,
+            CER,
+            USED_AS_DICTATION
+        FROM IAAP_STT_LOG
+        WHERE USE_YN = 'Y'
+        AND WAV_FILE_PATH = #{wavFilePath}
+        LIMIT 1
+    </select>
+
+    <select id="countByCallKeyAndStatus" resultType="int">
+		/* LogMapper.countByCallKeyAndStatus */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_LOG
+        WHERE USE_YN = 'Y'
+        AND CALL_KEY = #{callKey}
+        AND STATUS = #{status}
+    </select>
+
+    <insert id="save" parameterType="logSaveDto">
+		/* LogMapper.save */
+        INSERT INTO IAAP_STT_LOG
+        (
+            ID,
+            CALL_KEY,
+            CUSTOMER_IDENTIFIER,
+            DIRECTION,
+            START_AT,
+            START_TIME,
+            END_TIME,
+            WAV_FILE_PATH,
+            SERVICE_MODEL_ID,
+            ASSISTANT_ID,
+            STATUS,
+            FAIL_CAUSE,
+            TRANSCRIPT,
+            TRANSCRIPT_START,
+            TRANSCRIPT_END,
+            CER,
+            SENTENCE_WAV_PATH,
+            WORDS
+        ) VALUES
+        (
+            NEXTVAL(SEQ_IAAP_STT_LOG),
+            #{callKey},
+            #{customerIdentifier},
+            #{direction},
+            CURRENT_TIMESTAMP,
+            #{startTime},
+            #{endTime},
+            #{wavFilePath},
+            #{serviceModelId},
+            #{assistantId},
+            #{status},
+            #{failCause},
+            #{transcript},
+            #{transcriptStart},
+            #{transcriptEnd},
+            #{cer},
+            #{sentenceWavPath},
+            #{words}
+        )
+    </insert>
+
+    <update id="delete">
+		/* LogMapper.delete */
+        UPDATE IAAP_STT_LOG
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updateUsedAsDictation">
+		/* LogMapper.updateUsedAsDictation */
+        UPDATE IAAP_STT_LOG
+        SET USED_AS_DICTATION = #{usedAsDictation}
+        WHERE ID = #{id}
+    </update>
+    
+    <select id="isExistLogInDictationByCallkeyList" resultType="int" parameterType="list">
+		SELECT
+			COUNT(*)
+		FROM 
+			IAAP_STT_DICTATION isd 
+		WHERE 
+			isd.WAV_FILE_PATH IN (
+				SELECT WAV_FILE_PATH 
+				FROM
+					IAAP_STT_LOG isl 
+				WHERE 
+					isl.CALL_KEY IN 
+			        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+			            #{item}
+			        </foreach>
+				GROUP BY WAV_FILE_PATH 
+		) AND isd.USE_YN = 'Y';
+	</select>
+</mapper>

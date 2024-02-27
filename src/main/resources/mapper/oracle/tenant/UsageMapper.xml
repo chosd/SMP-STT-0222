@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.dictation.mapper.UsageMapper">
+
+    <select id="findByDictationId" resultType="usageDto">
+		/* UsageMapper.findByDictationId */
+        SELECT
+            ID,
+            DICTATION_ID,
+            VERIFY_DATASET_ID,
+            AM_TRAIN_DATA_DIRECTORY_ID,
+            WAV_FILE_NAME,
+            TYPE
+        FROM IAAP_STT_USAGE
+        WHERE USE_YN = 'Y'
+        AND DICTATION_ID = #{dictationId}
+    </select>
+
+    <select id="findByDictationIdAndType" resultType="usageDto">
+		/* UsageMapper.findByDictationIdAndType */
+        SELECT
+            ID,
+            TYPE,
+            DICTATION_ID,
+            VERIFY_DATASET_ID,
+            AM_TRAIN_DATA_DIRECTORY_ID,
+            AM_DATA_PATH,
+            WAV_FILE_NAME
+        FROM IAAP_STT_USAGE
+        WHERE USE_YN = 'Y'
+        AND DICTATION_ID = #{dictationId}
+        AND TYPE = #{type}
+    </select>
+
+    <insert id="save" parameterType="usageSaveDto">
+		/* UsageMapper.save */
+        INSERT INTO IAAP_STT_USAGE
+        (
+            ID,
+            DICTATION_ID,
+            VERIFY_DATASET_ID,
+            AM_TRAIN_DATA_DIRECTORY_ID,
+            AM_DATA_PATH,
+            WAV_FILE_NAME,
+            TYPE,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP
+        ) VALUES
+        (
+            SEQ_IAAP_STT_USAGE.NEXTVAL,
+            #{dictationId},
+            #{verifyDatasetId},
+            #{amTrainDataDirectoryId},
+            #{amDataPath},
+            #{wavFileName},
+            #{type},
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp}
+        )
+    </insert>
+
+    <update id="delete">
+		/* UsageMapper.delete */
+        UPDATE IAAP_STT_USAGE
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+
+    <update id="deleteByDictationId">
+		/* UsageMapper.deleteByDictationId */
+        UPDATE IAAP_STT_USAGE
+        SET USE_YN = 'N'
+        WHERE DICTATION_ID = #{dictationId}
+    </update>
+</mapper>

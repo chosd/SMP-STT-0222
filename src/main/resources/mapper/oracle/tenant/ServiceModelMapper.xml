@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.comm.serviceModel.mapper.ServiceModelMapper">
+
+    <resultMap id="serviceModelResultMap" type="com.kt.smp.stt.comm.serviceModel.domain.ServiceModelVO">
+        <id column="ID" property="id"/>
+        <result column="SERVICE_MODEL_NAME" property="serviceModelName"/>
+        <result column="SERVICE_CODE" property="serviceCode"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+    </resultMap>
+
+    <select id="listAll" resultMap="serviceModelResultMap">
+		/* ServiceModelMapper.listAll */
+        SELECT
+            ID,
+            SERVICE_MODEL_NAME
+            , DESCRIPTION
+            , SERVICE_CODE
+            , REG_DT
+            , REG_ID
+            , REG_IP
+            , UPD_DT
+            , UPD_ID
+            , UPD_IP
+            , USE_YN
+        FROM IAAP_STT_SERVICE_MODEL 
+        WHERE USE_YN = 'Y'
+    </select>
+
+    <!--  SELECT  -->
+    <select id="listPage"
+            parameterType="com.kt.smp.stt.comm.serviceModel.domain.ServiceModelSearchCondition"
+            resultMap="serviceModelResultMap">
+        /* ServiceModelMapper.listPage */
+        SELECT
+        SSM.ID
+        , SSM.SERVICE_MODEL_NAME
+        , SSM.SERVICE_CODE
+        , SSM.DESCRIPTION
+        , SSM.REG_DT
+        , SSM.REG_ID
+        , SSM.REG_IP
+        , SSM.UPD_DT
+        , SSM.UPD_ID
+        , SSM.UPD_IP
+        , SSM.USE_YN
+        FROM IAAP_STT_SERVICE_MODEL SSM
+        WHERE
+        	SSM.USE_YN = 'Y'
+        <if test="serviceModelName != null and serviceModelName != ''"><![CDATA[
+            AND SSM.SERVICE_MODEL_NAME LIKE '%' || #{serviceModelName} || '%'
+        ]]></if>
+        <if test="serviceCode != null and serviceCode != ''"><![CDATA[
+            AND SSM.SERVICE_CODE LIKE '%' || #{serviceCode} || '%'
+        ]]></if>
+        <if test="uploadedBy != null and uploadedBy != ''"><![CDATA[
+            AND SSM.REG_ID LIKE '%' || #{uploadedBy} || '%'
+        ]]></if>
+        <if test="description != null and description != ''"><![CDATA[
+            AND SSM.DESCRIPTION LIKE '%' || #{description} || '%'
+        ]]></if>
+        <choose>
+            <when test="from != null">
+                AND SSM.REG_DT >= to_date(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND SSM.REG_DT >= to_date('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                AND SSM.REG_DT &lt;= to_date(#{to} || ' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND SSM.REG_DT &lt;= current_date
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="detail" parameterType="Long" resultMap="serviceModelResultMap">
+        /* ServiceModelMapper.detail */
+        SELECT SSM.ID
+             , SSM.SERVICE_MODEL_NAME
+             , SSM.SERVICE_CODE
+             , SSM.DESCRIPTION
+             , SSM.REG_DT
+             , SSM.REG_ID
+             , SSM.REG_IP
+             , SSM.UPD_DT
+             , SSM.UPD_ID
+             , SSM.UPD_IP
+             , SSM.USE_YN
+        FROM IAAP_STT_SERVICE_MODEL SSM
+        WHERE SSM.ID = #{serviceModelId}
+          AND SSM.USE_YN = 'Y'
+    </select>
+
+    <select id="detailByServiceCode" parameterType="String" resultMap="serviceModelResultMap">
+        /* ServiceModelMapper.detailByServiceCode */
+        SELECT SSM.ID
+             , SSM.SERVICE_MODEL_NAME
+             , SSM.SERVICE_CODE
+             , SSM.DESCRIPTION
+             , SSM.REG_DT
+             , SSM.REG_ID
+             , SSM.REG_IP
+             , SSM.UPD_DT
+             , SSM.UPD_ID
+             , SSM.UPD_IP
+             , SSM.USE_YN
+        FROM IAAP_STT_SERVICE_MODEL SSM
+        WHERE SSM.SERVICE_CODE = #{serviceCode}
+          AND SSM.USE_YN = 'Y'
+    </select>
+
+    <select id="findByName" resultMap="serviceModelResultMap">
+		/* ServiceModelMapper.findByName */
+        SELECT SSM.ID
+             , SSM.SERVICE_MODEL_NAME
+             , SSM.SERVICE_CODE
+             , SSM.DESCRIPTION
+             , SSM.REG_DT
+             , SSM.REG_ID
+             , SSM.REG_IP
+             , SSM.UPD_DT
+             , SSM.UPD_ID
+             , SSM.UPD_IP
+             , SSM.USE_YN
+        FROM IAAP_STT_SERVICE_MODEL SSM
+        WHERE SSM.USE_YN = 'Y'
+          AND SSM.SERVICE_MODEL_NAME = #{name}
+    </select>
+
+    <select id="count" parameterType="com.kt.smp.stt.comm.serviceModel.domain.ServiceModelSearchCondition"
+            resultType="int">
+        /* ServiceModelMapper.count */
+        SELECT COUNT(1)
+        FROM
+        IAAP_STT_SERVICE_MODEL SSM
+        WHERE 1 = 1 
+        	AND SSM.USE_YN = 'Y'
+        <if test="serviceModelName != null and serviceModelName != ''"><![CDATA[
+            AND SSM.SERVICE_MODEL_NAME = #{serviceModelName}
+        ]]></if>
+        <if test="serviceCode != null and serviceCode != ''"><![CDATA[
+            AND SSM.SERVICE_CODE = #{serviceCode}
+        ]]></if>
+        <if test="uploadedBy != null and uploadedBy != ''"><![CDATA[
+                AND SSM.REG_ID = #{uploadedBy}
+            ]]></if>
+        <choose>
+            <when test="from != null">
+                AND SSM.REG_DT >= to_date(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND SSM.REG_DT >= to_date('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                   AND SSM.REG_DT &lt;= to_date(#{to} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                   AND SSM.REG_DT &lt;= current_date
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="exists" parameterType="Long" resultType="int">
+    	/* ServiceModelMapper.exists */
+        SELECT case when 
+        	EXISTS(SELECT 1 FROM IAAP_STT_SERVICE_MODEL SSM WHERE SSM.ID = #{serviceModelId} AND SSM.USE_YN = 'Y')
+        	THEN 1 ELSE 0 END isExists FROM dual
+    </select>
+
+    <select id="existServiceModelName" parameterType="String" resultType="int">
+        /* ServiceModelMapper.existServiceModelName */
+        SELECT case when
+        	EXISTS(SELECT 1 FROM IAAP_STT_SERVICE_MODEL SSM WHERE SSM.SERVICE_MODEL_NAME = #{serviceModelName} AND SSM.USE_YN = 'Y')
+        THEN 1 ELSE 0 END isExists FROM dual
+    </select>
+    
+    <select id="existServiceCode" parameterType="String" resultType="int">
+        /* ServiceModelMapper.existServiceCode */
+        SELECT case when
+        	EXISTS(SELECT 1 FROM IAAP_STT_SERVICE_MODEL SSM WHERE SSM.SERVICE_CODE = #{serviceCode} AND SSM.USE_YN = 'Y')
+        THEN 1 ELSE 0 END isExists FROM dual
+    </select>
+
+    <!--  INSERT  -->
+    <insert id="insert" parameterType="com.kt.smp.stt.comm.serviceModel.domain.ServiceModelVO">
+        /* ServiceModelMapper.insert */
+        INSERT INTO IAAP_STT_SERVICE_MODEL( ID
+                                          , SERVICE_MODEL_NAME
+                                          , SERVICE_CODE
+                                          , DESCRIPTION
+                                          , REG_DT
+                                          , REG_ID
+                                          , REG_IP
+                                          , UPD_DT
+                                          , UPD_ID
+                                          , UPD_IP
+                                          , USE_YN)
+        VALUES ( SEQ_IAAP_STT_SERVICE_MODEL.NEXTVAL
+               , #{serviceModelName}
+               , #{serviceCode}
+               , #{description}
+               , CURRENT_TIMESTAMP
+               , #{regId}
+               , #{regIp}
+               , NULL
+               , NULL
+               , NULL
+               , 'Y')
+    </insert>
+
+    <!--  UPDATE  -->	
+    <update id="update" parameterType="com.kt.smp.stt.comm.serviceModel.domain.ServiceModelVO">
+        /* ServiceModelMapper.update */
+        UPDATE
+            IAAP_STT_SERVICE_MODEL
+        SET SERVICE_MODEL_NAME     = #{serviceModelName}
+          , SERVICE_CODE           = #{serviceCode}
+          , DESCRIPTION            = #{description}
+          , UPD_DT                 = CURRENT_TIMESTAMP
+          , UPD_ID                 = #{updId}
+          , UPD_IP                 = #{updIp}
+        WHERE ID = #{id}
+          AND USE_YN = 'Y'
+    </update>
+
+    <update id="delete" parameterType="Long">
+        /* ServiceModelMapper.delete */
+        UPDATE
+        IAAP_STT_SERVICE_MODEL
+        SET
+        SERVICE_CODE = SERVICE_CODE || '0' || ID
+        , USE_YN = 'N'
+        WHERE
+        ID IN
+        <foreach collection="serviceModelIdList" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="countDuplicateServiceModelName" parameterType="String" resultType="int">
+        /* ServiceModelMapper.countDuplicateServiceModelName */
+        SELECT COUNT(1)
+        FROM IAAP_STT_SERVICE_MODEL SSM
+        WHERE SSM.SERVICE_MODEL_NAME = #{serviceModelName}
+          AND USE_YN = 'Y'
+    </select>
+
+    <select id="countDuplicateServiceCode" parameterType="String" resultType="int">
+        /* ServiceModelMapper.countDuplicateServiceCode */
+        SELECT COUNT(1)
+        FROM IAAP_STT_SERVICE_MODEL SSM
+        WHERE SSM.SERVICE_CODE = #{serviceCode}
+          AND USE_YN = 'Y'
+    </select>
+</mapper>

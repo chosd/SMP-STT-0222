@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ko"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorate="layouts/nolayout">
+	<th:block layout:fragment="html">
+		<div class="contentRoot">
+			<div class="content-header">
+				<h2>디렉토리 그룹 관리</h2>
+				<div class="button-group">
+					<button id="groupRegistrationDialogBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+						<span class="mdc-button__ripple"></span>
+						<i class="material-icons mdc-button__icon">add</i>
+						<span class="mdc-button__label">디렉토리 그룹 등록</span>
+					</button>
+				</div>
+			</div>
+			<div class="content-body">
+				<div class="card">
+					<div class="card-header">
+						<div class="form-row md-size">
+							<div id="pathGubunSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+								<div class="mdc-select__anchor">
+									<div class="mdc-notched-outline">
+										<span class="mdc-notched-outline__leading"></span>
+										<div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label">구분</label>
+										</div>
+										<span class="mdc-notched-outline__trailing"></span>
+									</div>
+									<span class="mdc-select__selected-text-container overflow-hidden">
+										<span class="mdc-select__selected-text"></span>
+									</span>
+									<span class="mdc-select__dropdown-icon"></span>
+								</div>
+								<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+									<ul class="mdc-deprecated-list">
+										<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="ALL" aria-selected="true">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">전체</span>
+										</li>
+										<li class="mdc-deprecated-list-item" data-value="TRAIN" >
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">학습</span>
+										</li>
+										<li class="mdc-deprecated-list-item" data-value="VERIFY">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">검증</span>
+										</li>
+									</ul>
+								</div>
+							</div>
+							<div id="textTypeSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+								<div class="mdc-select__anchor">
+									<div class="mdc-notched-outline">
+										<span class="mdc-notched-outline__leading"></span>
+										<div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label">검색타입</label>
+										</div>
+										<span class="mdc-notched-outline__trailing"></span>
+									</div>
+									<span class="mdc-select__selected-text-container overflow-hidden">
+										<span class="mdc-select__selected-text"></span>
+									</span>
+									<span class="mdc-select__dropdown-icon"></span>
+								</div>
+								<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+									<ul class="mdc-deprecated-list">
+										<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="ALL" aria-selected="true">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">전체</span>
+										</li>
+										<li class="mdc-deprecated-list-item" data-value="NAME" >
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">그룹명</span>
+										</li>
+										<li class="mdc-deprecated-list-item" data-value="ID">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">그룹ID</span>
+										</li>
+									</ul>
+								</div>
+							</div>
+							<div class="mdc-text-field text-field mdc-text-field--outlined flex-auto search-bar">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" v-model="text" @keyup.enter="doSearch"/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >검색어</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+							<button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="doSearch">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">search</i>
+								<span class="mdc-button__label">검색</span>
+							</button>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="table-controls form-row md-size">
+							<div class="table-result-info flex-auto">
+								<h4>검색결과 : <span>{{fn.addComma(0 < itemFromNum ? itemToNum+1 : 0)}}</span> ~ <span>{{fn.addComma(itemFromNum)}}</span> / 총 <span>{{fn.addComma(totalCount)}}</span>건</h4>
+							</div>
+							<button
+									class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--error"
+									@click="doDelete">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">delete</i>
+								<span class="mdc-button__label">선택 삭제</span>
+							</button>
+							<div id="sizeSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+								<div class="mdc-select__anchor">
+									<div class="mdc-notched-outline">
+										<span class="mdc-notched-outline__leading"></span>
+										<div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label">레코드 수</label>
+										</div>
+										<span class="mdc-notched-outline__trailing"></span>
+									</div>
+									<span class="mdc-select__selected-text-container overflow-hidden">
+										<span class="mdc-select__selected-text"></span>
+									</span>
+									<span class="mdc-select__dropdown-icon"></span>
+								</div>
+								<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+									<ul class="mdc-deprecated-list">
+										<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="5" aria-selected="true" @click="size=5;">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">5개</span>
+										</li>
+										<li class="mdc-deprecated-list-item" data-value="10" @click="size=10;">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">10개</span>
+										</li>
+										<li class="mdc-deprecated-list-item " data-value="50" @click="size=50;">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">50개</span>
+										</li>
+										<li class="mdc-deprecated-list-item " data-value="100" @click="size=100;">
+											<span class="mdc-deprecated-list-item__ripple"></span>
+											<span class="mdc-deprecated-list-item__text">100개</span>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<div class="table-container">
+							<!-- loading bar -->
+							<div id="groupListLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+								<div class="mdc-linear-progress__buffering-dots"></div>
+								<div class="mdc-linear-progress__buffer"></div>
+								<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+									<span class="mdc-linear-progress__bar-inner"></span>
+								</div>
+								<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+									<span class="mdc-linear-progress__bar-inner"></span>
+								</div>
+							</div>
+							<div class="mdc-data-table">
+								<div class="mdc-data-table__table-container">
+									<table class="mdc-data-table__table">
+										<thead>
+											<tr class="mdc-data-table__header-row">
+												<th class="mdc-data-table__header-cell mdc-data-table__header-cell--checkbox text-center" role="columnheader" scope="col">
+													<div class="mdc-checkbox mdc-data-table__header-row-checkbox mdc-checkbox--upgraded mdc-checkbox--selected mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+														<input id="chk-all" type="checkbox" class="mdc-checkbox__native-control" aria-checked="mixed" />
+														<div class="mdc-checkbox__background">
+															<svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+																<path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path></svg>
+															<div class="mdc-checkbox__mixedmark"></div>
+														</div>
+														<div class="mdc-checkbox__ripple"></div>
+													</div>
+												</th>
+												<th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">그룹ID</th>
+												<th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">그룹명</th>
+												<th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">구분</th>
+												<th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">기본경로</th>
+												<th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">설명</th>
+												<th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">등록일시</th>
+											</tr>
+										</thead>
+										<tbody class="mdc-data-table__content" v-if="0 == currentList.length">
+											<tr class="mdc-data-table__row is-non-clickable" aria-selected="false" >
+												<td class="text-center" colspan="5">검색 결과가 없습니다.</td>
+											</tr>
+										</tbody>
+										<tbody class="mdc-data-table__content" v-if="0 < currentList.length">
+											<tr v-for="(item, idx) in currentList" :data-id="item.id" class="group-info-row mdc-data-table__row" aria-selected="false" style="cursor: pointer;">
+												<td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
+													<div class="mdc-checkbox mdc-data-table__row-checkbox mdc-checkbox--upgraded mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+														<input type="checkbox" class="mdc-checkbox__native-control chk-row" aria-labelledby="u60" :value="item.id"/>
+														<div class="mdc-checkbox__background">
+															<svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+																<path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path></svg>
+															<div class="mdc-checkbox__mixedmark"></div>
+														</div>
+														<div class="mdc-checkbox__ripple"></div>
+													</div>
+												</td>
+												<td class="mdc-data-table__cell text-center">{{item.id}}</td>
+												<td class="mdc-data-table__cell">{{item.name}}</td>
+												<td class="mdc-data-table__cell text-center">{{convertDirectoryGubunCode2Name(item.gubun)}}</td>
+												<td class="mdc-data-table__cell text-center">{{item.path}}</td>
+												<td class="mdc-data-table__cell">{{item.description}}</td>
+												<td class="mdc-data-table__cell text-center">{{moment(item.regDt).format("YYYY-MM-DD HH:mm:ss")}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div class="table-pagination mdc-data-table__pagination" v-if="0 < currentList.length">
+							<div class="mdc-data-table__pagination-trailing mdc-chip-set mdc-chip-set--choice">
+								<div class="mdc-data-table__pagination-navigation">
+									<button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-first-page="true" v-bind:disabled="!(1 < currentPageNum)" @click="goPage(1)">
+										<div class="mdc-button__icon">first_page</div>
+									</button>
+									<button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-prev-page="true" v-bind:disabled="!(1 < currentPageNum)" @click="goPage(Math.max(1, currentPageNum-1))">
+										<div class="mdc-button__icon">chevron_left</div>
+									</button>
+									<button v-for="page in pagingNumbers" class="mdc-chip mdc-data-table__pagination-button fs-6 bg-transparent" :class="{'mdc-chip--selected': currentPageNum==page}" @click="goPage(page)">
+										{{page}}
+									</button>
+									<button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-next-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)" @click="goPage(Math.min(currentPageNum+1, lastPageNum))">
+										<div class="mdc-button__icon">chevron_right</div>
+									</button>
+									<button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-last-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)" @click="goPage(lastPageNum)">
+										<div class="mdc-button__icon">last_page</div>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="groupRegistrationDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<div class="mdc-dialog__header">
+						<h2 class="mdc-dialog__title">디렉토리 그룹 등록</h2>
+						<button class="mdc-icon-button material-icons close-button lg-size" data-mdc-dialog-action="close" tabindex="-1">
+							close
+						</button>
+					</div>
+					<!-- loading bar -->
+					<div id="groupRegistrationDialogLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content form-row-stack">
+						<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end">
+							*모든 항목은 필수입력사항입니다.
+						</p>
+						<!-- 데이터셋 구분용도 -->
+	                    <div class="form-row multiline-align-top">
+	                        <div>
+	                            <h5 class="mb-1">디렉토리 용도</h5>
+	                            <div class="mdc-form-field">
+	                                <div class="mdc-radio">
+	                                    <input class="mdc-radio__native-control" type="radio" id="radio-insert-path-train"
+	                                           name="pathGubun" checked value="insert-path-train">
+	                                    <div class="mdc-radio__background">
+	                                        <div class="mdc-radio__outer-circle"></div>
+	                                        <div class="mdc-radio__inner-circle"></div>
+	                                    </div>
+	                                    <div class="mdc-radio__ripple"></div>
+	                                    <div class="mdc-radio__focus-ring"></div>
+	                                </div>
+	                                <label for="radio-insert-path-train">학습</label>
+	
+	                                <div class="mdc-radio">
+	                                    <input class="mdc-radio__native-control" type="radio" id="radio-insert-path-verify" 
+	                                    		name="pathGubun" value="insert-path-verify">
+	                                    <div class="mdc-radio__background">
+	                                        <div class="mdc-radio__outer-circle"></div>
+	                                        <div class="mdc-radio__inner-circle"></div>
+	                                    </div>
+	                                    <div class="mdc-radio__ripple"></div>
+	                                    <div class="mdc-radio__focus-ring"></div>
+	                                </div>
+	                                <label for="radio-insert-path-verify">검증</label>
+	                            </div>
+	                        </div>
+	                      </div>
+						<div class="form-row multiline-align-top">
+							<div class="flex-auto">
+								<div id="newGroupNameInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto lg-size">
+									<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+									<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+										<div class="mdc-notched-outline__leading"></div>
+										<div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label" >디렉토리 그룹 이름</label>
+										</div>
+										<div class="mdc-notched-outline__trailing"></div>
+									</div>
+								</div>
+								<div class="mdc-text-field-helper-line">
+									<p id="duplicateNewGroupNameMessage" class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+										사용 가능한 그룹 이름입니다
+									</p>
+								</div>
+							</div>
+							<button id="newGroupNameCheckBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">content_copy</i>
+								<span class="mdc-button__label">중복확인</span>
+							</button>
+						</div>
+						
+						<div class="form-row multiline-align-top">
+	                        <div class="flex-auto">
+	                            <div id="directoryPathInput" class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+	                                <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+	                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+	                                    <div class="mdc-notched-outline__leading"></div>
+	                                    <div class="mdc-notched-outline__notch">
+	                                        <label class="mdc-floating-label">기본 디렉토리 경로 ex)/verify</label>
+	                                    </div>
+	                                    <div class="mdc-notched-outline__trailing"></div>
+	                                </div>
+	                            </div>
+	                            <div class="mdc-text-field-helper-line">
+	                                <p id="duplicateDirectoryPathMessage" class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+	                                    사용 가능한 디렉토리 경로입니다
+	                                </p>
+	                            </div>
+	                        </div>
+	                        <button id="directoryPathCheckBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+	                            <span class="mdc-button__ripple"></span>
+	                            <i class="material-icons mdc-button__icon">content_copy</i>
+	                            <span class="mdc-button__label">중복확인</span>
+	                        </button>
+	                    </div>
+						
+						<div class="form-row">
+							<div id="newGroupDescriptionInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >설명</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions">
+						<button id="newGroupRegistrationBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+							<span class="mdc-button__ripple"></span>
+							<span class="mdc-button__label">등록</span>
+						</button>
+						<button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+							<span class="mdc-button__ripple"></span>
+							<span class="mdc-button__label">취소</span>
+						</button>
+					</footer>
+				</div>
+			</div>
+		</div>
+		<input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+	</th:block>
+	<th:block layout:fragment="script">
+		<script type="text/javascript">
+		(function () {
+
+			const DEFAULT_PAGE_START = 0;
+			const DEFAULT_PAGE_SIZE = 5;
+			const PAGING_BTN_SIZE = 5;
+			const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+			const DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/directory/group/{groupId}";
+			const LABEL = {
+				message: {
+					// 공통
+					API_ERROR_TITLE: "실패",
+					API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+
+					INVALID_GROUP_NAME_ERROR: "올바른 그룹 이름을 입력해주세요.",
+					INVALID_DIRECTORY_PATH_ERROR: "올바른 디렉토리 경로를 입력해주세요.",
+					CONFLICT_GROUP_NAME_ERROR: "이미 등록되어 있거나 올바르지 않은 그룹 이름 입니다.",
+					VALID_GROUP_NAME: "사용 가능한 그룹 이름 입니다.",
+					CONFLICT_DIRECTORY_PATH_ERROR: "이미 등록되어 있거나 올바르지 않은 디렉토리 경로 입니다.",
+					VALID_DIRECTORY_PATH: "사용 가능한 디렉토리 경로 입니다.",
+					GROUP_REGISTRATION_CONFIRM: "신규 그룹을 등록하시겠습니까?",
+					GROUP_REGISTRATION_TITLE: "그룹 등록",
+					GROUP_REGISTRATION_MESSAGE: "신규 그룹이 등록되었습니다.",
+					GROUP_REGISTRATION_FAIL: "그룹 등록에 실패하였습니다. 입력된 정보를 확인 후 다시 등록해 주세요.",
+				}
+			};
+			new Vue({
+				el: ".contentRoot",
+				data: {
+					LABEL: LABEL,
+					moment: moment,
+					fn: fn,
+					serviceUrlPrefix: serviceUrlPrefix,
+
+					//검색조건
+					text: "",
+					textType: "ALL",
+					gubunType: "ALL",
+					start: DEFAULT_PAGE_START,
+					size: DEFAULT_PAGE_SIZE,
+
+					// 현재 적용되어 있는 검색 조건
+					_searchCondition: {
+						text: "",
+						typeType: "ALL",
+						start: 0,
+						size: 0,
+					},
+
+					// 검색 결과
+					totalCount: 0,
+					currentPageNum: 0,
+					lastPageNum: 0,
+					itemFromNum: 0,
+					itemToNum: 0,
+					currentList: [],
+					pagingNumbers: [],
+
+					// etc
+					initSearched: false,		// 초기 검색이 제공되었는지 여부
+
+					// 그룹 등록 Dialog 변수들
+					newGroupName: "",
+					newGroupDescription: "",
+					pathGubun: "",
+					directoryPath: "",
+					DIRECTORY_GUBUN_TO_NAME: {},
+					directoryGubunList: [
+						{code:"TRAIN", name:"학습"},
+						{code:"VERIFY", name:"검증"}
+					],
+
+					// 그룹 등록 팝업 Dialog
+					groupRegistrationDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#groupRegistrationDialog')),
+				},
+				created: function () {
+					var self = this;
+					this.initPage(location.search.slice(1));
+					this.$nextTick(function () {
+						self.doRefresh();
+					});
+				},
+				mounted: function () {
+					var self = this;
+
+					// 페이지 이동시 처리
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						console.log("page move out");
+					});
+
+					this.initMaterialUx();
+
+					// 팝업 이외 영역 클릭 시 아무런 처리 하지 않음 default close
+					this.groupRegistrationDialog.scrimClickAction = '';
+
+					$('#textTypeSelector').data('select').unlisten('MDCSelect:change')
+					$('#textTypeSelector').data('select').listen('MDCSelect:change', function (event) {
+						self.textType = $.trim(event.detail.value);
+					});
+					
+					$('#pathGubunSelector').data('select').unlisten('MDCSelect:change')
+					$('#pathGubunSelector').data('select').listen('MDCSelect:change', function (event) {
+						if(event.detail.value == 'ALL'){
+							self.gubunType = '';
+						}else {
+							self.gubunType = $.trim(event.detail.value);	
+						}
+						
+					});
+
+					$('#sizeSelector').data('select').unlisten('MDCSelect:change')
+					$('#sizeSelector').data('select').listen('MDCSelect:change', function (event) {
+						self.size = $.trim(event.detail.value);
+						self.doSearch();
+					});
+
+					// 그룹 등록 요청 팝업
+					$('#groupRegistrationDialogBtn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						self.showBeforeGroupRegistrationDialog($(self.groupRegistrationDialog.root));
+						self.groupRegistrationDialog.open();
+					});
+
+					// 그룹 등록 팝업 show 후처리
+					this.groupRegistrationDialog.listen('MDCDialog:opened', function() {
+						self.showAfterGroupRegistrationDialog($(self.groupRegistrationDialog.root));
+					});
+
+				},
+				methods: {
+
+					/**
+					 * 초기 url을 기준으로 화면 내용 설정
+					 */
+					initPage: function (queryString) {
+						var params = Qs.parse(queryString);
+						this.textType = params.textType || "";
+						this.gubunType = params.gubunType || "";
+						this.text = params.text || "";
+						this.start = parseInt(params.start || DEFAULT_PAGE_START);
+						this.size = parseInt(params.size || DEFAULT_PAGE_SIZE);
+
+						this._searchCondition = {
+							textType: this.textType,
+							gubunType: this.gubunType,
+							text: this.text,
+							start: this.start,
+							size: this.size,
+						};
+
+						// selector 초기값 설정
+						$('#textTypeSelector').attr('data-value', this.textType);
+						$('#pathGubunSelector').attr('data-value', this.gubunType);
+						$('#sizeSelector').attr('data-value', this.size);
+						
+						for (var i = 0; i < this.directoryGubunList.length; i++) {
+			              var directoryGubun = this.directoryGubunList[i];
+			
+						  this.DIRECTORY_GUBUN_TO_NAME[directoryGubun.code] = directoryGubun.name;
+			              
+			            }
+						
+					},
+
+					initMaterialUx: function () {
+
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							el.class
+							mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0);
+						}
+
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const el of textFields) {
+							$(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+						}
+
+						// select material ux 적용
+						const selects = document.querySelectorAll('.mdc-select');
+						for (const el of selects) {
+							var $select = mdc.select.MDCSelect.attachTo(el);
+							var $el = $(el);
+							var value = $el.attr('data-value');
+							// 초기값 설정
+							_.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+							$el.data('select', $select);
+						}
+
+						$("#chk-all").on('click', function() {
+							$(".chk-row").prop('checked', $("#chk-all").is(":checked"));
+						});
+					},
+
+					/**
+					 * 검색 버튼클릭 시 처리
+					 */
+					doSearch: function () {
+						let self = this;
+
+						this._searchCondition = {
+							textType: this.textType,
+							gubunType: this.gubunType,
+							text: this.text,
+							start: 0,
+							size: this.size,
+						};
+						this._pushHistory(this._searchCondition);
+						this._search(this._searchCondition, $('#groupListLoadingBar'), function (isError, data) {
+							if (isError) {
+								toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+							} else {
+								self.renderDatas(data.total, data.object, self._searchCondition);
+							}
+						});
+					},
+
+					/**
+					 * 특정 페이지로 이동한다.
+					 */
+					goPage: function (pageNum) {
+						let self = this;
+
+						this._searchCondition.start = this._searchCondition.size * (pageNum-1);
+						this._pushHistory(this._searchCondition);
+						this._search(this._searchCondition, $('#groupListLoadingBar'), function (isError, data, total, list) {
+							if (isError) {
+								toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+							} else {
+								self.renderDatas(data.total, data.object, self._searchCondition);
+							}
+						});
+					},
+
+					/**
+					 * 현재 검색 목록을 refresh한다.
+					 */
+					doRefresh: function () {
+						let self = this;
+						this._search(this._searchCondition, $('#groupListLoadingBar'), function (isError, data, total, list) {
+							if (isError) {
+								toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+							} else {
+								self.renderDatas(data.total, data.object, self._searchCondition);
+							}
+						});
+					},
+
+					/**
+					 * 검색결과를 화면에 연결된 변수들에 저장
+					 */
+					renderDatas: function (totalCount, list, condition) {
+
+						$("input[type=checkbox]").prop('checked', false);
+						var self = this;
+						this.lastPageNum = Math.ceil((totalCount || 0) / condition.size);
+						this.currentPageNum = Math.ceil(condition.start / condition.size) + 1;
+
+						this.totalCount = totalCount;
+						this.currentList = list || [];
+						// 최신순으로 정렬하기 때문에 역순
+						this.itemFromNum = totalCount - parseInt(condition.start);
+						this.itemToNum = totalCount - Math.min(totalCount, parseInt(condition.start) + parseInt(condition.size));
+
+						this.pagingNumbers = [this.currentPageNum];
+						for (let diff = 1 ; this.pagingNumbers.length < PAGING_BTN_SIZE && diff <= PAGING_BTN_SIZE ; diff++) {
+							if (1 <= this.currentPageNum - diff) {
+								this.pagingNumbers.push(this.currentPageNum - diff);
+							}
+							if (this.pagingNumbers.length < PAGING_BTN_SIZE && this.currentPageNum + diff <= this.lastPageNum) {
+								this.pagingNumbers.push(this.currentPageNum + diff);
+							}
+						}
+						this.pagingNumbers = _.sortBy(this.pagingNumbers);
+
+						// 화면에 리스트가 구성된 이후 각 row에 대한 클릭 이벤트 적용
+						this.$nextTick(function() {
+							$(".chk-row").unbind('click').bind('click', function(ev) {
+								ev.stopPropagation();
+							});
+							/* 디렉토리 상세페이지 제거
+							$('.group-info-row').unbind('click').bind('click', function (ev) {
+								var groupId = ev.currentTarget.dataset.id;
+								window.index.movePage(DETAIL_PAGE_SERVICE_URI.replace("{groupId}", groupId));
+							});*/
+						});
+					},
+					
+					convertDirectoryGubunCode2Name: function(gubunCode) {
+			        	return this.DIRECTORY_GUBUN_TO_NAME[gubunCode];
+			        },
+
+					/**
+					 * 그룹 등록 팝업 초기화
+					 */
+					showBeforeGroupRegistrationDialog: function($root) {
+						var $newGroupNameInput = $root.find('#newGroupNameInput');
+						var $newGroupNameCheckBtn = $root.find('#newGroupNameCheckBtn');
+						var $duplicateNewGroupNameMessage = $root.find('#duplicateNewGroupNameMessage');
+						var $directoryPathInput = $root.find('#directoryPathInput');
+						var $directoryPathCheckBtn = $root.find('#directoryPathCheckBtn');
+						var $duplicateDirectoryPathMessage = $root.find('#duplicateDirectoryPathMessage');
+						var $newGroupDescriptionInput = $root.find("#newGroupDescriptionInput");
+						var $loadingBar = $root.find('#groupRegistrationDialogLoadingBar');
+						var $registrationBtn = $root.find('#newGroupRegistrationBtn');
+						var $radioInsertPathTrain = $root.find('#radio-insert-path-train');
+
+						$radioInsertPathTrain.prop("checked", true)
+
+						// 팝업 출력 내용 초기화
+						$newGroupNameInput.data('textField').value = "";
+						$duplicateNewGroupNameMessage.empty();
+						$directoryPathInput.data('textField').value = "";
+						$duplicateDirectoryPathMessage.empty();
+						$newGroupDescriptionInput.data('textField').value = "";
+						
+
+						// input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+						$root.find('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+						// 팝업 내용 저장 변수 초기화
+						this.newGroupName = "";
+						this.newGroupDescription = "";
+						this.pathGubun = "TRAIN";
+						this.directoryPath = "";
+
+						// 중복확인이 모두 되면 활성화되도록 disabled 처리
+						$newGroupNameCheckBtn.prop('disabled', false);
+						$directoryPathCheckBtn.prop('disabled', false);
+						$registrationBtn.prop('disabled', true);
+
+						$loadingBar.css('opacity', 0);
+					},
+
+					/**
+					 * 그룹 등록 팝업 이벤트 바인딩 & 값 설정
+					 */
+					showAfterGroupRegistrationDialog: function($root) {
+						var self = this;
+
+						// dialog에 포함된 이벤트 처리
+						// 화면에 hide되어 있는 상태에 대한 버튼들은 vue.js에서 event mount가 되지 않음.
+						var $newGroupNameInput = $root.find('#newGroupNameInput');
+						var $newGroupNameCheckBtn = $root.find('#newGroupNameCheckBtn');
+						var $duplicateNewGroupNameMessage = $root.find('#duplicateNewGroupNameMessage');
+						var $directoryPathInput = $root.find('#directoryPathInput');
+						var $directoryPathCheckBtn = $root.find('#directoryPathCheckBtn');
+						var $duplicateDirectoryPathMessage = $root.find('#duplicateDirectoryPathMessage');
+						var $groupRegistrationDialogRadio = $root.find("#groupRegistrationDialog input[type=radio]")
+						var $newGroupDescriptionInput = $root.find("#newGroupDescriptionInput");
+						var $loadingBar = $root.find('#groupRegistrationDialogLoadingBar');
+						var $registrationBtn = $root.find('#newGroupRegistrationBtn');
+
+						// 등록 버튼 활성화 처리
+						var registrationActiveFunc = function () {
+							if(!_.isEmpty(self.newGroupName) && _.isEqual(self.newGroupName, $.trim($newGroupNameInput.data('textField').value))
+								&& !_.isEmpty(self.directoryPath) && _.isEqual(self.directoryPath, $.trim($directoryPathInput.data('textField').value))) {
+								$registrationBtn.prop('disabled', false);
+							} else {
+								$registrationBtn.prop('disabled', true);
+							}
+						};
+
+						// 디렉토리 용도 변경에 따른 처리
+						$('#groupRegistrationDialog input[type=radio]').unbind('click').bind('click', function (e) {
+							//console.log("11111>>>> "+e.target.value)
+							var currentGubun = e.target.value;
+							if(currentGubun == "insert-path-train") {
+								self.pathGubun = "TRAIN";	
+							}else if(currentGubun == "insert-path-verify"){
+								self.pathGubun = "VERIFY";
+							}
+							
+						});
+
+						// 그룹 이름 입력 변경에 따른 처리
+						$newGroupNameInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+							
+							if (self.newGroupName !== "" && _.isEqual(self.newGroupName, $.trim($newGroupNameInput.data('textField').value))) {
+								$newGroupNameCheckBtn.prop('disabled', true);
+							} else {
+								$newGroupNameCheckBtn.prop('disabled', false);
+							}
+							registrationActiveFunc();
+						});
+						
+						// 기본디렉토리 입력 변경에 따른 처리
+						$directoryPathInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+							if (self.directoryPath !== "" && _.isEqual(self.directoryPath, $.trim($directoryPathInput.data('textField').value))) {
+								$directoryPathCheckBtn.prop('disabled', true);
+							} else {
+								$directoryPathCheckBtn.prop('disabled', false);
+							}
+							registrationActiveFunc();
+						});
+
+						$newGroupDescriptionInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+							self.newGroupDescription = $newGroupDescriptionInput.data('textField').value;
+						});
+
+						// 그룹 이름 중복 확인 버튼 처리
+						$newGroupNameCheckBtn.unbind('click').bind('click', function () {
+							var newName = $newGroupNameInput.data('textField').value;
+
+							if ($.trim(newName) === '') {
+								$duplicateNewGroupNameMessage.removeClass('mdc-theme--success');
+								$duplicateNewGroupNameMessage.addClass('mdc-theme--error');
+								$duplicateNewGroupNameMessage.html(LABEL.message.INVALID_GROUP_NAME_ERROR);
+							} else {
+								self._duplicateCheckGroupName(newName, $loadingBar, function (isError, data) {
+									if (isError) {
+										toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+									} else if (data === 'ACCEPTED') {
+										$duplicateNewGroupNameMessage.removeClass('mdc-theme--error');
+										$duplicateNewGroupNameMessage.addClass('mdc-theme--success');
+										$duplicateNewGroupNameMessage.html(LABEL.message.VALID_GROUP_NAME);
+										self.newGroupName = $.trim(newName);
+									} else {
+										$duplicateNewGroupNameMessage.removeClass('mdc-theme--success');
+										$duplicateNewGroupNameMessage.addClass('mdc-theme--error');
+										$duplicateNewGroupNameMessage.html(LABEL.message.CONFLICT_GROUP_NAME_ERROR);
+										self.newGroupName = '';
+									}
+									$newGroupNameInput.trigger('change');
+								});
+							}
+						});
+						
+						// 기본디렉토리경로 중복 확인 버튼 처리
+						$directoryPathCheckBtn.unbind('click').bind('click', function () {
+							var newPath = $directoryPathInput.data('textField').value;
+
+							if ($.trim(newPath) === '') {
+								$duplicateDirectoryPathMessage.removeClass('mdc-theme--success');
+								$duplicateDirectoryPathMessage.addClass('mdc-theme--error');
+								$duplicateDirectoryPathMessage.html(LABEL.message.INVALID_DIRECTORY_PATH_ERROR);
+							} else {
+								self._duplicateCheckDirectoryPath(newPath, $loadingBar, function (isError, data) {
+									if (isError) {
+										toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+									} else if (data === 'ACCEPTED') {
+										$duplicateDirectoryPathMessage.removeClass('mdc-theme--error');
+										$duplicateDirectoryPathMessage.addClass('mdc-theme--success');
+										$duplicateDirectoryPathMessage.html(LABEL.message.VALID_DIRECTORY_PATH);
+										self.directoryPath = $.trim(newPath);
+									} else {
+										$duplicateDirectoryPathMessage.removeClass('mdc-theme--success');
+										$duplicateDirectoryPathMessage.addClass('mdc-theme--error');
+										$duplicateDirectoryPathMessage.html(LABEL.message.CONFLICT_DIRECTORY_PATH_ERROR);
+										self.directoryPath = '';
+									}
+									$directoryPathInput.trigger('change');
+								});
+							}
+						});
+
+						// 그룹 등록 버튼 처리
+						$registrationBtn.unbind('click').bind('click', function () {
+							if (!confirm(LABEL.message.GROUP_REGISTRATION_CONFIRM)) {
+								return ;
+							}
+
+							self._registerGroup({
+								name: self.newGroupName,
+								description: self.newGroupDescription,
+								path: self.directoryPath,
+								gubun: self.pathGubun
+							}, $loadingBar, function (isError, data) {
+								if (isError) {
+									toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+								} else if(data+"" === 'true') {
+									toastr.success(LABEL.message.GROUP_REGISTRATION_MESSAGE, LABEL.message.GROUP_REGISTRATION_TITLE);
+									self.groupRegistrationDialog.close();
+									// 목록 갱신
+									self.doRefresh();
+								}
+							});
+						});
+					},
+
+					/**
+					 * 현재 검색 조건에 대한 history를 push한다.
+					 */
+					_pushHistory: function (condition) {
+						if (!this.initSearched) {
+							this.initSearched = true;
+							// 맨 처음 page의 경우 history를 변경하여 back 시 이전 페이지로 돌아가도록 한다.
+							history.replaceState(null, null, "?" + $.param(condition));
+						} else {
+							history.pushState(null, null, "?" + $.param(condition));
+						}
+					},
+
+					/**
+					 * 검색 API 호출
+					 */
+					_search: function(params, $loadingBar, cbFunc) {
+						$loadingBar.css('opacity', 1);
+						$.ajax({
+							method: "GET",
+							url: this.serviceUrlPrefix + "/api/directory/group",
+							dataType: "json",
+							data: params,
+							success: function (response, textStatus, jqXHR) {
+								if (typeof cbFunc === "function") {
+									cbFunc(response.code !== 200, response.code === 200 ? response : response);
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								if (typeof cbFunc === "function") {
+									cbFunc(true, jqXHR.status+"] "+jqXHR.responseText);
+								}
+							},
+							complete: function () {
+								$loadingBar.css('opacity', 0);
+							}
+						});
+					},
+
+					/**
+					 * 그룹 이름 중복 체크
+					 */
+					_duplicateCheckGroupName: function (name, $loadingBar, cbFunc) {
+						$loadingBar.css('opacity', 1);
+						$.ajax({
+							method: "GET",
+							url: this.serviceUrlPrefix + "/api/directory/group/name/duplicate",
+							dataType: "json",
+							data: {
+								encodedName: encodeURIComponent(name)
+							},
+							success: function (response, textStatus, jqXHR) {
+								if (typeof cbFunc === "function") {
+									cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								if (typeof cbFunc === "function") {
+									cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+								}
+							},
+							complete: function () {
+								$loadingBar.css('opacity', 0);
+							}
+						});
+					},
+					
+					/**
+					 * 디렉토리 경로 중복 체크
+					 */
+					_duplicateCheckDirectoryPath: function (path, $loadingBar, cbFunc) {
+						$loadingBar.css('opacity', 1);
+						$.ajax({
+							method: "GET",
+							url: this.serviceUrlPrefix + "/api/directory/group/path/duplicate",
+							dataType: "json",
+							data: {
+								path: path
+							},
+							success: function (response, textStatus, jqXHR) {
+								if (typeof cbFunc === "function") {
+									cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								if (typeof cbFunc === "function") {
+									cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+								}
+							},
+							complete: function () {
+								$loadingBar.css('opacity', 0);
+							}
+						});
+					},
+
+					/**
+					 * 신규 그룹을 등록한다.
+					 */
+					_registerGroup: function(params, $loadingBar, cbFunc) {
+						$loadingBar.css('opacity', 1);
+						$.ajax({
+							method: "POST",
+							url: this.serviceUrlPrefix + "/api/directory/group",
+							contentType: "application/json",
+							dataType: "json",
+							data: JSON.stringify(params),
+							success: function (response, textStatus, jqXHR) {
+								if (typeof cbFunc === "function") {
+									cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								if (typeof cbFunc === "function") {
+									cbFunc(true, jqXHR);
+								}
+							},
+							complete: function () {
+								$loadingBar.css('opacity', 0);
+							}
+						});
+					},
+
+					/**
+					 * 선택한 그룹을 삭제한다.
+					 */
+					doDelete: function() {
+						var self = this;
+						var checkedList = $(".chk-row:checked");
+						var targetIdList = $.map(checkedList, function(item) {
+							return item.value;
+						});
+
+						if(targetIdList.length < 1) {
+							alert("삭제할 그룹을 선택해주세요");
+							return;
+						}
+
+						if (!confirm("그룹을 삭제하시겠습니까?")) {
+							return ;
+						}
+
+						var params = {
+							targetIdList : targetIdList
+						};
+
+						$.ajax({
+							method: "POST",
+							url: this.serviceUrlPrefix + "/api/directory/group/delete",
+							contentType: "application/json",
+							dataType: "json",
+							data: JSON.stringify(params),
+							success: function (response, textStatus, jqXHR) {
+
+								if (response.code === 200) {
+									self.doRefresh();
+									toastr.success("그룹 삭제가 완료됐습니다.");
+									return;
+								}
+
+								toastr.error(response.message);
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								toastr.error(LABEL.message.API_ERROR_MESSAGE);
+							}
+						});
+					}
+				}
+			});
+		})();
+		</script>
+	</th:block>
+</html>

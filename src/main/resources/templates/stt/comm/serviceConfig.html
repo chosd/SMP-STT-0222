@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+	<div class="contentRoot">
+		<div class="content-header">
+			<h2>STT 서비스 설정</h2>
+			<div class="button-group">
+				<!-- <button id="configDeleteBtn" class="mdc-button mdc-button--outlined mdc-theme--on-error mdc-theme--error-bg mdc-ripple-upgraded" @click="doDelete"> -->
+				<button id="configDeleteBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--error" @click="doDelete">
+					<span class="mdc-button__ripple"></span>
+					<i class="material-icons mdc-button__icon me-1">delete</i>
+					<span class="mdc-button__label">설정 삭제</span>
+				</button>
+				<button id="configSaveBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded" @click="doSave">
+					<span class="mdc-button__ripple"></span>
+					<i class="material-icons mdc-button__icon me-1">key</i>
+					<span class="mdc-button__label">설정 저장</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="content-body">
+			<div class="card">
+				<div class="card-body">
+					<div class="form-row-stack">
+						<div class="form-row">
+							<div id="siteCodeInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >Site Code</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+							<div id="projectCodeInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >Project Code</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="form-row">
+							<div id="updDtInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >변경일</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+							<div id="updIdInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >변경자</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="content-title">
+						<h4>엔진 파라미터 설정</h4>
+						<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end mb-1 flex-right">
+							* 항목은 필수입력사항입니다.
+						</p>
+					</div>
+					<div class="form-row">
+						<div id="engineParameterInput" class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+							<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value=""/>
+							<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+								<div class="mdc-notched-outline__leading"></div>
+								<div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label" >엔진 파라미터</label>
+								</div>
+								<div class="mdc-notched-outline__trailing"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="content-title">
+						<h4>DB 접속 설정</h4>
+						<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end mb-1 flex-right">
+							* 항목은 필수입력사항입니다.
+						</p>
+					</div>
+					<div class="form-row-stack">
+						<div class="form-row">
+							<div id="dbUrlInput" class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value=""/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >서버주소</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="form-row">
+							<div id="dbUsernameInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value=""/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >사용자ID</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+							<div id="dbPasswordInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value=""/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >비밀번호</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+	<input type="hidden" readonly id="projectCode" th:value="${projectCode}">
+	<input type="hidden" readonly id="siteCode" th:value="${siteCode}">
+</th:block>
+<th:block layout:fragment="script">
+	<script type="text/javascript">
+
+		(function () {
+
+			const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+			const siteCode = $("#siteCode").val();
+			const projectCode = $("#projectCode").val();
+
+			const LABEL = {
+				message: {
+					// 공통
+					API_ERROR_TITLE: "실패",
+					API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+
+					SAVE_SERVICE_CONFIGURATION_CONFIRM: "설정 정보를 저장하시겠습니까?",
+					SAVE_SERVICE_CONFIGURATION_TITLE: "서비스 설정 저장",
+					SAVE_SERVICE_CONFIGURATION_MESSAGE: "서비스 설정 정보가 저장되었습니다.",
+
+					DELETE_SERVICE_CONFIGURATION_CONFIRM: "서비스 설정 정보를 삭제하시겠습니까?",
+					DELETE_SERVICE_CONFIGURATION_TITLE: "서비스 설정 삭제",
+					DELETE_SERVICE_CONFIGURATION_MESSAGE: "서비스 설정 정보가 삭제되었습니다.",
+
+				}
+			};
+
+			new Vue({
+				el: ".contentRoot",
+				data: {
+					serviceUrlPrefix: serviceUrlPrefix,
+					siteCode: siteCode,
+					projectCode: projectCode,
+					config: {},
+					engineParameter: "",
+					dbUrl: "",
+					dbUsername: "",
+					dbPassword: ""
+				},
+				created: function () {
+
+				},
+				mounted: function () {
+					var self = this;
+					// 페이지 이동시 처리 
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						console.log("page move out");
+					});
+
+
+					this.initMaterialUx();
+					this.$nextTick(function () {
+						self.doRefresh();
+					});
+
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							$(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0));
+						}
+
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const el of textFields) {
+							$(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+						}
+					},
+
+					/**
+					 * 화면의 내용을 새로고침한다..
+					 */
+					doRefresh: function () {
+						var self = this;
+						var $loadingBar = window.index.getLoadingBar();
+						var $deleteBtn = $('#configDeleteBtn');
+						var $saveBtn = $('#configSaveBtn');
+						var $siteCodeInput = $('#siteCodeInput');
+						var $projectCodeInput = $('#projectCodeInput');
+						var $updDtInput = $('#updDtInput');
+						var $updIdInput = $('#updIdInput');
+						var $engineParameterInput = $('#engineParameterInput');
+						var $dbUrlInput = $('#dbUrlInput');
+						var $dbUsernameInput = $('#dbUsernameInput');
+						var $dbPasswordInput = $('#dbPasswordInput');
+
+						$siteCodeInput.data('textField').value = this.siteCode;
+						$projectCodeInput.data('textField').value = this.projectCode;
+						$updDtInput.data('textField').value = '';
+						$updIdInput.data('textField').value = '';
+						$engineParameterInput.data('textField').value = '';
+						$dbUrlInput.data('textField').value = '';
+						$dbUsernameInput.data('textField').value = '';
+						$dbPasswordInput.data('textField').value = '';
+
+						$deleteBtn.prop('disabled', true);
+						$saveBtn.prop('disabled', true);
+
+						this.getConfig($loadingBar, function (isError, data) {
+							if (isError) {
+								toastr.error(data, LABEL.message.API_ERROR_TITLE);
+							} else {
+								self.config = data.object || {};
+								self.renderConfig(data.object);
+								$('.mdc-text-field').removeClass('mdc-text-field--invalid');
+							}
+						});
+					},
+
+					renderConfig: function(config) {
+
+						var self = this;
+						var isNew = false;
+
+						var $deleteBtn = $('#configDeleteBtn');
+						var $saveBtn = $('#configSaveBtn');
+						var $siteCodeInput = $('#siteCodeInput');
+						var $projectCodeInput = $('#projectCodeInput');
+						var $updDtInput = $('#updDtInput');
+						var $updIdInput = $('#updIdInput');
+						var $engineParameterInput = $('#engineParameterInput');
+						var $dbUrlInput = $('#dbUrlInput');
+						var $dbUsernameInput = $('#dbUsernameInput');
+						var $dbPasswordInput = $('#dbPasswordInput');
+
+						if (config === null) {
+							$siteCodeInput.data('textField').value = this.siteCode;
+							$projectCodeInput.data('textField').value = this.projectCode;
+							$saveBtn.prop('disabled', true);
+							$deleteBtn.prop('disabled', true);
+							isNew = true;
+						}
+						else {
+							$siteCodeInput.data('textField').value = config.siteCode;
+							$projectCodeInput.data('textField').value = config.projectCode;
+							$updDtInput.data('textField').value = config.updDt || "";
+							$updIdInput.data('textField').value = config.updId || "";
+							$engineParameterInput.data('textField').value = config.engineParameter || "";
+							$dbUrlInput.data('textField').value = config.dbUrl || "";
+							$dbUsernameInput.data('textField').value = config.dbUsername || "";
+							$dbPasswordInput.data('textField').value = config.dbPassword || "";
+							$deleteBtn.prop('disabled', false);
+
+							this.engineParameter = config.engineParameter;
+							this.dbUrl = config.dbUrl;
+							this.dbUsername = config.dbUsername;
+							this.dbPassword = config.dbPassword;
+							isNew = false;
+
+						}
+
+						var toggleSaveBtn = function () {
+							if ((!_.isEmpty(self.engineParameter) && !_.isEqual(self.config.engineParameter, self.engineParameter)) &&
+							    (!_.isEmpty(self.dbUrl) && !_.isEqual(self.config.dbUrl, self.dbUrl)) &&
+							    (!_.isEmpty(self.dbUsername) && !_.isEqual(self.config.dbUsername, self.dbUsername)) &&
+								(!_.isEmpty(self.dbPassword) && !_.isEqual(self.config.dbPassword, self.dbPassword))) {
+
+								$saveBtn.prop('disabled', false);
+							}
+							else {
+								$saveBtn.prop('disabled', true);
+							}
+						};
+
+						var toggleUpdateBtn = function() {
+							if( _.isEmpty(self.engineParameter) || _.isEmpty(self.dbUrl) || _.isEmpty(self.dbUsername) || _.isEmpty(self.dbPassword)) {
+                                $saveBtn.prop('disabled', true);
+							}
+                            else if ((!_.isEmpty(self.engineParameter) && !_.isEqual(self.config.engineParameter, self.engineParameter)) ||
+									(!_.isEmpty(self.dbUrl) && !_.isEqual(self.config.dbUrl, self.dbUrl)) ||
+									(!_.isEmpty(self.dbUsername) && !_.isEqual(self.config.dbUsername, self.dbUsername)) ||
+									(!_.isEmpty(self.dbPassword) && !_.isEqual(self.config.dbPassword, self.dbPassword))) {
+
+								$saveBtn.prop('disabled', false);
+							}
+							else {
+								$saveBtn.prop('disabled', true);
+							}
+						}
+
+						$engineParameterInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+							self.engineParameter = $engineParameterInput.data('textField').value;
+							isNew ? toggleSaveBtn() : toggleUpdateBtn();
+						});
+
+						$dbUrlInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+							self.dbUrl = $dbUrlInput.data('textField').value;
+							isNew ? toggleSaveBtn() : toggleUpdateBtn();
+						});
+
+						$dbUsernameInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+							self.dbUsername = $dbUsernameInput.data('textField').value;
+							isNew ? toggleSaveBtn() : toggleUpdateBtn();
+						});
+
+						$dbPasswordInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+							self.dbPassword = $dbPasswordInput.data('textField').value;
+							isNew ? toggleSaveBtn() : toggleUpdateBtn();
+						});
+
+					},
+					/**
+					 * 설정 저장 클릭 시 처리
+					 */
+					doSave: function () {
+						var self = this;
+						var $loadingBar = window.index.getLoadingBar();
+
+						if(confirm(LABEL.message.SAVE_SERVICE_CONFIGURATION_CONFIRM)) {
+
+							var params = {
+								siteCode: this.siteCode,
+								projectCode: this.projectCode,
+								engineParameter: this.engineParameter,
+								dbUrl: this.dbUrl,
+								dbUsername: this.dbUsername,
+								dbPassword: this.dbPassword
+							};
+
+							this.save(params, $loadingBar, function (isError, data) {
+								if (isError) {
+									toastr.error(data, LABEL.message.API_ERROR_TITLE);
+								} else {
+									toastr.success(LABEL.message.SAVE_SERVICE_CONFIGURATION_MESSAGE, LABEL.message.SAVE_SERVICE_CONFIGURATION_TITLE);
+									self.doRefresh();
+								}
+							});
+						}
+					},
+
+					/**
+					 * 설정 삭제 버튼 클릭 시 처리
+					 */
+					doDelete: function () {
+						var self = this;
+						var $loadingBar = window.index.getLoadingBar();
+						if(confirm(LABEL.message.DELETE_SERVICE_CONFIGURATION_CONFIRM)) {
+							this.delete($loadingBar, function (isError, data) {
+								if (isError) {
+									toastr.error(data, LABEL.message.API_ERROR_TITLE);
+								} else {
+									toastr.success(LABEL.message.DELETE_SERVICE_CONFIGURATION_MESSAGE, LABEL.message.DELETE_SERVICE_CONFIGURATION_TITLE);
+									self.doRefresh();
+								}
+							});
+						}
+					},
+
+					/**
+					 * 설정 정보 상세 조회
+					 * @param $loadingBar
+					 * @param cbFunc
+					 * @private
+					 */
+					getConfig: function ($loadingBar, cbFunc) {
+						$loadingBar.css('opacity', 1);
+
+						var self = this;
+
+						$.ajax({
+							method: "GET",
+							url: this.serviceUrlPrefix + "/api/config/" + this.projectCode,
+							dataType: "json",
+							success: function (response, textStatus, jqXHR) {
+								console.log(response);
+								if (typeof cbFunc === "function") {
+									cbFunc(response.code !== 200, response.code === 200 ? response : response.message);
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								if (typeof cbFunc === "function") {
+									cbFunc(true, jqXHR.status+"] "+jqXHR.responseText);
+								}
+							},
+							complete: function () {
+								$loadingBar.css('opacity', 0);
+							}
+						});
+					},
+
+					/**
+					 * 수정된 인증 정보를 저장한다.
+					 * @param params
+					 * @param $loadingBar
+					 * @param cbFunc
+					 * @private
+					 */
+					save: function (params, $loadingBar, cbFunc) {
+
+						$loadingBar.css('opacity', 1);
+						var self = this;
+						$.ajax({
+							method: "POST",
+							url: this.serviceUrlPrefix + "/api/config",
+							contentType: "application/json",
+							dataType: "json",
+							data: JSON.stringify(params),
+							success: function (response, textStatus, jqXHR) {
+								if (typeof cbFunc === "function") {
+									cbFunc(response.code !== 200, response.code === 200 ? response : response.message);
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								if (typeof cbFunc === "function") {
+									cbFunc(true, jqXHR.status+"] "+jqXHR.responseText);
+								}
+							},
+							complete: function () {
+								$loadingBar.css('opacity', 0);
+							}
+						});
+					},
+
+					/**
+					 * 등록되어 있는 인증 정보를 삭제한다.
+					 */
+					delete: function($loadingBar, cbFunc) {
+						$loadingBar.css('opacity', 1);
+						$.ajax({
+							method: "POST",
+							url: this.serviceUrlPrefix + "/api/config/" + projectCode + "/delete",
+							dataType: "json",
+							success: function (response, textStatus, jqXHR) {
+								if (typeof cbFunc === "function") {
+									cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+								}
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								if (typeof cbFunc === "function") {
+									cbFunc(true, jqXHR.status+"] "+jqXHR.responseText);
+								}
+							},
+							complete: function () {
+								$loadingBar.css('opacity', 0);
+							}
+						});
+					}
+				}
+			});
+		})();
+	</script>
+</th:block>
+</html>

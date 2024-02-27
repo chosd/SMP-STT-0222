@@ -1,0 +1,209 @@
+# default config
+spring:
+  profiles:
+    active: dev
+
+  devtools:
+    livereload:
+      enabled: true
+    restart :
+      enabled: true
+  datasource:
+    master:
+      type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        maximum-pool-size: 2
+    tenant:
+      auto-ddl: false
+
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+
+  thymeleaf:
+    cache: true
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+server:
+  port: 8081
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    session:
+      timeout: 1800
+    context-path: /
+
+logging:
+  level:
+    root: warn
+  pattern:
+    file: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%-37.37logger{36}] [%-30.30M{29} - %-5.5L{4}] - %msg%n"
+    console: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%-37.37logger{36}] [%-30.30M{29} - %-5.5L{4}] - %msg%n"
+  file:
+    name: /sw/skylife/logs/SMP/stt-smp.log # 원하는 파일명으로 변경 가능
+  logback:
+    rollingpolicy:
+      clean-history-on-start: false
+      file-name-pattern: "${logging.file.name}.%d{yyyyMMdd}.%i.gz"
+      max-file-size: 10MB
+      max-history: 90
+
+pagehelper:
+  reasonable: true
+  support-methods-arguments: true
+
+# app-config
+smp:
+  service:
+    name: KT-STT
+    version: 1.0
+    description: KT STT Service for Master SMP
+    endpoint: http://localhost:8081
+    uri:
+      prefix: /kt-stt/1.0
+    lastupdatedat: 2023-09-21 20:00:00
+  license:
+    ip: 125.159.61.195
+    port: 55298
+    servicekey: 200-0001-2-01
+    channelNo: 1
+  confidence:
+    ip: 125.159.61.195
+    port: 55298
+
+scheduler:
+  reprocess:
+    hour: 1
+
+directory:
+  home: c:/nas/stt
+
+core:
+  stt:
+    protocol: http
+    # API 통신서버
+    host: 112.220.184.107:28182
+    host-deploy: 112.220.184.107:28182
+    multi-tenancy: false
+    channel:
+      delay: 3
+
+cipher:
+  secretKey: 4F8ABBD4EE68E655F42146E87D6E4022	# opaque(=> base64) else aes128 key
+  # secretKey: opaque
+  iv: 32C863027BDDB0C8
+  test:
+  
+wavenc:
+  secretKey: F292F0BCA016E72A6AC0F5E73DA7BF2537C915CCA23AC7A072D72A1B0204FC93
+  iv: A8366482EE141F8E27ADA8B959D4E03F
+  
+calltext:
+  secretKey: 2BDF247745B276BB847D93F950672642EF943B2AD14D2A57BCA743E048CE516F
+  iv: A8366482EE141F8E27ADA8B959D4E03F
+
+# 콜 정보 (상담 내역 청취) 관련
+callinfo:
+  stream-mode: true 	# DB 음원파일경로 사용 시 false
+  stream-url: http://112.217.73.70:8081/rec_mgn_sys/app/player_stt.jsp?		# 스트리밍 플레이어 URL
+  audio:
+    decode: true		# 다운로드받은 오디오 파일 복호화 필요 여부
+    ext: mp3			# 다운로드받은 오디오 확장자
+  text:
+    decode: true		# STT 결과 발화 문장 복호화 필요 여부
+    masking: true		# STT 결과 발화 문장 숫자 마스킹 필요 여부
+  web-url: ${smp.service.uri.prefix}/waves/**	# for web url ex)localhost:8081/resources/waves/hi.wav
+  wav-download-path: /2nas_home/stt/download/	# mp3 / wav download
+
+reprocess:
+  url: http://129.10.18.151:9997/app/request_stt.jsp	# 재처리 요청 URL
+  multipart: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    master:
+      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+      url: jdbc:log4jdbc:mariadb://localhost:3306/medicheck_stt_master?characterEncoding=UTF-8&allowMultiQueries=true
+      username: root
+      password: 7C2me07fS9dneaWvSFkV9A==
+      #url: jdbc:log4jdbc:oracle:thin:@218.36.72.120:1521:TORA
+#      username: sttusr
+#      password: w4yT0YfRc5gwjutKcKT3Ww==
+logging:
+  level:
+    jdbc:
+      sqlonly: error
+      sqltiming: debug
+    com:
+      kt:
+        smp: info
+pagehelper:
+  helper-dialect: mariadb		# resources/mapper/다음 폴더명과 일치 oracle, mysql, mariadb, sqlserver, sqlserver2012, postgresql, db2
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    master:
+      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+      url: jdbc:log4jdbc:oracle:thin:@localhost:1521:XE
+      username: c##stt
+      password: SmVvPIG6SyGuSa2cD0QmHg==
+logging:
+  level:
+    jdbc:
+      sqlonly: error
+      sqltiming: debug
+    com:
+      kt:
+        smp: debug
+pagehelper:
+  helper-dialect: oracle		# resources/mapper/다음 폴더명과 일치 oracle, mysql, mariadb, sqlserver, sqlserver2012, postgresql, db2
+---
+spring:
+  config:
+    activate:
+      on-profile: stg
+  datasource:
+    master:
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mariadb://112.220.184.107:43306/stt_master?characterEncoding=UTF-8&allowMultiQueries=true
+      username: root
+      password: 7C2me07fS9dneaWvSFkV9A==
+logging:
+  level:
+    jdbc:
+      sqlonly: error
+      sqltiming: debug
+    com:
+      kt:
+        smp: debug
+pagehelper:
+  helper-dialect: mariadb		# resources/mapper/다음 폴더명과 일치 oracle, mysql, mariadb, sqlserver, sqlserver2012, postgresql, db2
+---
+spring:
+  config:
+    activate:
+      on-profile: prd
+  datasource:
+    master:
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mariadb://mariadb.db.svc.cluster.local:3306/stt_master?characterEncoding=UTF-8&allowMultiQueries=true
+      username: root
+      password: 7C2me07fS9dneaWvSFkV9A==
+pagehelper:
+  helper-dialect: mariadb		# resources/mapper/다음 폴더명과 일치 oracle, mysql, mariadb, sqlserver, sqlserver2012, postgresql, db2

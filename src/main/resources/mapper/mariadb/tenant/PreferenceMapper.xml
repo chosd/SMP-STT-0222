@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.comm.preference.mapper.PreferenceMapper">
+	
+	<select id="findCategoryList" resultType="PreferenceCodeDto">
+		/* PreferenceMapper.findCategoryList */
+		SELECT 
+			ID
+			,CODE_KEY
+			,CODE_VALUE
+			,DESCRIPTION
+		FROM
+			IAAP_STT_CONFIG
+		WHERE
+			CODE_KEY = 'C'
+	</select>
+	
+	<select id="findAllConfig" parameterType="string" resultType="PreferenceCodeDto">
+		/* PreferenceMapper.findAllConfig */
+		SELECT
+			ID
+			,CODE_KEY
+			,CODE_VALUE
+			,DESCRIPTION
+		FROM
+			IAAP_STT_CONFIG
+		WHERE
+			REGEXP_INSTR(CODE_KEY,'[^0-9]') > 0
+	</select>
+	
+	<select id="findByCodeKey" parameterType="string" resultType="PreferenceCodeDto">
+		/* PreferenceMapper.findByCodeKey */
+		SELECT
+			ID
+			,CODE_KEY
+			,CODE_VALUE
+			,DESCRIPTION
+		FROM
+			IAAP_STT_CONFIG
+		WHERE
+			CODE_KEY = #{codeKey}
+	</select>
+	
+	<select id="findRemovableList" resultType="PreferenceCodeDto">
+		/* PreferenceMapper.findRemovableList */
+		SELECT 
+			ID
+			,CODE_KEY
+			,CODE_VALUE
+			,DESCRIPTION
+		FROM
+			IAAP_STT_CONFIG
+		WHERE
+			CODE_KEY = 'S'
+			AND ( DESCRIPTION LIKE 'REMOVER_FILE%' OR DESCRIPTION LIKE 'REMOVER_DATA%' )
+	</select>
+	
+	<select id="findRemoveList" resultType="PreferenceCodeDto">
+		/* PreferenceMapper.findRemoveList */
+		SELECT 
+			ID
+			,CODE_KEY
+			,CODE_VALUE
+			,DESCRIPTION
+		FROM
+			IAAP_STT_CONFIG
+		WHERE
+			CODE_KEY = 'S'
+			AND CODE_VALUE = 'Y'
+			AND ( DESCRIPTION LIKE 'REMOVER_FILE%' OR DESCRIPTION LIKE 'REMOVER_DATA%' )
+	</select>
+	
+	<update id="updateSchedulerConfigValues" parameterType="SchedulerConfigUpdateDto">
+		/* PreferenceMapper.updateSchedulerConfigValues */
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{schedulerUseYn}
+			WHERE
+				DESCRIPTION = 'SCHEDULER_USEYN';
+				
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{removerTime}
+			WHERE
+				DESCRIPTION = 'REMOVER_TIME';
+				
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{removerStandard}
+			WHERE
+				DESCRIPTION = 'REMOVER_STANDARD';
+			
+			UPDATE	                                      
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{hwResourceCycle}
+			WHERE
+				DESCRIPTION = 'SCHEDULER_CYCLE_HW_RESOURCE';
+				
+			UPDATE	                                      
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{statisticsCycle}
+			WHERE
+				DESCRIPTION = 'SCHEDULER_CYCLE_STATISTICS';
+			
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = 'N'
+			WHERE
+				DESCRIPTION LIKE 'REMOVER_FILE%' OR DESCRIPTION LIKE 'REMOVER_DATA%';
+			
+			<if test="removerFileList != null and removerFileList.size() > 0">
+				UPDATE
+					IAAP_STT_CONFIG
+				SET
+					CODE_VALUE = 'Y'
+				WHERE
+					<foreach item="item" collection="removerFileList" separator="OR DESCRIPTION = " open="DESCRIPTION = " close=";">
+						#{item}
+					</foreach>
+			</if>
+			
+			<if test="removerDataList != null and removerDataList.size() > 0">
+				UPDATE
+					IAAP_STT_CONFIG
+				SET
+					CODE_VALUE = 'Y'
+				WHERE
+					<foreach item="item" collection="removerDataList" separator="OR DESCRIPTION = " open="DESCRIPTION = " close=";">
+						#{item}
+					</foreach>
+			</if>
+	</update>
+	
+	<update id="updateThresholdConfigValues" parameterType="ThresholdConfigDto">
+		/* PreferenceMapper.updateThresholdConfigValues */
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{cpu}
+			WHERE
+				DESCRIPTION = 'THRESHOLD_CPU';
+				
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{storage}
+			WHERE
+				DESCRIPTION = 'THRESHOLD_STORAGE';
+								
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{memory}
+			WHERE
+				DESCRIPTION = 'THRESHOLD_MEMORY';
+	</update>
+	
+	<update id="updateAgentConfigValues" parameterType="AgentConfigDto">
+		/* PreferenceMapper.updateAgentConfigValues */
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{sessionTarget}
+			WHERE
+				DESCRIPTION = 'SESSION_TARGET';
+		
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{multipartHostDeploy}
+			WHERE
+				DESCRIPTION = 'MULTIPART_HOST_DEPLOY';
+				
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{multipartHostTest}
+			WHERE
+				DESCRIPTION = 'MULTIPART_HOST_TEST';
+				
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{multipartSubDeploy}
+			WHERE
+				DESCRIPTION = 'MULTIPART_SUB_DEPLOY';
+				
+			UPDATE
+				IAAP_STT_CONFIG
+			SET
+				CODE_VALUE = #{multipartSubTest}
+			WHERE
+				DESCRIPTION = 'MULTIPART_SUB_TEST';
+	</update>
+	
+	<update id="updateEtcConfigValues" parameterType="EtcConfigDto">
+		/* PreferenceMapper.updateEtcConfigValues */
+		UPDATE
+			IAAP_STT_CONFIG
+		SET
+			CODE_VALUE = #{recordCount}
+		WHERE
+			DESCRIPTION = 'SCREEN_RECORDS';
+			
+		UPDATE
+			IAAP_STT_CONFIG
+		SET
+			CODE_VALUE = #{confidenceChartThreshold}
+		WHERE
+			DESCRIPTION = 'CONFIDENCE_CHART_THRESHOLD';
+	</update>
+	
+	<update id="updateEncryptConfigValues" parameterType="EncryptConfigDto">
+		/* PreferenceMapper.updateEncryptConfigValues */
+		UPDATE
+			IAAP_STT_CONFIG
+		SET
+			CODE_VALUE = #{textEncrypt}
+		WHERE
+			DESCRIPTION = 'TEXT_ENCRYPT';
+			
+		UPDATE
+			IAAP_STT_CONFIG
+		SET
+			CODE_VALUE = #{wavEncrypt}
+		WHERE
+			DESCRIPTION = 'WAV_ENCRYPT';
+	</update>
+	
+	<select id="findSessionTarget" resultType="string">
+		/* PreferenceMapper.findSessionTarget */
+		SELECT
+			CODE_VALUE
+		FROM
+			IAAP_STT_CONFIG
+		WHERE
+			DESCRIPTION = 'SESSION_TARGET';
+	</select>
+	
+	<insert id="insertSessionSortCondition" parameterType="com.kt.smp.stt.operate.session.dto.SessionRequestDto">
+		/* PreferenceMapper.insertSessionSortCondition */
+		INSERT INTO IAAP_STT_CONFIG
+		VALUES (
+			NEXTVAL(SEQ_IAAP_STT_CONFIG),
+			'O',
+			#{firstSortCondition},
+			'SESSION_FIRST_SORT_CONDITION',
+			NOW(),
+			#{regId},
+			#{regIp},
+			NOW(),
+			#{regId},
+			#{regIp},
+			'Y'
+		);
+		
+		INSERT INTO IAAP_STT_CONFIG
+		VALUES (
+			NEXTVAL(SEQ_IAAP_STT_CONFIG),
+			'O',
+			#{secondSortCondition},
+			'SESSION_SECOND_SORT_CONDITION',
+			NOW(),
+			#{regId},
+			#{regIp},
+			NOW(),
+			#{regId},
+			#{regIp},
+			'Y'
+		);
+	</insert>
+	
+	<update id="updateSessionSortCondition" parameterType="com.kt.smp.stt.operate.session.dto.SessionRequestDto">
+		/* PreferenceMapper.updateSessionSortCondition */
+		UPDATE 
+			IAAP_STT_CONFIG
+		SET 
+			CODE_VALUE = #{firstSortCondition}
+		WHERE
+			DESCRIPTION = 'SESSION_FIRST_SORT_CONDITION';
+			
+		UPDATE 
+			IAAP_STT_CONFIG
+		SET 
+			CODE_VALUE = #{secondSortCondition}
+		WHERE
+			DESCRIPTION = 'SESSION_SECOND_SORT_CONDITION';
+	</update>
+</mapper>

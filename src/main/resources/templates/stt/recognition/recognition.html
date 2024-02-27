@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <style>
+        .chart-container{
+			display: flex;
+			justify-content: space-between;
+			flex-wrap: wrap;
+		}
+    </style>
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>인식률 차트</h2>
+        </div>
+        <div class="content-body">
+            <div class="card">
+                <!-- >>> 검색 바 -->
+                <div class="card-header">
+                    <div class="form-row md-size">
+                        <!-- >> 서비스 모델 선택 -->
+                        <div :class="{'is-active': isActive}"
+                             class="check-form-wrap">
+                            <div @click="() => {isActive = !isActive; this.adjustServiceModelSelectorLabel();}"
+                                 class="check-form-title">
+                                <span id="service-model-selector-label">서비스 모델 선택*</span>
+                                <span class="mdc-select__dropdown-icon icon-vertical-center" :class="{'icon-rotate': isActive}"></span>
+                            </div>
+                            <div class="check-form-list-container">
+                                <div class="check-form-list">
+                                    <div v-for="item in serviceModelList" class="mdc-form-field" :key="item.id">
+                                        <div class="mdc-checkbox isChkbox">
+                                            <input type="checkbox"
+                                                   :id="'checkbox-' + item.id"
+                                                   :value="item.serviceCode"
+                                                   :name="item.serviceModelName"
+                                                   class="mdc-checkbox__native-control serviceModelChkbox isChkbox"/>
+                                            <div class="mdc-checkbox__background">
+                                                <svg class="mdc-checkbox__checkmark"
+                                                     viewBox="0 0 24 24">
+                                                    <path class="mdc-checkbox__checkmark-path"
+                                                          fill="none"
+                                                          d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                                                </svg>
+                                                <div class="mdc-checkbox__mixedmark isChkbox"></div>
+                                            </div>
+                                            <div class="mdc-checkbox__ripple isChkbox"></div>
+                                        </div>
+                                        <label :for="'checkbox-' + item.id" class="isChkbox">{{ item.serviceModelName }}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- << 서비스 모델 선택 -->
+
+                        <!-- >> 검색 기간 -->
+                        <div class="form-row flex-auto">
+                            <div class="flex-auto flex-ratio-two">
+                                <div id="start-date-mdc"
+                                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.from"
+                                    />
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">통계 시작일</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto" hidden>
+                                <div id="start-time-mdc"
+                                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.startSearchTime"
+                                    />
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">통계 시작 시간</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto flex-ratio-two">
+                                <div id="end-date-mdc" class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.to"
+                                    />
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">통계 종료일</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto" hidden>
+                                <div id="end-time-mdc"
+                                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.endSearchTime"
+                                    />
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">통계 종료 시간</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- << 검색 기간 -->
+
+                        <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded"
+                                @click="search">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon me-1">search</i>
+                            <span class="mdc-button__label">검색</span>
+                        </button>
+                        <!-- <<< 검색 바 -->
+                    </div>
+                </div>
+				
+                <div class="card-body custom-scrollbar">
+                    <!-- loading bar -->
+                    <div v-show="searching" role="progressbar"
+                         class="mdc-linear-progress mdc-linear-progress--indeterminate"
+                         style="opacity: 1;">
+                        <div class="mdc-linear-progress__buffering-dots"></div>
+                        <div class="mdc-linear-progress__buffer"></div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                    </div>
+                    <div class="chart_area">
+                        <div style="width: 100%; height: 100%; position: relative;" class="chart-container">
+                            <div id="noDataTextField"
+                                 style="text-align: center; width: 100%; height: 100%; position: absolute; left: 0; top: 38%; display: none;">
+                                <p>데이터가 없습니다.</p>
+                            </div>
+                            <div v-for="(chart, index) in chartList" style="width: 100%; height: 400px; padding-bottom: 120px;">
+                                <div class="table-controls flex-auto">
+                        			<h4>검색결과 : <span>{{ chart.totalCount }}</span>건</h4>
+                    			</div>
+                    			<div class="mountedNoDataTextField"
+                                 	style="text-align: center;position: relative; top: 56%;">
+                                	<p>데이터가 없습니다.</p>
+                            	</div>
+                                <canvas :id="'chart_' + chart.serviceCode"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript" th:src='${smpServiceUriPrefix + "/js/chartjsMomentAdapter.js"}'></script>
+    <script type="text/javascript">
+        (function () {
+            var LABEL = {
+                searchCondition: {
+                    serviceCodeList: [],
+                    from: moment(new Date()).format("YYYY-MM-DD"),
+                    startSearchTime: "00:00",
+                    to: moment(new Date()).format("YYYY-MM-DD"),
+                    endSearchTime: "23:59"
+                },
+                message: {
+					SERVICE_CODE_NOT_SELECTED: "검색할 서비스 코드를 선택해주세요",
+					DATE_NOT_PICKED: "올바른 조회 일자를 선택해주세요.",
+				    INVALID_DATE_RANGE: "기간이 유효하지 않습니다. 다시 선택해주세요.",
+				    OVER_END_DATE: "조회 종료일(to)이 오늘 날짜를 넘을 수 없습니다.",
+				    OVER_DATE_RANGE: "조회는 최대 90일까지만 가능합니다.",
+				    UNKNOWN_ERROR: "알 수 없는 문제로 에러가 발생하였습니다. 담당자에게 문의해주세요."
+				}
+            };
+            
+            new Vue({
+                el: ".contentRoot",
+                data: {
+                    baseUrl: "",
+
+                    // 검색
+                    searchCondition: {...LABEL.searchCondition},
+                    searching: false, // 검색중
+                    searchResults: [], // 검색 결과
+                    searchTotalCount: [], // 검색 결과 개수
+                    serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+                    hashmap: [],
+                    SERVICE_MODEL_ID_TO_NAME: {},
+                    newObj: {...LABEL.insertRequest},
+
+                    // 차트
+                    myChartList: [],
+                    chartData: {},
+                    
+                    chartList: [],
+                    chartDataList: [],
+                    
+                    isChecked: false,
+                    isActive: false
+                },
+                created: function () {
+                    // Base url 받아오기
+                    const baseUrl = document.querySelector('#smpServiceUriPrefix').value;
+                    this.baseUrl = baseUrl;
+
+                    // 서비스 목록 받아오기
+                    var self = this;
+                },
+                mounted: function () {
+
+					const self = this;
+
+                  // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+                        // console.log("page move out");
+                        var $startAtInput = $('#start-date-mdc');
+                        var $endAtInput = $('#end-date-mdc');
+                        $startAtInput.data('datepicker').destroy();
+                        $endAtInput.data('datepicker').destroy();
+                    });
+					
+                    this.initMaterialUx();
+                    this.initSearchBarEvents();
+
+					const body = document.querySelector("body");
+					body.addEventListener('click', (event)=>{
+						const target = event.target;
+						
+					    if(target.className === "check-form-title" ) {
+							return;
+						}
+						
+						if(target.parentElement?.className === "check-form-title") {
+							return;
+						}
+						
+						const array = [].slice.call(target.classList); 
+						
+						if(array.indexOf("isChkbox")>= 0) {
+							return;
+						}
+						
+						self.isActive = false;
+						this.adjustServiceModelSelectorLabel();
+					});
+					
+					this.serviceModelList.forEach(serviceModel => {
+						const chartData = {
+							dataset: [],
+							serviceCode: serviceModel.serviceCode,
+							serviceModelName: serviceModel.serviceModelName
+						};
+						const chartList = 
+				            {
+				                serviceCode: serviceModel.serviceCode,
+				                serviceModelName: serviceModel.serviceModelName,
+				                serviceModelId: serviceModel.serviceModelId,
+				                totalCount: 0,
+				            };
+				        
+				        this.chartList.push(chartList);
+						
+						setTimeout(()=>{
+							self.createChart(chartData, true);	
+						},300);
+							
+					});
+					    
+                },
+                methods: {
+                    // 화면 초기화
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            el.class
+                            mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0);
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const textField of textFields) {
+                            const mdcTextField = mdc.textField.MDCTextField.attachTo(textField);
+                            $(textField).data('instance', mdcTextField); //
+                        }
+
+                        // select material ux 적용
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            const select = mdc.select.MDCSelect.attachTo(el);
+                            $(el).data('instance', select); //
+                        }
+                        
+                        this.initMaterialDatepickers();
+                        this.initTimepickers();
+                    },
+                    initMaterialDatepickers: function () {
+
+                        // datepicker 적용
+                        var self = this;
+                        var $startAtInput = $('#start-date-mdc');
+                        var $endAtInput = $('#end-date-mdc');
+
+                        var today = moment(new Date()).format("YYYY-MM-DD");
+
+                        // https://github.com/FreddyFY/material-datepicker
+                        var datepickerOption = {
+                            lang: "en",
+                            orientation: "portrait",
+                            color: document.defaultView.getComputedStyle(document.documentElement).getPropertyValue("--mdc-theme-primary"),
+                            closeAfterClick: false,
+                            outputFormat: 'YYYY-MM-DD',
+                            topHeaderFormat: 'YYYY MM',
+                            headerFormat: 'Do' // 1st 2nd ... 30th 31st
+                        };
+
+                        if ($startAtInput.data('datepicker') != null) {
+                            $startAtInput.data('datepicker').destroy();
+                        }
+
+                        $startAtInput.data('datepicker', new MaterialDatepicker($startAtInput.data('instance').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+                                var finalDate = moment(date).format("YYYY-MM-DD");
+
+                                if (_.isEmpty($startAtInput.data('instance').value)) {
+                                    finalDate = today;
+                                }
+
+                                $startAtInput.data('instance').value = finalDate;
+                                self.searchCondition.from = finalDate;
+
+                                if (self.searchCondition.to < finalDate) {
+                                    self.searchCondition.to = finalDate;
+                                    $endAtInput.data('instance').value = finalDate;
+                                }
+
+                                // 날짜 변경에 따른 timepicker 설정. 검색 시작-종료날짜 같은 경우 timepicker의 min-max 값 설정
+                                if (self.searchCondition.from == self.searchCondition.to) {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', self.searchCondition.endSearchTime);
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', self.searchCondition.startSearchTime);
+                                } else {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', "23:59");
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', "00:00");
+                                }
+                            }
+                        })));
+
+                        if ($endAtInput.data('datepicker') != null) {
+                            $endAtInput.data('datepicker').destroy();
+                        }
+
+                        $endAtInput.data('datepicker', new MaterialDatepicker($endAtInput.data('instance').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+                                var finalDate = moment(date).format("YYYY-MM-DD");
+
+                                if (_.isEmpty($endAtInput.data('instance').value)) {
+                                    finalDate = today;
+                                }
+
+                                $endAtInput.data('instance').value = finalDate;
+                                self.searchCondition.to = finalDate;
+
+                                if (self.searchCondition.from > finalDate) {
+                                    self.searchCondition. from = finalDate;
+                                    $startAtInput.data('instance').value = finalDate;
+                                }
+
+                                // 날짜 변경에 따른 timepicker 설정. 검색 시작-종료날짜 같은 경우 timepicker의 min-max 값 설정
+                                if (self.searchCondition.from == self.searchCondition.to) {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', self.searchCondition.endSearchTime);
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', self.searchCondition.startSearchTime);
+                                } else {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', "23:59");
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', "00:00");
+                                }
+                            }
+                        })));
+                    },
+                    initTimepickers: function () {
+
+                        // timepicker 적용
+                        var self = this;
+                        var $startAtInput = $('#start-time-mdc');
+                        var $endAtInput = $('#end-time-mdc');
+
+
+                        // https://github.com/jonthornton/jquery-timepicker
+                        var timepickerOptions = {
+                            timeFormat: 'H:i',
+                            step: 10,
+                            show2400: true,
+                            maxTime: "23:59"
+                        };
+
+                        $($startAtInput.data('instance').input).timepicker(timepickerOptions)
+                            .on('change', function (e) {
+                                $startAtInput.data('instance').value = e.target.value;
+                                self.searchCondition.startSearchTime = e.target.value;
+
+                                // 검색 시작-종료 날짜가 같은 경우, 종료 timepicker의 최소 시간 = 시작 timepicker의 시간
+                                if (self.searchCondition.from == self.searchCondition.to) {
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', self.searchCondition.startSearchTime);
+                                } else {
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', "00:00");
+                                }
+                            });
+                        $($endAtInput.data('instance').input).timepicker(timepickerOptions)
+                            .on('change', function (e) {
+                                $endAtInput.data('instance').value = e.target.value;
+                                self.searchCondition.endSearchTime = e.target.value;
+
+                                // 검색 시작-종료 날짜가 같은 경우, 시작 timepicker의 최대 시간 = 종료 timepicker의 시간
+                                if (self.searchCondition.from == self.searchCondition.to) {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', self.searchCondition.endSearchTime);
+                                } else {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', "23:59");
+                                }
+                            });
+                    },
+
+                    initSearchBarEvents: function () {
+                        var self = this;
+                        $('.search-bar input').on("keydown", function (e) {
+                            if (e.keyCode == 13) {
+                                self.search();
+                            }
+                        });
+                    },
+                    // mdc-select destroy 후 재생성
+                    recreateMdcSelect: function ($mdcSelect) {
+                        this.$nextTick(function () {
+                            const $select = $mdcSelect[0];
+                            $($select).data('instance').destroy();
+
+                            const newMdcSelect = new mdc.select.MDCSelect($select);
+                            $($select).data('instance', newMdcSelect);
+                        })
+                    },
+                    _convertDatetime: function (searchCondition, isStart) {
+                        var searchUnit = searchCondition['searchUnit'];
+
+                        var sDate = searchCondition.from;
+                        var eDate = searchCondition.to;
+                        var sTime = searchCondition.startSearchTime;
+                        var eTime = searchCondition.endSearchTime;
+
+                        var finalDate = isStart ? sDate : eDate;
+                        var finalTime = isStart ? sTime : eTime;
+
+                        if (searchUnit == "MONTH") {
+                            var targetDate = "";
+                            if (isStart) {
+                                var sDateObject = new Date(sDate);
+                                targetDate = new Date(sDateObject.getFullYear(), sDateObject.getMonth(), 1);
+                                finalTime = "00:00";
+                            } else {
+                                var eDateObject = new Date(eDate);
+                                targetDate = new Date(eDateObject.getFullYear(), eDateObject.getMonth() + 1, 0);
+                                finalTime = "23:59";
+                            }
+                            finalDate = moment(targetDate).format("YYYY-MM-DD");
+                        }
+
+                        if (searchUnit == "HOUR") {
+                            if (isStart) {
+                                finalTime = sTime.split(":")[0] + ":00";
+                            } else {
+                                finalTime = eTime.split(":")[0] + ":59";
+                            }
+                        }
+
+                        return finalDate + " " + finalTime;
+                    },
+                    search: function () {
+                        if (this.getCheckedServiceCodeList().length == 0) {
+							toastr.error(LABEL.message.SERVICE_CODE_NOT_SELECTED);
+							return;
+						}
+						
+						if (!this.validateSearchDate(this.searchCondition.from, this.searchCondition.to)) {
+							return;
+						};
+						
+						const queryString = this.makeSearchConditionQueryString();
+						
+						this._setSearching(true);						
+                        
+                        $.ajax({
+                            url: this.baseUrl + "/recognition/api/listPage?" + queryString,
+                            method: "get",
+                            contentType: 'application/json; charset=UTF-8',
+                            dataType: "json"
+                        }).done(data => {
+							const restResult = data.result;
+                            this._setSearchResults(restResult.chartList); // 검색 결과 목록
+                            this._setHashmap(restResult.hashmap);
+                            this._setChart(restResult);
+                        }).always(() => {
+                            this._setSearching(false);
+                        }) 
+                    },
+                    makeSearchConditionQueryString: function () {
+                        const searchConditions = {...this.searchCondition}
+						searchConditions['serviceCodeList'] = this.getCheckedServiceCodeList();
+                        // 날짜, 시간 변경
+                        /*const startDatetime = this._convertDatetime(searchConditions, true);
+                        const endDatetime = this._convertDatetime(searchConditions, false);
+	
+                        searchConditions['from'] = startDatetime;
+                        searchConditions['to'] = endDatetime;
+
+                        // 검색 시간, 분 필드 삭제
+                        delete searchConditions['startSearchTime'];
+                        delete searchConditions['endSearchTime'];
+						*/
+                        const queryString = Qs.stringify(searchConditions);
+                        return queryString;
+                    },
+                    _setSearchResults: function (chartList) {
+						const self = this;
+                        this.searchResults = chartList;
+                        chartList.forEach((chart)=>{
+							if (chart.totalCount === 0) {
+								return;
+							}
+							self.searchTotalCount.push(chart.totalCount);
+						})
+                    },
+                    _setHashmap: function (hashmap) {
+                        this.hashmap = hashmap;
+                    },
+                    _setSearching: function (searching) {
+                        this.searching = searching;
+                    },
+                    _setChart: function (restResult) {
+						const chartData = restResult.chartData;
+						const chartList = restResult.chartList;
+						console.log(">>> in _setChart chartData : " , chartData)
+						console.log(">>> in _setChart chartList : " , chartList)
+						const validChartDatas = chartList.filter(function(data){
+							return data.totalCount > 0;
+						})
+						this.chartList = validChartDatas;
+						
+						const self = this;
+						
+						const newChartList = [];
+						
+                        // 데이터 없을 시
+                        if (validChartDatas.length !== 0) {
+							$('#noDataTextField')[0].style.display = 'none';
+                        } else {
+                            $('#noDataTextField')[0].style.display = ''; 
+                            return;
+                        }
+                        
+                        this.destroyAllChart();
+                        setTimeout(function(){
+							chartData.forEach(function(data){
+		                    	self.createChart(data,false, validChartDatas );
+							});
+							$('.mountedNoDataTextField').each((index, item)=>{
+								item.style.display = "none";
+							});	
+						},300);
+                    },
+                    createChart: function(chartData, isMounted, chartList) {
+						if (!isMounted) {
+							
+							if (chartData.datasets.length === 0) {
+								return;
+							}
+													
+						}
+						const canvas = document.getElementById('chart_' + chartData.serviceCode);
+      					const ctx = canvas.getContext('2d');
+      					
+      					const chartDataObject = {
+					        type: 'line',
+					        data: {
+								datasets: chartData.datasets
+							},
+					        options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										type: "time",
+										time: {
+											unit: 'day',
+											tooltipFormat: "yyyy-MM-DD",
+											displayFormats: {
+												day: 'yyyy-MM-DD'
+											}
+										},
+										title: {
+											display: true,
+											text: "날짜",
+											font: {
+												size: 14,
+												weight: "bold"
+											},
+											align: "start"
+										}
+									},
+									y: {
+										title: {
+											display: true,
+											text: "인식률(평균)",
+											font: {
+												size: 14,
+												weight: "bold"
+											}
+										}
+									}
+								},
+								plugins: {
+									title: {
+										display: true,
+										text: chartData.serviceModelName,
+										padding: {
+						                    bottom: 30
+						                },
+						                font: {
+											size: 18,
+											weight: "bold"
+										}
+									},
+									legend: {
+										display: true,
+										labels: {
+											padding: 15
+										}
+									},
+									tooltip:{
+										enabled: true,
+										position: "nearest", // nearest cursor
+										//external: externalTooltipHandler
+										bodyColor: 'orange',
+										backgroundColor: 'midnightblue',
+										//titleColor: '',
+										titleFont: { weight: "bold" }, 
+				                        padding: 10, 
+				                        cornerRadius: 10, 
+				                        borderColor: "#042a0b", 
+				                        borderWidth: "2",
+				                        callbacks:{
+											label: function(tooltipData){
+												//console.log(">>> tooltipData : " , tooltipData)
+												const labels = tooltipData.dataset.label.toString(); 
+                                				const values = tooltipData.dataset.data[tooltipData.dataIndex]; 
+                                				var verifyName = "";
+                                				var endVerifyTime = "";
+                                				//const result = tooltipData.dataset.data.reduce((var1, var2) => var1 + var2, 0 );
+                                				//const percentage = ((values / result) * 100).toFixed(2) + "%"; 
+  												
+  												for(var i=0; i< chartList.length; i++){
+													if(chartList[i].serviceModelName = chartData.serviceModelName){
+														var detailData = chartList[i].sttRecognitionDetailList;
+														for(var j=0; j<detailData.length; j++){
+															if(detailData[j].avgCer==tooltipData.raw.y && detailData[j].resultModelId==tooltipData.raw.x &&
+																detailData[j].datasetName==labels) {
+																//console.log(">>> detailData[j].endAt : "+detailData[j].endAt)
+																endVerifyTime = detailData[j].endAt;
+																verifyName = detailData[j].verifyName;
+															}
+														}
+													}
+												}
+												var result = [`검증이름 :  ${verifyName}`, `CER :  ${values.y}`, `검증완료시간 :  ${endVerifyTime}`];
+												
+                                				//return `검증이름 : ${verifyName}\n CER : ${values.y} 검증완료시간 : ${endVerifyTime}`;
+                                				return result;
+											}
+										}
+									}
+								}
+							}
+					      };
+					      
+					      
+					      
+					    this.myChartList.push(new Chart(ctx, chartDataObject));
+					    
+					},
+					destroyAllChart: function() {
+						this.myChartList.forEach(function(myChart){
+							myChart.destroy();
+						});
+					},
+                    getCheckedServiceCodeList: function() {
+						const checkedServiceCodeList = [];
+						
+						$(".serviceModelChkbox").each((index, chkbox)=>{
+							if (chkbox.checked) {
+								checkedServiceCodeList.push(chkbox.value);
+							}
+						});
+						return checkedServiceCodeList;
+					},
+					getCheckedServiceModelNameList: function() {
+						const checkedServiceModelNameList = [];
+						
+						$(".serviceModelChkbox").each((index, chkbox)=>{
+							if (chkbox.checked) {
+								checkedServiceModelNameList.push(chkbox.name);
+							}
+						});
+						return checkedServiceModelNameList;
+					},
+                    convertServiceModelId2Name: function(id) {
+                        return this.SERVICE_MODEL_ID_TO_NAME[id];
+                    },
+                    adjustServiceModelSelectorLabel: function() {
+						const checkedServiceModelNameList = this.getCheckedServiceModelNameList();
+						if (checkedServiceModelNameList.length === 0) {
+							$("#service-model-selector-label").text("서비스 모델 선택*");
+							return;
+						};
+						let serviceModelLabel = "";
+						checkedServiceModelNameList.forEach(function(name, index){
+							if (index > 0) {
+								serviceModelLabel += ", "
+							}
+							serviceModelLabel += name
+						})
+						$("#service-model-selector-label").text(serviceModelLabel);
+					},
+					validateSearchDate: function(startDate, endDate) {
+					  if (startDate == null || endDate == null) {
+						 toastr.error(LABEL.message.DATE_NOT_PICKED);
+						 return false;  
+					  }
+					  
+					  const startDateObj = new Date(startDate);
+					  const endDateObj = new Date(endDate);
+					  const today = new Date();
+						
+				  	  if (startDateObj > endDateObj) {
+						  toastr.error(LABEL.message.INVALID_DATE_RANGE);
+						  return false;
+					  }
+				  	
+				  	  const diffMSec = endDateObj.getTime() - startDateObj.getTime();
+					  const diffDate = diffMSec / (24 * 60 * 60 * 1000);
+					
+					  if (diffDate > 90) {
+						  toastr.error(LABEL.message.OVER_DATE_RANGE);
+						  return false;
+					  }
+					
+					  return true;
+				  },
+                }
+            });
+        })
+        ();
+    </script>
+</th:block>
+
+
+</html>

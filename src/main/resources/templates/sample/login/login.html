@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ko"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorate="layouts/nolayout">
+	<th:block layout:fragment="html">
+		<div class="contentRoot mdc-layout-grid__inner">
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12 mt-7">
+				<div class=" mdc-elevation--z10 p-4 text-center" style="width: 400px; margin: 0 auto;">
+					<div class="mdc-text-field demo-text-field-outlined-shaped text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label">아이디</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+					<div class="mdc-text-field demo-text-field-outlined-shaped text-field mdc-text-field--outlined w-100 mt-3">
+						<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label">비밀번호</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+					<div class="mdc-layout-grid__inner">
+						<div class="mdc-form-field mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<div class="mdc-checkbox mdc-checkbox--selected mdc-checkbox--upgraded mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+								<input type="checkbox" class="mdc-checkbox__native-control" id="0.04283140257181639"  checked="true" />
+								<div class="mdc-checkbox__background">
+									<svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24"><path class="mdc-checkbox__checkmark-path" fill="none" stroke="white" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path></svg>
+									<div class="mdc-checkbox__mixedmark"></div>
+								</div>
+								<div class="mdc-checkbox__ripple"></div>
+							</div>
+							<label for="0.04283140257181639">아이디 저장</label>
+						</div>
+						
+						<div class="mdc-form-field mdc-layout-grid__cell mdc-layout-grid__cell--span-6 ms-auto">
+							<button id="admin-registration-dialog-btn" class="mdc-button undefined mdc-ripple-upgraded">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon me-1">person_add</i>
+								<span class="mdc-button__label">관리자 등록 요청</span>
+							</button>
+						</div>
+					</div>
+					
+					<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 mt-4">
+						<span class="mdc-button__ripple"></span>
+						<i class="material-icons mdc-button__icon">login</i>
+						<span class="mdc-button__label">로그인</span>
+					</button>
+				</div>
+			</div>
+			
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+				<div>Dialog</div>
+				<div class="mt-1">
+					<button id="password-registration-dialog-btn" class="mdc-button mdc-button--outlined m-1">비밀번호 등록</button>
+					<button id="captcha-certification-dialog-btn" class="mdc-button mdc-button--outlined m-1">캡챠</button>
+					<button id="opt-certification-dialog-btn" class="mdc-button mdc-button--outlined m-1">OPT 인증</button>
+				</div>
+				<br/>
+				<div>Toast</div>
+				<div class="mt-1">
+					<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.error('등록되지 않은 이메일이거나, 이메일 또는 비밀번호를 잘못 입력했습니다. 확인 후 다시 로그인해 주세요.', '로그인 실패');">로그인 실패</button>
+					<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.info('관리자 등록 승인 후 로그인이 가능합니다. 승인 후 다시 로그인해 주세요.', '로그인 실패');">승인 전 로그인</button>
+					<button id="login-fail1-toast-btn" class="mdc-button mdc-button--outlined m-1">반려 후 로그인</button>
+					<button id="login-fail2-toast-btn" class="mdc-button mdc-button--outlined m-1">정지 계정</button>
+					<button id="login-fail3-toast-btn" class="mdc-button mdc-button--outlined m-1">유효기간 만료</button>
+					<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.success('관리자 등록 요청되었습니다.', '관리자 등록 요청')">관리자 등록 요청 완료</button>
+					<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.success('비밀번호가 등록되었습니다.<br/>등록된 비밀번호로 로그인해 주세요.', '비밀번호 등록')">비밀번호 등록 완료</button>
+				</div>
+			</div>
+		</div>
+		
+		<div id="admin-registration-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">관리자 등록 요청</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end">
+								*모든 항목은 필수입력사항입니다.
+							</p>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+							    <div class="mdc-select__anchor" aria-required="true">
+							        <div class="mdc-notched-outline">
+							            <span class="mdc-notched-outline__leading"></span>
+							            <div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label mdc-floating-label--required">시스템 권한</label>
+										</div>
+							            <span class="mdc-notched-outline__trailing"></span>
+							        </div>
+							        <span class="mdc-select__selected-text-container overflow-hidden">
+							            <span class="mdc-select__selected-text"></span>
+							        </span>
+							        <span class="mdc-select__dropdown-icon"></span>
+							    </div>
+							    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+							        <ul class="mdc-deprecated-list">
+							            <li class="mdc-deprecated-list-item " data-value="0">
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">시스템 관리자</span>
+							            </li>
+							            <li class="mdc-deprecated-list-item" data-value="1" >
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">사이트 관리자</span>
+							            </li>
+							            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="2" aria-selected="true">
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">프로젝트 관리자</span>
+							            </li>
+							        </ul>
+							    </div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+							    <div class="mdc-select__anchor" aria-required="true">
+							        <div class="mdc-notched-outline">
+							            <span class="mdc-notched-outline__leading"></span>
+							            <div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label mdc-floating-label--required">사이트</label>
+										</div>
+							            <span class="mdc-notched-outline__trailing"></span>
+							        </div>
+							        <span class="mdc-select__selected-text-container overflow-hidden">
+							            <span class="mdc-select__selected-text"></span>
+							        </span>
+							        <span class="mdc-select__dropdown-icon"></span>
+							    </div>
+							    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+							        <ul class="mdc-deprecated-list">
+							            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">하나금융</span>
+							            </li>
+							            <li class="mdc-deprecated-list-item" data-value="1" >
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">신한금융</span>
+							            </li>
+							        </ul>
+							    </div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+							    <div class="mdc-select__anchor" aria-required="true">
+							        <div class="mdc-notched-outline">
+							            <span class="mdc-notched-outline__leading"></span>
+							            <div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label mdc-floating-label--required">프로젝트</label>
+										</div>
+							            <span class="mdc-notched-outline__trailing"></span>
+							        </div>
+							        <span class="mdc-select__selected-text-container overflow-hidden">
+							            <span class="mdc-select__selected-text"></span>
+							        </span>
+							        <span class="mdc-select__dropdown-icon"></span>
+							    </div>
+							    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+							        <ul class="mdc-deprecated-list">
+							            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">하나은행</span>
+							            </li>
+							            <li class="mdc-deprecated-list-item" data-value="1" >
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">하나카드</span>
+							            </li>
+							        </ul>
+							    </div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+							    <div class="mdc-select__anchor" aria-required="true">
+							        <div class="mdc-notched-outline">
+							            <span class="mdc-notched-outline__leading"></span>
+							            <div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label mdc-floating-label--required">프로젝트 권한</label>
+										</div>
+							            <span class="mdc-notched-outline__trailing"></span>
+							        </div>
+							        <span class="mdc-select__selected-text-container overflow-hidden">
+							            <span class="mdc-select__selected-text"></span>
+							        </span>
+							        <span class="mdc-select__dropdown-icon"></span>
+							    </div>
+							    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+							        <ul class="mdc-deprecated-list">
+							            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">통합 관리자</span>
+							            </li>
+							            <li class="mdc-deprecated-list-item" data-value="1" >
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">NLP 관리자</span>
+							            </li>
+							            <li class="mdc-deprecated-list-item" data-value="2" >
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">STT 관리자</span>
+							            </li>
+							            <li class="mdc-deprecated-list-item" data-value="3" >
+							                <span class="mdc-deprecated-list-item__ripple"></span>
+							                <span class="mdc-deprecated-list-item__text">TTS 관리자</span>
+							            </li>
+							        </ul>
+							    </div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="sample mdc-layout-grid__inner ">
+								<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+									<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+										<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+										<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+											<div class="mdc-notched-outline__leading"></div>
+											<div class="mdc-notched-outline__notch">
+												<label class="mdc-floating-label" >아이디</label>
+											</div>
+											<div class="mdc-notched-outline__trailing"></div>
+										</div>
+									</div>
+									<div class="mdc-text-field-helper-line">
+										<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+											사용 가능한 아이디 입니다
+										</p>
+									</div>
+								</div>
+								<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+									<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded w-100 h-75">
+										<span class="mdc-button__ripple"></span>
+										<i class="material-icons mdc-button__icon">group</i>
+										<span class="mdc-button__label">중복확인</span>
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >비밀번호</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >비밀번호 확인</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+							<div class="mdc-text-field-helper-line">
+								<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error">
+									비밀번호와 비밀번호 확인이 일치하지 않습니다. 확인 후 입력해 주세요.
+								</p>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >이름</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >조직</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label">연락처</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label">이메일</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">close</i>
+								<span class="mdc-button__label">취소</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('관리자 등록을 요청하시겠습니까?');">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">done</i>
+								<span class="mdc-button__label">신청</span>
+							</button>
+						</div>
+					</footer>
+				</div>
+			</div>
+		</div>
+		
+		<div id="password-registration-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">비밀번호 등록</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end">
+								*모든 항목은 필수입력사항입니다.
+							</p>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >비밀번호</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label">비밀번호 확인</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+							<div class="mdc-text-field-helper-line">
+								<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error">
+									비밀번호와 비밀번호 확인이 일치하지 않습니다. 확인 후 입력해 주세요.
+								</p>
+							</div>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions">
+						<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('입력된 비밀번호를 등록하시겠습니까?');">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">lock</i>
+							<span class="mdc-button__label">비밀번호 등록</span>
+						</button>
+					</footer>
+				</div>
+			</div>
+		</div>
+	
+		<div id="captcha-certification-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">캡챠</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div>그림에 나오는 문자(그림, 알파벳)를 입력한에 보이는 그대로 입력하세요.</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8 border text-center pt-1">
+							캡챠 이미지
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+							<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded w-100">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">refresh</i>
+								<span class="mdc-button__label">새로고침</span>
+							</button>
+							<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded mt-1 w-100">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">volume_up</i>
+								<span class="mdc-button__label">음성듣기</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label"  >그림의 문자를 입력하세요</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions">
+						<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">done</i>
+							<span class="mdc-button__label">확인</span>
+						</button>
+					</footer>
+				</div>
+			</div>
+		</div>
+		
+		<div id="opt-certification-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">OPT 인증</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							계정정보에 등록된 연락처(<span>010-11**-*222</span>)로 SMS 인증번호가 발송되었습니다.
+							3분 내로 인증번호를 입력해 주세요.<br/>
+							<br/>
+							해당 연락처로 인증번호가 수신되지 않을 경우, 스팸처리 여부를 확인해 주세요.
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-text-field__icon" style="padding-right: 10px;">03:00</div>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label"  >인증번호</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+							<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded w-100 h-100">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">refresh</i>
+								<span class="mdc-button__label">다시받기</span>
+							</button>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions">
+						<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">done</i>
+							<span class="mdc-button__label">확인</span>
+						</button>
+					</footer>
+				</div>
+			</div>
+		</div>
+	
+	</th:block>
+	<th:block layout:fragment="script">
+
+		<script type="text/javascript">
+		(function () {
+			new Vue({
+				el: ".contentRoot",
+				data: {
+					
+				},
+				created: function () {
+					console.log('tset');
+				},
+				mounted: function () {
+					// 페이지 이동시 처리 
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						console.log("page move out");
+					});
+					
+					this.initMaterialUx();
+					
+					// 관리자 등록 요청 팝업
+					var modal0 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#admin-registration-dialog'));
+					$('#admin-registration-dialog-btn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						var inputs = modal0.root.querySelectorAll('input');
+						for (const el of inputs) {
+							el.value = "";
+						}
+						modal0.open();
+					});
+					
+					// 비밀번호 등록 팝업
+					var modal1 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#password-registration-dialog'));
+					$('#password-registration-dialog-btn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						var inputs = modal1.root.querySelectorAll('input');
+						for (const el of inputs) {
+							el.value = "";
+						}
+						modal1.open();
+					});
+					
+					// 캡챠 인증 팝업
+					var modal2 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#captcha-certification-dialog'));
+					$('#captcha-certification-dialog-btn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						var inputs = modal2.root.querySelectorAll('input');
+						for (const el of inputs) {
+							el.value = "";
+						}
+						modal2.open();
+					});
+					
+					// OPT 인증 팝업
+					var modal3 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#opt-certification-dialog'));
+					$('#opt-certification-dialog-btn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						var inputs = modal3.root.querySelectorAll('input');
+						for (const el of inputs) {
+							el.value = "";
+						}
+						modal3.open();
+					});
+					
+					// 로그인 실패
+					$('#login-fail1-toast-btn').unbind('click').bind('click', function () {
+						var html = "관리자 등록 요청이 반려되었습니다. 관리자에게 문의하시기 바랍니다.<br/>";
+						html += "반려 사유 : 반려 메시지<br/>";
+						html += "관리자 : test@kt.com<br/>";
+						toastr.info(html, "로그인 실패");
+					});
+					$('#login-fail2-toast-btn').unbind('click').bind('click', function () {
+						var html = "해당 계정은 정지되어 있습니다. 정지 해지 후 로그인해 주세요. <br/>";
+						html += "정지기간 : 2022년 10월 2일<br/>";
+						toastr.warning(html, "로그인 실패");
+					});
+					$('#login-fail3-toast-btn').unbind('click').bind('click', function () {
+						var html = "해당 계정의 유효기간이 만료되었습니다. 로그인을 위해서는 관리자에게 문의하시기 바랍니다.<br/>";
+						html += "관리자 : test@kt.com<br/>";
+						toastr.warning(html, "로그인 실패");
+					});
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							el.class
+							mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0);
+						}
+						
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const textField of textFields) {
+							mdc.textField.MDCTextField.attachTo(textField);
+						}
+						
+						// checkbox material ux 적용
+						const checkBoxs = document.querySelectorAll('.mdc-checkbox');
+						for (const checkBox of checkBoxs) {
+							mdc.checkbox.MDCCheckbox.attachTo(checkBox);
+						}
+						
+						// select material ux 적용
+						const selects = document.querySelectorAll('.mdc-select');
+						for (const el of selects) {
+							const select = mdc.select.MDCSelect.attachTo(el);
+							select.listen('MDCSelect:change', (evt) => {
+								//console.log(evt);
+							});
+						}
+					}
+				}
+			});
+		})();
+		</script>
+	</th:block>
+</html>

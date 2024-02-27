@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>STT 음성인식 테스트</h2>
+            <div class="button-group">
+                <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--default" @click="clear">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon me-1">clear</i>
+                    <span class="mdc-button__label">초기화</span>
+                </button>
+                <!--등록-->
+                <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded" @click="test">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon me-1">add</i>
+                    <span class="mdc-button__label">테스트 요청</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <div class="card">
+                <div class="card-body">
+                    <!-- >>> 음성 합성 요청 -->
+                    <div class="content-item search-bar">
+                        <div class="content-title mt-0">
+                            <h3>테스트 요청</h3>
+                        </div>
+                        <div class="form-row md-size">
+                            <!-- >> 서비스 모델 검색 -->
+                            <div
+                                class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required flex-auto max-w-200px"
+                                id="serviceModels-mdc-select">
+                                <div class="mdc-select__anchor" aria-required="true">
+                                    <div class="mdc-notched-outline">
+                                        <span class="mdc-notched-outline__leading"></span>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label mdc-floating-label--required">
+                                                서비스 모델
+                                            </label>
+                                        </div>
+                                        <span class="mdc-notched-outline__trailing"></span>
+                                    </div>
+                                    <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                                    <span class="mdc-select__dropdown-icon"></span>
+                                </div>
+                                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                    <ul class="mdc-deprecated-list">
+                                        <li class="mdc-deprecated-list-item" data-value="''"
+                                            @click="searchCondition.serviceCode=''"
+                                            :class="{'mdc-deprecated-list-item--selected': searchCondition.serviceCode==''}"
+                                            :aria-selected="searchCondition.serviceCode=='' ? 'true' : 'false'">
+                                            <span class="mdc-deprecated-list-item__ripple"></span>
+                                            <span class="mdc-deprecated-list-item__text">선택</span>
+                                        </li>
+                                        <li v-for="serviceModel in serviceModelList"
+                                            class="mdc-deprecated-list-item"
+                                            :data-value="serviceModel.serviceCode"
+                                            @click="searchCondition.serviceCode = serviceModel.serviceCode"
+                                            :class="{'mdc-deprecated-list-item--selected': searchCondition.serviceCode == serviceModel.serviceCode} "
+                                            :aria-selected="searchCondition.serviceCode == serviceModel.serviceCode ? 'true' : 'false'">
+                                            <span class="mdc-deprecated-list-item__ripple"></span>
+                                            <span class="mdc-deprecated-list-item__text">
+                                                {{ serviceModel.serviceModelName }}
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- >> 단건 테스트 대상 서버 선택 -->
+<!--                            <div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required flex-auto flex-ratio-two"-->
+<!--                                 id="serviceModels-mdc-select">-->
+<!--                                <div class="mdc-select__anchor" aria-required="true">-->
+<!--                                    <div class="mdc-notched-outline">-->
+<!--                                        <span class="mdc-notched-outline__leading"></span>-->
+<!--                                        <div class="mdc-notched-outline__notch">-->
+<!--                                            <label class="mdc-floating-label mdc-floating-label--required">대상 서버</label>-->
+<!--                                        </div>-->
+<!--                                        <span class="mdc-notched-outline__trailing"></span>-->
+<!--                                    </div>-->
+<!--                                    <span class="mdc-select__selected-text-container overflow-hidden">-->
+<!--                                        <span class="mdc-select__selected-text"></span>-->
+<!--                                    </span>-->
+<!--                                    <span class="mdc-select__dropdown-icon"></span>-->
+<!--                                </div>-->
+<!--                                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">-->
+<!--                                    <ul class="mdc-deprecated-list">-->
+<!--                                        <li class="mdc-deprecated-list-item" data-value="''" @click="searchCondition.testTarget=''"-->
+<!--                                            :class="{'mdc-deprecated-list-item--selected': searchCondition.testTarget==''}"-->
+<!--                                            :aria-selected="searchCondition.testTarget=='' ? 'true' : 'false'">-->
+<!--                                            <span class="mdc-deprecated-list-item__ripple"></span>-->
+<!--                                            <span class="mdc-deprecated-list-item__text">선택</span>-->
+<!--                                        </li>-->
+<!--                                        <li v-for="target in testTargetList" class="mdc-deprecated-list-item"-->
+<!--                                            :data-value="target"-->
+<!--                                            @click="searchCondition.testTarget = target.host"-->
+<!--                                            :class="{'mdc-deprecated-list-item--selected': searchCondition.testTarget == target.host} "-->
+<!--                                            :aria-selected="searchCondition.testTarget == target.propertyName ? 'true' : 'false'">-->
+<!--                                            <span class="mdc-deprecated-list-item__ripple"></span>-->
+<!--                                            <span class="mdc-deprecated-list-item__text">{{ target.host }}</span>-->
+<!--                                        </li>-->
+<!--                                    </ul>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <!-- << NAS 사용 / 미사용 선택 -->
+                            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2" style="display: flex;">
+                                <div class="mdc-form-field">
+                                    <div class="mdc-radio">
+                                        <input class="mdc-radio__native-control" type="radio" id="radio-nas-enable" name="testTarget" v-model="testTarget" value="host">
+                                        <div class="mdc-radio__background">
+                                            <div class="mdc-radio__outer-circle"></div>
+                                            <div class="mdc-radio__inner-circle"></div>
+                                        </div>
+                                        <div class="mdc-radio__ripple"></div>
+                                        <div class="mdc-radio__focus-ring"></div>
+                                    </div>
+                                    <label for="radio-nas-enable">{{testTargetMap.host.host}}</label>
+
+                                    <div v-if="testTargetMap.hostDeploy != null" class="mdc-radio">
+                                        <input class="mdc-radio__native-control" type="radio" id="radio-nas-disable" name="testTarget" v-model="testTarget" value="sub">
+                                        <div class="mdc-radio__background">
+                                            <div class="mdc-radio__outer-circle"></div>
+                                            <div class="mdc-radio__inner-circle"></div>
+                                        </div>
+                                        <div class="mdc-radio__ripple"></div>
+                                        <div class="mdc-radio__focus-ring"></div>
+                                    </div>
+                                    <label v-if="testTargetMap.hostDeploy != null" for="radio-nas-disable">{{testTargetMap.hostDeploy.host}}</label>
+                                </div>
+                            </div>
+                            <div class="flex-auto">
+                                <input id="insert-file-input" type="file" class="d-none" accept=".wav,.WAV"
+                                       @change="onChangeInsertFile"/>
+                                <div id="insert-file-name"
+                                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <i class="mdc-text-field__icon material-icons">attach_file</i>
+                                    <input type="text" class="mdc-text-field__input"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                                    <label for="insert-file-input" class="w-100 h-100 position-absolute"
+                                           style="z-index: 2; cursor: pointer"></label>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">파일업로드(WAV)</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- << 서버 검색 -->
+                        </div>
+                    </div>
+                    <!-- <<< 단건 테스트 요청 -->
+
+                    <div class="content-title">
+                        <h3>단건 테스트 결과</h3>
+                    </div>
+
+                    <!-- loading bar -->
+                    <div v-show="testing" role="progressbar"
+                         class="mdc-linear-progress mdc-linear-progress--indeterminate"
+                         style="opacity: 1;">
+                        <div class="mdc-linear-progress__buffering-dots"></div>
+                        <div class="mdc-linear-progress__buffer"></div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                    </div>
+
+                    <!-- >> 테스트 결과 -->
+                    <div class="table-container test-result-table">
+                        <div class="mdc-data-table w-100">
+                            <div class="mdc-data-table__table-container">
+                                <table class="mdc-data-table__table">
+                                    <tr>
+                                        <th class="mdc-data-table__header-cell text-center" style="width: 15%">결과</th>
+                                        <td class="mdc-data-table__cell" style="text-align: unset">
+                                            <div class="json-result-wrap">
+                                                <pre id="jsonResult">
+    
+                                                </pre>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+    <input type="hidden" readonly id="nasEnable" th:value="${nasEnable}">
+    <input type="hidden" readonly id="testTargetMap" th:value="${testTarget}">
+</th:block>
+
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        (function () {
+            var LABEL = {
+                searchCondition: {
+                    serviceModelId: "",
+                    serviceCode: "",
+                    testTarget: ""
+                }
+            };
+            const nasEnable = document.querySelector('#nasEnable').value;
+
+            new Vue({
+                el: ".contentRoot",
+                data: {
+                    searchCondition: {...LABEL.searchCondition},
+                    testing: false,
+                    polling: false,
+					nasUsable: "nasEnable",
+                    serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+                    testTargetMap: JSON.parse("[[${testTarget}]]".replaceAll('&quot;', "\"")),
+                    testTarget: "host",
+                },
+                created: function () {
+                    // Base url 받아오기
+                    const baseUrl = document.querySelector('#smpServiceUriPrefix').value;
+                    this.baseUrl = baseUrl;
+                },
+                mounted: function () {
+					const self = this;
+                    // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+						if (self.polling){
+							self.polling = false;   
+						}
+                    });
+
+                    this.initMaterialUx();
+
+                },
+                methods: {
+                    initMaterialUx: function () {
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            el.class
+                            mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0);
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const textField of textFields) {
+                            const mdcTextField = mdc.textField.MDCTextField.attachTo(textField);
+                            $(textField).data('instance', mdcTextField);
+                        }
+
+                        // select material ux 적용
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            const select = mdc.select.MDCSelect.attachTo(el);
+                            $(el).data('instance', select); //
+                        }
+
+                        // linear progress material ux 적용
+                        const progresses = document.querySelectorAll('.mdc-linear-progress');
+                        for (const el of progresses) {
+                            const progress = mdc.linearProgress.MDCLinearProgress.attachTo(el);
+                            $(el).data('instance', progress); //
+                        }
+                    },
+
+                    clear: function() {
+                        const $select = $("#serviceModels-mdc-select")[0];
+                        $($select).data('instance').value = "전체";
+                        this.searchCondition.serviceModelId = null;
+                        this.searchCondition.serviceCode = null;
+                        $("#insert-file-name").data('instance').value = '';
+                        $("#insert-file-input").val('');
+                        $("#jsonResult").html(this.getEmptyJson())
+                    },
+
+                    getEmptyJson: function () {
+                        var emptyJson = JSON.stringify("<br>", undefined, '\t');
+                        emptyJson = emptyJson.replace(/(['"])/g, " ");
+
+                        return emptyJson;
+                    },
+					setTesting: function(testing){
+						this.testing = testing;
+					},
+                    // 등록
+                    test: function (e) {
+                        if (!this.validateInsert()) {
+                            return;
+                        }
+
+                        if (!confirm("단건테스트 진행하시겠습니까?")) {
+                            return;
+                        }
+
+                        $("#jsonResult").html(this.getEmptyJson());
+
+                        var formData = new FormData();
+                        var $fileInput = $("#insert-file-input");
+                        var file = $fileInput.prop("files")[0];
+
+                        if (file != undefined && file != null) {
+                            formData.append("modelFile", $fileInput.prop("files")[0]);
+                        } else {
+                            return false;
+                        }
+                        
+                        if (this.testTarget === "host") {
+							this.searchCondition.testTarget = "host";
+						} else {
+							this.searchCondition.testTarget = "sub";
+						}
+						
+						console.log(this.testTarget);
+						
+                        var insertObj = {...this.searchCondition}
+                        // insertObj.uuid = crypto.randomUUID().substring(0, 16);
+                        insertObj.uuid = this.getUUID().substring(0, 16);
+						
+                        formData.append("properties", new Blob([JSON.stringify(insertObj)], {type: "application/json"}));
+
+                        var self = this;
+                 
+                        const url = this.baseUrl + "/sttTest/api/insert";
+                        $.ajax({
+                            url: url,
+                            method: "post",
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            enctype: 'multipart/form-data',
+                            dataType: "json",
+                            data: formData,
+                            beforeSend: function () {
+                                alert("요청 후 최대 1분 소요될 수 있습니다.");
+
+                                self.setTesting(true);
+                            }
+                        }).done(result => {
+                            if (result.resultCode && result.resultCode == '0000') {
+                                this.pollCallbackResult(insertObj.uuid, 0);
+                            } else {
+								self.setTesting(false);
+								if(result.resultMsg) {
+                                	toastr.error(result.resultMsg);
+                                }
+								else {
+                                	toastr.error('unknown error');
+                                }
+                            }
+                        }).fail(function(xhr, status, error) {
+							toastr.error('오류가 발생했습니다.');
+							self.setTesting(false);
+						})
+
+                        e.preventDefault();
+                        e.stopPropagation();
+                    },
+					getUUID: function() {
+					  if (typeof crypto === 'object') {
+					    if (typeof crypto.randomUUID === 'function') {
+					      // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
+					      return crypto.randomUUID();
+					    }
+					    if (typeof crypto.getRandomValues === 'function' && typeof Uint8Array === 'function') {
+					      // https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
+					      const callback = (c) => {
+					        const num = Number(c);
+					        return (num ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (num / 4)))).toString(16);
+					      };
+					      return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, callback);
+					    }
+					  }
+					  let timestamp = new Date().getTime();
+					  let perforNow = (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0;
+					  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+					    let random = Math.random() * 16;
+					    if (timestamp > 0) {
+					      random = (timestamp + random) % 16 | 0;
+					      timestamp = Math.floor(timestamp / 16);
+					    } else {
+					      random = (perforNow + random) % 16 | 0;
+					      perforNow = Math.floor(perforNow / 16);
+					    }
+					    return (c === 'x' ? random : (random & 0x3) | 0x8).toString(16);
+					  });
+					},
+                    onChangeInsertFile: function (e) {
+                        var updateFileName = e.target.files[0].name;
+                        $("#insert-file-name").data('instance').value = updateFileName;
+                    },
+
+                    // 유효성 검사 (액션별)
+                    validateInsert: function () {
+                        // 서비스 모델
+                        if (!this.searchCondition.serviceCode) {
+                            toastr.error("서비스 모델을 선택해주세요.")
+                            return;
+                        }
+
+                        var $fileInput = $("#insert-file-input");
+                        var file = $fileInput.prop("files")[0];
+
+                        if (file == undefined || file == null) {
+                            toastr.error("wav 파일을 업로드해주세요.")
+                            return;
+                        }
+
+                        if (file.size > 10 * 1024 * 1024) {
+                            toastr.error("파일 사이즈 최대 10MB");
+                            return;
+                        }
+
+                        return true;
+                    },
+
+                    pollCallbackResult: function(uuid, cnt) {
+						if (cnt === 0) {
+							this.polling = true;
+						}
+						
+						if (!this.polling) {
+							return;
+						}
+						
+                        if (cnt == 300) {
+                            toastr.error("단건테스트에 실패했습니다. 잠시 후 다시 시도해주세요.");
+
+                            return;
+                        }
+						
+                        var self = this;
+                        
+                        $.ajax({
+                            url: this.baseUrl + "/sttTest/api/poll/" + uuid,
+                            method: "GET",
+                            contentType: 'application/json; charset=UTF-8'
+                        }).done(function(result){
+							if (result.resultCode == '0000') {
+								var jsonString = JSON.stringify(result);
+								jsonString = jsonString.replaceAll("\"transcript\":", "\"음성인식 결과\":");
+								jsonString = jsonString.replaceAll("\"confidence\":", "\"신뢰도\":");
+								jsonString = jsonString.replaceAll("null", '" "');
+								result = JSON.parse(jsonString);
+								$('#jsonResult').html(JSON.stringify(result.result, undefined, '\t'));
+								self.setTesting(false);
+							} else {
+								self.sleep(2000).then(function () {
+									self.pollCallbackResult(uuid, cnt + 1);
+								});
+							}
+						}).fail(function(xhr, status, error){
+							console.error(error);
+                            toastr.error(xhr.status + " : 서버와의 통신이 원활하지 않습니다. 다시 시도해 주십시오.");
+                            self.setTesting(false);
+						});
+                    },
+
+                    _setProcessing: function (processing) {
+                        this.processing = processing;
+                    },
+
+                    sleep: function(time) {
+                        return new Promise(function(resolve) {
+                            setTimeout(resolve, time);
+                        });
+                    },
+
+                    getEmptyJson: function () {
+                        var emptyJson = JSON.stringify("<br>", undefined, '\t');
+                        emptyJson = emptyJson.replace(/(['"])/g, " ");
+
+                        return emptyJson;
+                    }
+                }
+            });
+        })();
+    </script>
+</th:block>
+
+</html>

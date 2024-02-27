@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+  <div class="contentRoot">
+    <div class="content-header">
+      <h2>검증요청 관리</h2>
+      <div class="button-group">
+        <button id="verifyDialogBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+          <span class="mdc-button__ripple"></span>
+          <i class="material-icons mdc-button__icon">add</i>
+          <span class="mdc-button__label">검증요청</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <div class="card">
+        <div class="card-header pb-4">
+          <div class="form-row md-size multiline-align-top">
+            <div id="searchServiceModelSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">서비스모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value=" "
+                      aria-selected="true">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">전체</span>
+                  </li>
+                  <li v-for="(item, index) in serviceModelList" class="mdc-deprecated-list-item"
+                      :data-value="item.serviceCode">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">{{item.serviceModelName}}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div id="searchVerifyStatusSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">상태</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value=" "
+                      aria-selected="true">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">전체</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="READY">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">준비중</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="VERIFYING">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">검증중</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="COMPLETE">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">검증완료</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="FAIL">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">검증실패</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" v-model="datasetName"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">검증데이터셋명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" v-model="description"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">요청명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" v-model="cerFrom"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">CER(from)</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" v-model="cerTo"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">CER(to)</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" v-model="regId"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">작성자</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="flex-auto flex-ratio-two">
+              <div class="form-row h-100">
+                <div id="searchRegDtFromInput"
+                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                  <i class="material-icons mdc-text-field__icon">event</i>
+                  <input type="text" class="mdc-text-field__input"
+                         aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                  <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                    <div class="mdc-notched-outline__leading"></div>
+                    <div class="mdc-notched-outline__notch">
+                      <label class="mdc-floating-label">등록일(from)</label>
+                    </div>
+                    <div class="mdc-notched-outline__trailing"></div>
+                  </div>
+                </div>
+                <div id="searchRegDtToInput"
+                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                  <i class="material-icons mdc-text-field__icon">event</i>
+                  <input type="text" class="mdc-text-field__input"
+                         aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                  <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                    <div class="mdc-notched-outline__leading"></div>
+                    <div class="mdc-notched-outline__notch">
+                      <label class="mdc-floating-label">등록일(to)</label>
+                    </div>
+                    <div class="mdc-notched-outline__trailing"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line">
+                <p
+                  class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg">
+                  등록일이 없는 경우는 전체 기간을 뜻합니다.
+                </p>
+              </div>
+            </div>
+            <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="doSearch">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">search</i>
+              <span class="mdc-button__label">검색</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-controls form-row md-size">
+            <div class="table-result-info flex-auto">
+              <h4>검색결과 : <span>{{fn.addComma(totalCount)}}</span>건</h4>
+            </div>
+            <div id="sizeSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">레코드 수</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected"
+                      data-value="10" aria-selected="true" @click="size=10;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">10개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="20" @click="size=20;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">20개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item " data-value="30" @click="size=30;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">30개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item " data-value="40" @click="size=40;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">40개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item " data-value="50" @click="size=50;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">50개</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <div class="mdc-data-table-wrapper">
+              <!-- loading bar -->
+              <div id="verifyHistoryListLoadingBar" role="progressbar"
+                   class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+                <div class="mdc-linear-progress__buffering-dots"></div>
+                <div class="mdc-linear-progress__buffer"></div>
+                <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                  <span class="mdc-linear-progress__bar-inner"></span>
+                </div>
+                <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                  <span class="mdc-linear-progress__bar-inner"></span>
+                </div>
+              </div>
+              <div class="mdc-data-table">
+                <div class="mdc-data-table__table-container">
+                  <table class="mdc-data-table__table">
+                    <thead>
+                    <tr class="mdc-data-table__header-row">
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">No.
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">서비스모델
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader" style="display:none;"
+                          scope="col">배포모델ID
+                      </th>
+                      <!--                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"-->
+                      <!--                                                scope="col">배포모델 다운로드-->
+                      <!--                                            </th>-->
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">검증데이터셋명
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">검증데이터 수
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">CER
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">요청명
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">작성자
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">등록일시
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">상태조회
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">상태
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">인식률 반영
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">인식률 반영 여부
+                      </th>
+                      <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                          scope="col">재검증
+                      </th>
+                    </tr>
+                    </thead>
+                    <tbody class="mdc-data-table__content" v-if="0 == currentList.length">
+                    <tr class="mdc-data-table__row" aria-selected="false">
+                      <td class="text-center" colspan="13">검색 결과가 없습니다.</td>
+                    </tr>
+                    </tbody>
+                    <tbody class="mdc-data-table__content" v-if="0 < currentList.length">
+                    <tr v-for="(item, idx) in currentList" :data-id="item.id"
+                        :id="'row-' + item.id"
+                        class="verify-history-info-row mdc-data-table__row" aria-selected="false"
+                        style="cursor: pointer;">
+                      <td class="mdc-data-table__cell text-center">{{itemFromNum - idx}}</td>
+                      <td class="mdc-data-table__cell text-center" :data-id="item.serviceModelId"
+                          name="serviceModelName">{{item.serviceModelName}}
+                      </td>
+                      <td class="mdc-data-table__cell text-center" :data-id="item.deployModelId" style="display:none;"
+                          name="deployedModelName">{{item.deployedModelName}}
+                      </td>
+                      <!--                                            <td class="mdc-data-table__cell text-center">-->
+                      <!--                                                <button-->
+                      <!--                                                    class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-theme--primary"-->
+                      <!--                                                    :data-id="item.id"-->
+                      <!--                                                    @click="requestDeployModelDownload($event,item.deployedModelName)">-->
+                      <!--                                                    file_download-->
+                      <!--                                                </button>-->
+                      <!--                                            </td>-->
+                      <td class="mdc-data-table__cell" :data-id="item.datasetId"
+                          name="datasetName">{{item.datasetName}}
+                      </td>
+                      <td class="mdc-data-table__cell text-center">{{item.numOfData}}</td>
+                      <td class="mdc-data-table__cell text-center" v-if="item.cer == null">-</td>
+                      <td class="mdc-data-table__cell text-center" v-else>{{item.cer}}</td>
+                      <td class="mdc-data-table__cell" name="description">
+                        {{item.description}}
+                      </td>
+                      <td class="mdc-data-table__cell text-center">{{item.regId}}</td>
+                      <td class="mdc-data-table__cell text-center">
+                        {{moment(item.regDt).format("YYYY-MM-DD HH:mm:ss")}}
+                      </td>
+                      <td class="mdc-data-table__cell text-center"
+                          v-if="item.status !== 'COMPLETE' && item.status !== 'READY'">
+                        <div class="sync-btn-outer">
+                          <button
+                            :data-id="item.id"
+                            @click="selectStatus($event,item.serviceModelId, item.id)"
+                            class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded  mdc-theme--primary">
+                            sync
+                          </button>
+                        </div>
+                      </td>
+                      <td class="mdc-data-table__cell text-center"
+                          v-else>
+                        <button
+                          :data-id="item.id"
+                          class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded"
+                          style="color: #ccc;" disabled>
+                          sync
+                        </button>
+                      </td>
+                      <td :id="'status' + item.id" class="mdc-data-table__cell text-center">
+                        <span>{{ item.status }}</span>
+                      </td>
+                      <td class="mdc-data-table__cell text-center"
+                          v-if="item.status === 'COMPLETE' && item.saveYn === 'N'">
+                        <button
+                          :data-id="item.id"
+                          @click="updateYn($event,item.id)"
+                          class="mdc-button mdc-button--icon-leading">
+                          <span class="mdc-button__label">반영</span>
+                        </button>
+                      </td>
+                      <td class="mdc-data-table__cell text-center"
+                          v-else>
+                        <button
+                          :data-id="item.id"
+                          class="mdc-button mdc-button--icon-leading" disabled
+                          style="color: #ccc;">
+                          <span class="mdc-button__label">반영</span>
+                        </button>
+                      </td>
+                      <td class="mdc-data-table__cell text-center">{{item.saveYn}}</td>
+                      <td class="mdc-data-table__cell text-center">
+                        <button
+                          class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-theme--primary"
+                          :data-id="item.id"
+                          @click="requestReVerify($event,item.id)">
+                          sync
+                        </button>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="table-pagination mdc-data-table__pagination" v-if="0 < currentList.length">
+            <div class="mdc-data-table__pagination-trailing mdc-chip-set mdc-chip-set--choice">
+              <div class="mdc-data-table__pagination-navigation">
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-first-page="true" v-bind:disabled="!(1 < currentPageNum)" @click="goPage(1)">
+                  <div class="mdc-button__icon">first_page</div>
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-prev-page="true" v-bind:disabled="!(1 < currentPageNum)"
+                        @click="goPage(Math.max(1, currentPageNum-1))">
+                  <div class="mdc-button__icon">chevron_left</div>
+                </button>
+                <button v-for="page in pagingNumbers"
+                        class="mdc-chip mdc-data-table__pagination-button fs-6 bg-transparent"
+                        :class="{'mdc-chip--selected': currentPageNum==page}" @click="goPage(page)">
+                  {{page}}
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-next-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)"
+                        @click="goPage(Math.min(currentPageNum+1, lastPageNum))">
+                  <div class="mdc-button__icon">chevron_right</div>
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-last-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)"
+                        @click="goPage(lastPageNum)">
+                  <div class="mdc-button__icon">last_page</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="verifyDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label"
+       aria-describedby="simple-dialog-description" tabindex="-1">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">검증요청</h2>
+          <button class="mdc-icon-button material-icons close-button" tabindex="-1">
+            close
+          </button>
+        </div>
+        <!-- loading bar -->
+        <div id="verifyDialogLoadingBar" role="progressbar"
+             class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+          <div class="mdc-linear-progress__buffering-dots"></div>
+          <div class="mdc-linear-progress__buffer"></div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+            *모든 항목은 필수입력사항입니다.
+          </p>
+          <div class="form-row">
+            <div id="newVerifyServiceModelSelector" class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">서비스모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-layout-grid__inner mdc-menu-surface--fixed" style="z-index: 9999;">
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row" style="display: none;">
+            <div class="form-row">
+              <div id="newVerifyDeployModelInputDiv" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"
+                       id="newVerifyDeployModelInput"
+                       readonly/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">배포모델ID</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="newVerifyDatasetSelector"
+                 class="dialog-mdc-select mdc-select mdc-select--outlined mdc-select--no-label w-100">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">검증데이터셋명</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-layout-grid__inner mdc-menu-surface--fixed" style="z-index: 9999;">
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="newVerifyDescriptionInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+              <input type="text" required class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">검증요청명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button id="newVerifyBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">등록</span>
+          </button>
+          <button
+            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg close-button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">취소</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <div id="verifyHistoryDialog" class="mdc-dialog mdc-dialog--fullscreen" role="alertdialog" aria-modal="true"
+       aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">검증이력 상세</h2>
+          <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+            close
+          </button>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <div class="form-row">
+            <div id="verifyHistoryServiceModelNameInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">서비스모델</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div id="verifyHistoryDeployedModelIdInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">배포모델ID</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="verifyHistoryDatasetNameInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">검증데이터셋명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div id="verifyHistoryDescriptionInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">요청명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="verifyHistoryRegIdInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">작성자</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div id="verifyHistoryStartAtInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">요청시간</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="verifyHistoryEndAtInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">종료시간</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div id="verifyHistoryTotalTimeInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">소요시간 (초)</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="verifyHistoryStatusInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">상태</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div id="verifyHistoryFailCauseInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">실패원인</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="verifyHistoryCerInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">CER</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div id="verifyHistoryWerInput"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">WER</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button
+            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg"
+            data-mdc-dialog-action="close">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">닫기</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <div id="reVerifyDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label"
+       aria-describedby="simple-dialog-description">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">재검증요청</h2>
+        </div>
+        <div id="reVerifyDialogLoadingBar" role="progressbar"
+             class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+          <div class="mdc-linear-progress__buffering-dots"></div>
+          <div class="mdc-linear-progress__buffer"></div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+            <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+              *모든 항목은 필수입력사항입니다.
+            </p>
+          </div>
+          <div class="form-row">
+            <div id="reVerifyServiceModelSelector" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">서비스모델</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row" style="display:none;">
+            <div id="reVerifyDeployedModelSelector"
+                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">배포모델ID</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="reVerifyDatasetSelector" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">검증데이터셋명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div id="reVerifyDescriptionInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">요청명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button
+            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg"
+            data-mdc-dialog-action="close">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">취소</span>
+          </button>
+          <button id="reVerifyBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">등록</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+  <input type="hidden" readonly id="defaultPageSize" th:value="${defaultPageSize}">
+</th:block>
+<th:block layout:fragment="script">
+  <script type="text/javascript">
+    (function () {
+
+      const DEFAULT_PAGE_START = 0;
+      const DEFAULT_PAGE_SIZE = $("#defaultPageSize").val();
+      const PAGING_BTN_SIZE = 5;
+      const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+      const LABEL = {
+        message: {
+          // 공통
+          API_ERROR_TITLE: "실패",
+          API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+
+          VERIFY_REQUEST_CONFIRM: "검증요청 하시겠습니까?",
+          VERIFY_REQUEST_TITLE: "검증요청",
+          VERIFY_REQUEST_MESSAGE: "검증요청이 완료됐습니다",
+          VERIFY_REQUEST_FAIL: "검증요청이 실패하였습니다. 입력된 정보를 확인 후 다시 등록해 주세요.",
+          VERIFY_UPATE_SAVE_SUCCESS: "인식률에 반영 되었습니다.",
+        }
+      };
+      new Vue({
+        el: ".contentRoot",
+        data: {
+          LABEL: LABEL,
+          moment: moment,
+          fn: fn,
+          serviceUrlPrefix: serviceUrlPrefix,
+
+          //검색조건
+          serviceModelId: "",
+          status: "",
+          datasetName: "",
+          description: "",
+          cerFrom: "",
+          cerTo: "",
+          regId: "",
+          regDtFrom: "",
+          regDtTo: "",
+          start: DEFAULT_PAGE_START,
+          size: DEFAULT_PAGE_SIZE,
+
+          // 현재 적용되어 있는 검색 조건
+          _searchCondition: {
+            serviceModelId: "",
+            status: "",
+            datasetName: "",
+            description : "",
+            cerFrom: "",
+            cerTo: "",
+            regId: "",
+            regDtFrom: "",
+            regDtTo: "",
+            start: 0,
+            size: 0,
+          },
+
+          // 검색 결과
+          totalCount: 0,
+          currentPageNum: 0,
+          lastPageNum: 0,
+          itemFromNum: 0,
+          itemToNum: 0,
+          currentList: [],
+          pagingNumbers: [],
+
+          // etc
+          initSearched: false,		// 초기 검색이 제공되었는지 여부
+          currentXhr: [],             // 모달 내 XHR 중단할 때 사용
+          checkXhrAbort: false,       // 모달 내에서 등록/저장 등 업로드 시엔 컨펌 추가
+          currentDialog: null,        // vue data에서 정의한 모달의 key. ( :string)
+
+          // 그룹 등록 Dialog 변수들
+          newVerifyServiceModelId: "",
+          newVerifyDeployId: "",
+          newVerifyDatasetId: "",
+          newVerifyDatasetName: "",
+          newVerifyDescription: "",
+
+          verifyDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#verifyDialog')),
+          verifyHistoryDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#verifyHistoryDialog')),
+          reVerifyDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#reVerifyDialog')),
+
+          serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+          deployedModelList: JSON.parse("[[${deployedModelList}]]".replaceAll('&quot;', "\"")),
+          dataList: JSON.parse("[[${dataList}]]".replaceAll('&quot;', "\"")),
+        },
+        created: function () {
+          var self = this;
+          this.initPage(location.search.slice(1));
+          this.$nextTick(function () {
+            self.doRefresh();
+          });
+        },
+        mounted: function () {
+          var self = this;
+
+          // 페이지 이동시 처리
+          $('#drawer-main-content-viewer').one('page.move', function () {
+            console.log("page move out");
+            var $searchRegDtFromInput = $('#searchRegDtFromInput');
+            var $searchRegDtToInput = $('#searchRegDtToInput');
+            $searchRegDtFromInput.data('datepicker').destroy();
+            $searchRegDtToInput.data('datepicker').destroy();
+          });
+
+          this.initMaterialUx();
+          this.initVerifyDialogSelector();
+
+          // 팝업 이외 영역 클릭 시 아무런 처리 하지 않음 default close
+          this.verifyDialog.scrimClickAction = '';
+          this.verifyHistoryDialog.scrimClickAction = '';
+
+          $('#searchServiceModelSelector').data('select').unlisten('MDCSelect:change')
+          $('#searchServiceModelSelector').data('select').listen('MDCSelect:change', function (event) {
+            self.serviceModelId = $.trim(event.detail.value);
+            // self.doSearch();
+          });
+
+          $('#searchVerifyStatusSelector').data('select').unlisten('MDCSelect:change')
+          $('#searchVerifyStatusSelector').data('select').listen('MDCSelect:change', function (event) {
+            self.status = $.trim(event.detail.value);
+            // self.doSearch();
+          });
+
+          $('#sizeSelector').data('select').unlisten('MDCSelect:change')
+          $('#sizeSelector').data('select').listen('MDCSelect:change', function (event) {
+            self.size = $.trim(event.detail.value);
+            self.doSearch();
+          });
+
+          // 검증요청 팝업
+          $('#verifyDialogBtn').unbind('click').bind('click', function () {
+            // 팝업 초기화
+            self.showBeforeVerifyDialog($(self.verifyDialog.root));
+            self.verifyDialog.open();
+            self.currentDialog = 'verifyDialog';
+          });
+
+          // 데이터셋 등록 팝업 show 후처리
+          this.verifyDialog.listen('MDCDialog:opened', function () {
+            self.showAfterVerifyDialog($(self.verifyDialog.root));
+          });
+
+          // 모달 닫기 및 xhr 종료 이벤트 바인딩
+          $('.close-button').off('click').on('click', function () {
+            self.onCloseDialog();
+          })
+          $('.mdc-dialog').on('keydown', function (e) {
+            if (e.key === 'Escape') self.onCloseDialog();
+          })
+        },
+        methods: {
+
+          /**
+           * 초기 url을 기준으로 화면 내용 설정
+           */
+          initPage: function (queryString) {
+            var params = Qs.parse(queryString);
+            this.serviceModelId = params.serviceModelId || "";
+            this.status = params.status || "";
+            this.datasetName = params.datasetName || "";
+            this.cerFrom = params.cerFrom || "";
+            this.cerTo = params.cerTo || "";
+            this.regId = params.regId || "";
+            this.regDtFrom = params.regDtFrom || "";
+            this.regDtTo = params.regDtTo || "";
+            this.start = parseInt(params.start || DEFAULT_PAGE_START);
+            this.size = parseInt(params.size || DEFAULT_PAGE_SIZE);
+
+            this._searchCondition = {
+              serviceModelId: this.serviceModelId,
+              status: this.status,
+              datasetName: this.datasetName,
+              cerFrom: this.cerFrom,
+              cerTo: this.cerTo,
+              regId: this.regId,
+              regDtFrom: this.regDtFrom,
+              regDtTo: this.regDtTo,
+              start: this.start,
+              size: this.size,
+            };
+
+            // selector 초기값 설정
+            $('#searchServiceModelSelector').attr('data-value', this.serviceModelId);
+            $('#searchVerifyStatusSelector').attr('data-value', this.status);
+            $('#sizeSelector').attr('data-value', this.size);
+          },
+
+          initMaterialUx: function () {
+
+            // ripple material ux 적용
+            const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+            for (const el of elements) {
+              el.class
+              mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                isUnbounded: true
+              } : void 0);
+            }
+
+            // input text material ux 적용
+            const textFields = document.querySelectorAll('.mdc-text-field');
+            for (const el of textFields) {
+              $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+            }
+
+            // select material ux 적용
+            const selects = document.querySelectorAll('.mdc-select');
+            for (const el of selects) {
+              var $select = mdc.select.MDCSelect.attachTo(el);
+              var $el = $(el);
+              var value = $el.attr('data-value');
+              // 초기값 설정
+              _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+              $el.data('select', $select);
+            }
+          },
+
+          initVerifyDialogSelector: function () {
+
+            this.initVerifyDialogServiceModelSelector();
+            //this.initVerifyDialogDeployedModelSelector();
+            this.initVerifyDialogDatasetSelector();
+          },
+
+          initVerifyDialogServiceModelSelector: function () {
+            var serviceModelListHtml = this.getDefaultListElement();
+            for (var serviceModel of this.serviceModelList) {
+              serviceModelListHtml += this.getListElement(serviceModel.serviceModelName, serviceModel.serviceCode);
+            }
+
+            $("#newVerifyServiceModelSelector ul").html(serviceModelListHtml);
+            this.initSelector("#newVerifyServiceModelSelector");
+          },
+
+          initVerifyDialogDeployedModelSelector: function (serviceModelId) {
+
+            var deployedModelListHtml = this.getDefaultListElement();
+
+            if (!serviceModelId) {
+              $("#newVerifyDeployedModelSelector ul").html(deployedModelListHtml);
+              this.initSelector("#newVerifyDeployedModelSelector");
+              return;
+            }
+
+            for (var deployedModel of this.deployedModelList) {
+              if ($.trim(deployedModel.serviceModelId) === serviceModelId) {
+                deployedModelListHtml += this.getListElement(deployedModel.name, deployedModel.id);
+              }
+            }
+
+            $("#newVerifyDeployedModelSelector ul").html(deployedModelListHtml);
+            this.initSelector("#newVerifyDeployedModelSelector");
+          },
+
+          initVerifyDialogDatasetSelector: function (serviceModelId) {
+
+            var dataListHtml = this.getDefaultListElement();
+
+            if (!serviceModelId) {
+              $("#newVerifyDatasetSelector ul").html(dataListHtml);
+              this.initSelector("#newVerifyDatasetSelector");
+              return;
+            }
+            console.log(">>> verifydata group list : ", this.dataList)
+            for (var data of this.dataList) {
+              if ($.trim(data.serviceModelId) === serviceModelId) {
+                dataListHtml += this.getListElement(data.datasetName, data.datasetId);
+              }
+            }
+
+            $("#newVerifyDatasetSelector ul").html(dataListHtml);
+            this.initSelector("#newVerifyDatasetSelector");
+          },
+
+          initSelector: function (selectorId) {
+
+            const $selector = $(selectorId)[0];
+            $($selector).data('select').destroy();
+            const newSelector = new mdc.select.MDCSelect($selector);
+            $($selector).data('select', newSelector);
+
+          },
+
+          getListElement: function (text, value) {
+            var element = '<li class="mdc-deprecated-list-item" data-value="{value}"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">{text}</span></li>'
+            element = element.replace('{text}', text);
+            element = element.replace('{value}', value);
+
+            return element;
+          },
+
+          getDeployModelByServiceModel: function (serviceModelId) {
+            return this.deployedModelList.find(function (deployModel) {
+              return deployModel.serviceModelId == serviceModelId;
+            });
+          },
+
+          getDeployModelByName: function (name) {
+            return this.deployedModelList.find(function (deployModel) {
+              return deployModel.name == name;
+            });
+          },
+
+          getDefaultListElement: function () {
+            return '<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value=" " aria-selected="true"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">선택</span></li>'
+          },
+
+          /**
+           * 검색 버튼클릭 시 처리
+           */
+          doSearch: function () {
+            let self = this;
+
+            this._searchCondition = {
+              serviceModelId: this.serviceModelId,
+              status: this.status,
+              datasetName: this.datasetName,
+              description : this.description,
+              cerFrom: this.cerFrom,
+              cerTo: this.cerTo,
+              regId: this.regId,
+              regDtFrom: this.regDtFrom,
+              regDtTo: this.regDtTo,
+              start: 0,
+              size: this.size,
+            };
+
+            this._pushHistory(this._searchCondition);
+            this._search(this._searchCondition, $('#verifyHistoryListLoadingBar'), function (isError, data) {
+              if (isError) {
+                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+              } else {
+                self.renderDatas(data.total, data.object, self._searchCondition);
+              }
+            });
+          },
+
+          /**
+           * 특정 페이지로 이동한다.
+           */
+          goPage: function (pageNum) {
+            let self = this;
+
+            this._searchCondition.start = this._searchCondition.size * (pageNum - 1);
+            this._pushHistory(this._searchCondition);
+            this._search(this._searchCondition, $('#verifyHistoryListLoadingBar'), function (isError, data, total, list) {
+              if (isError) {
+                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+              } else {
+                self.renderDatas(data.total, data.object, self._searchCondition);
+              }
+            });
+          },
+
+          /**
+           * 현재 검색 목록을 refresh한다.
+           */
+          doRefresh: function () {
+            let self = this;
+            this._search(this._searchCondition, $('#verifyHistoryListLoadingBar'), function (isError, data, total, list) {
+              if (isError) {
+                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+              } else {
+                self.renderDatas(data.total, data.object, self._searchCondition);
+              }
+            });
+          },
+
+          /**
+           * 검색결과를 화면에 연결된 변수들에 저장
+           */
+          renderDatas: function (totalCount, list, condition) {
+
+            $("input[type=checkbox]").prop('checked', false);
+
+            var self = this;
+            this.lastPageNum = Math.ceil((totalCount || 0) / condition.size);
+            this.currentPageNum = Math.ceil(condition.start / condition.size) + 1;
+
+            this.totalCount = totalCount;
+            this.currentList = list || [];
+            // 최신순으로 정렬하기 때문에 역순
+            this.itemFromNum = totalCount - parseInt(condition.start);
+            this.itemToNum = totalCount - Math.min(totalCount, parseInt(condition.start) + parseInt(condition.size));
+
+            this.pagingNumbers = [this.currentPageNum];
+            for (let diff = 1; this.pagingNumbers.length < PAGING_BTN_SIZE && diff <= PAGING_BTN_SIZE; diff++) {
+              if (1 <= this.currentPageNum - diff) {
+                this.pagingNumbers.push(this.currentPageNum - diff);
+              }
+              if (this.pagingNumbers.length < PAGING_BTN_SIZE && this.currentPageNum + diff <= this.lastPageNum) {
+                this.pagingNumbers.push(this.currentPageNum + diff);
+              }
+            }
+            this.pagingNumbers = _.sortBy(this.pagingNumbers);
+
+            this.initDatepicker();
+
+            // 화면에 리스트가 구성된 이후 각 row에 대한 클릭 이벤트 적용
+            this.$nextTick(function () {
+              $('.verify-history-info-row').unbind('click').bind('click', function (ev) {
+                var datasetId = ev.currentTarget.dataset.id;
+                self.openDetailDialog(datasetId);
+              });
+            });
+          },
+
+          initDatepicker: function () {
+
+            var self = this;
+            var $searchRegDtFromInput = $('#searchRegDtFromInput');
+            var $searchRegDtToInput = $('#searchRegDtToInput');
+
+            // MaterialDatepicker 설정
+            var datepickerOption = {
+              lang: "en",		// ko 는 없음....
+              orientation: "portrait",
+              color: document.defaultView.getComputedStyle(document.documentElement).getPropertyValue("--mdc-theme-primary"),
+              closeAfterClick: false,
+              //date: null,
+              outputFormat: 'YYYY-MM-DD',
+              topHeaderFormat: 'YYYY MM',
+              headerFormat: 'Do',
+            };
+
+            if ($searchRegDtFromInput.data('datepicker') != null) {
+              $searchRegDtFromInput.data('datepicker').destroy();
+            }
+
+            $searchRegDtFromInput.data('datepicker', new MaterialDatepicker($searchRegDtFromInput.data('textField').input, $.extend({}, datepickerOption, {
+              onChange: function (date) {
+                if (!$searchRegDtFromInput.data('textField')) {
+                  return;
+                }
+                if (_.isEmpty($searchRegDtFromInput.data('textField').value)) {
+                  self.regDtFrom = null
+                } else {
+                  self.regDtFrom = moment(date).format("YYYY-MM-DD HH:mm:ss");
+                }
+              }
+            })));
+
+            if ($searchRegDtToInput.data('datepicker') != null) {
+              $searchRegDtToInput.data('datepicker').destroy();
+            }
+
+            $searchRegDtToInput.data('datepicker', new MaterialDatepicker($searchRegDtToInput.data('textField').input, $.extend({}, datepickerOption, {
+              onChange: function (date) {
+                if (!$searchRegDtToInput.data('textField')) {
+                  return;
+                }
+                if (_.isEmpty($searchRegDtToInput.data('textField').value)) {
+                  self.regDtTo = null
+                } else {
+                  self.regDtTo = moment(date).format("YYYY-MM-DD HH:mm:ss");
+                }
+              }
+            })));
+
+            $searchRegDtFromInput.data('textField').value = this.regDtFrom ? moment(this.regDtFrom).format("YYYY-MM-DD") : '';
+            $searchRegDtToInput.data('textField').value = this.regDtTo ? moment(this.regDtTo).format("YYYY-MM-DD") : '';
+
+          },
+
+          /**
+           * 데이터셋 등록 팝업 초기화
+           */
+          showBeforeVerifyDialog: function ($root) {
+
+            var $newVerifyServiceModelSelector = $root.find('#newVerifyServiceModelSelector');
+            var $newVerifyDeployModelInput = $root.find('#newVerifyDeployModelInput');
+            var $newVerifyDatasetSelector = $root.find("#newVerifyDatasetSelector");
+            var $newVerifyDescriptionInput = $root.find('#newVerifyDescriptionInput');
+            var $loadingBar = $root.find('#verifyDialogLoadingBar');
+            var $verifyBtn = $root.find('#newVerifyBtn');
+
+            // 팝업 출력 내용 초기화
+            $newVerifyServiceModelSelector.data('select').value = " ";
+            $newVerifyDeployModelInput.val(" ");
+            $newVerifyDatasetSelector.data('select').value = " ";
+            $newVerifyDescriptionInput.data('textField').value = "";
+            $verifyBtn.prop('disabled', true);
+
+            // input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+            $root.find('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+            // 팝업 내용 저장 변수 초기화
+            this.newVerifyServiceModelId = "";
+            this.newVerifyDeployId = "";
+            this.newVerifyDatasetId = "";
+            this.newVerifyDatasetName = "";
+            this.newVerifyDescription = "";
+
+            $loadingBar.css('opacity', 0);
+          },
+
+          /**
+           * 검증요청 팝업 이벤트 바인딩 & 값 설정
+           */
+          showAfterVerifyDialog: function ($root) {
+
+            var self = this;
+            var $newVerifyServiceModelSelector = $root.find('#newVerifyServiceModelSelector');
+            //var $newVerifyDeployedModelSelector = $root.find('#newVerifyDeployedModelSelector');
+            var $newVerifyDatasetSelector = $root.find("#newVerifyDatasetSelector");
+            var $newVerifyDescriptionInput = $root.find('#newVerifyDescriptionInput');
+            var $loadingBar = $root.find('#verifyDialogLoadingBar');
+            var $verifyBtn = $root.find('#newVerifyBtn');
+
+            // 등록 버튼 활성화 처리
+            // 인식률차트에서 설명값을 각 검증요청 구분값 이름으로 사용하기로 함,이에 따라 화면상에서 필수 입력처리
+            var registrationActiveFunc = function () {
+              if (!_.isEmpty(self.newVerifyServiceModelId) && _.isEqual(self.newVerifyServiceModelId, $.trim($newVerifyServiceModelSelector.data('select').value)) &&
+                //!_.isEmpty(self.newVerifyDeployId) && _.isEqual(self.newVerifyDeployId, $.trim($newVerifyDeployedModelSelector.data('select').value)) &&
+                !_.isEmpty(self.newVerifyDatasetId) && _.isEqual(self.newVerifyDatasetId, $.trim($newVerifyDatasetSelector.data('select').value)) &&
+                !_.isEmpty(self.newVerifyDescription) && _.isEqual(self.newVerifyDescription, $.trim($newVerifyDescriptionInput.data('textField').value))
+              ) {
+
+                $verifyBtn.prop('disabled', false);
+              } else {
+
+                $verifyBtn.prop('disabled', true);
+              }
+            };
+
+            $newVerifyServiceModelSelector.data('select').unlisten("MDCSelect:change");
+            $newVerifyServiceModelSelector.data('select').listen('MDCSelect:change', function (ev) {
+
+              self.newVerifyServiceModelId = ev.detail.value;
+              const foundDeployModel = self.getDeployModelByServiceModel(self.newVerifyServiceModelId);
+              console.log(">>> foundDeployModel : ", foundDeployModel)
+              if (foundDeployModel) {
+                $($('#newVerifyDeployModelInput')[0].parentElement).data('textField').value = foundDeployModel.name;
+                self.newVerifyDeployId = foundDeployModel.id;
+              } else {
+                $($('#newVerifyDeployModelInput')[0].parentElement).data('textField').value = " ";
+                self.newVerifyDeployId = "";
+              }
+
+              //$("#newVerifyDeployModelInput").val(foundDeployModel.name);
+              self.initVerifyDialogDatasetSelector(self.newVerifyServiceModelId);
+
+              registrationActiveFunc();
+            });
+
+            /*$newVerifyDeployedModelSelector.data('select').unlisten("MDCSelect:change");
+            $newVerifyDeployedModelSelector.data('select').listen('MDCSelect:change', function(ev) {
+                self.newVerifyDeployId = ev.detail.value;
+                registrationActiveFunc();
+            });*/
+
+            $newVerifyDatasetSelector.data('select').unlisten("MDCSelect:change");
+            $newVerifyDatasetSelector.data('select').listen('MDCSelect:change', function (ev) {
+              console.log(">>>> ev detail : ", ev.detail)
+              self.newVerifyDatasetId = ev.detail.value;
+              for (var data of self.dataList) {
+                if (data.datasetId == ev.detail.value) {
+                  self.newVerifyDatasetName = data.datasetName;
+                }
+              }
+              registrationActiveFunc();
+            });
+
+            $newVerifyDescriptionInput.unbind('change keydown keyup focusout').bind('change keydown keyup focusout', function () {
+              self.newVerifyDescription = $newVerifyDescriptionInput.data('textField').value;
+              registrationActiveFunc();
+            });
+
+            // 검증요청 버튼 처리
+            $verifyBtn.unbind('click').bind('click', function () {
+              if (!confirm(LABEL.message.VERIFY_REQUEST_CONFIRM)) {
+                return;
+              }
+
+              self._requestVerify({
+                serviceModelId: self.newVerifyServiceModelId,
+                deployId: self.newVerifyDeployId,
+                datasetId: self.newVerifyDatasetId,
+                datasetName: self.newVerifyDatasetName,
+                description: self.newVerifyDescription
+              }, $loadingBar, function (isError, data) {
+                if (isError) {
+
+                  let errorMessage = data.message;
+                  if (data.message?.indexOf("Index") !== -1) {
+                    errorMessage = "해당 검증 데이터셋에 검증 데이터가 없습니다."
+                  }
+                  toastr.error(errorMessage, LABEL.message.API_ERROR_TITLE);
+                } else if (data + "" === 'true') {
+                  toastr.success(LABEL.message.VERIFY_REQUEST_MESSAGE, LABEL.message.VERIFY_REQUEST_TITLE);
+                  self.verifyDialog.close();
+                  self.doRefresh();
+                }
+              });
+            });
+          },
+
+          /**
+           * 검증이력 상세 팝업 초기화
+           */
+          showBeforeVerifyHistoryDialog: function ($root, history) {
+
+            var self = this;
+
+            var $verifyHistoryServiceModelNameInput = $root.find("#verifyHistoryServiceModelNameInput");
+            var $verifyHistoryDeployedModelIdInput = $root.find('#verifyHistoryDeployedModelIdInput');
+            var $verifyHistoryDatasetNameInput = $root.find("#verifyHistoryDatasetNameInput");
+            var $verifyHistoryDescriptionInput = $root.find('#verifyHistoryDescriptionInput');
+            var $verifyHistoryRegIdInput = $root.find("#verifyHistoryRegIdInput");
+            var $verifyHistoryStartAtInput = $root.find("#verifyHistoryStartAtInput");
+            var $verifyHistoryEndAtInput = $root.find("#verifyHistoryEndAtInput");
+            var $verifyHistoryTotalTimeInput = $root.find("#verifyHistoryTotalTimeInput");
+            var $verifyHistoryStatusInput = $root.find("#verifyHistoryStatusInput");
+            var $verifyHistoryFailCauseInput = $root.find("#verifyHistoryFailCauseInput");
+            var $verifyHistoryCerInput = $root.find("#verifyHistoryCerInput");
+            var $verifyHistoryWerInput = $root.find("#verifyHistoryWerInput");
+
+            // 팝업 출력 내용 초기화
+            $verifyHistoryServiceModelNameInput.data('textField').value = (history.serviceModelName) ? history.serviceModelName : '';
+            $verifyHistoryDeployedModelIdInput.data('textField').value = (history.deployedModelName) ? history.deployedModelName : '';
+            $verifyHistoryRegIdInput.data('textField').value = (history.regId) ? history.regId : '';
+            $verifyHistoryDatasetNameInput.data('textField').value = (history.datasetName) ? history.datasetName : '';
+            $verifyHistoryDescriptionInput.data('textField').value = (history.description) ? history.description : '';
+            $verifyHistoryStartAtInput.data('textField').value
+              = (history.startAt) ? moment(history.startAt).format("YYYY-MM-DD HH:mm:ss") : '';
+            $verifyHistoryEndAtInput.data('textField').value
+              = (history.endAt) ? moment(history.endAt).format("YYYY-MM-DD HH:mm:ss") : '';
+
+            $verifyHistoryTotalTimeInput.data('textField').value = (history.totalTime) ? history.totalTime : '';
+
+            $verifyHistoryStatusInput.data('textField').value = (history.status) ? history.status : '';
+            $verifyHistoryFailCauseInput.data('textField').value = (history.failCause) ? history.failCause : '';
+            $verifyHistoryCerInput.data('textField').value = history.cer !== null ? history.cer : '';
+            $verifyHistoryWerInput.data('textField').value = history.wer !== null ? history.wer : '';
+
+            // input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+            $root.find('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+          },
+
+          /**
+           * 현재 검색 조건에 대한 history를 push한다.
+           */
+          _pushHistory: function (condition) {
+            if (!this.initSearched) {
+              this.initSearched = true;
+              // 맨 처음 page의 경우 history를 변경하여 back 시 이전 페이지로 돌아가도록 한다.
+              history.replaceState(null, null, "?" + $.param(condition));
+            } else {
+              history.pushState(null, null, "?" + $.param(condition));
+            }
+          },
+
+          /**
+           * 검색 API 호출
+           */
+          _search: function (params, $loadingBar, cbFunc) {
+            $loadingBar.css('opacity', 1);
+            $.ajax({
+              method: "GET",
+              url: this.serviceUrlPrefix + "/api/verify/history",
+              dataType: "json",
+              data: params,
+              success: function (response, textStatus, jqXHR) {
+                if (typeof cbFunc === "function") {
+                  cbFunc(response.code !== 200, response.code === 200 ? response : response);
+                }
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                if (typeof cbFunc === "function") {
+                  cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                }
+              },
+              complete: function () {
+                $loadingBar.css('opacity', 0);
+              }
+            });
+          },
+
+          /**
+           * 검증요청을 한다.
+           */
+          _requestVerify: function (params, $loadingBar, cbFunc) {
+            if (!this.validateParam(params)) {
+              toastr.error("올바른 요청값을 입력해주세요.");
+              return;
+            }
+            $loadingBar.css('opacity', 1);
+            const self = this;
+            this.checkXhrAbort = true;
+            this.dispatchProcessing('process');
+            let apiUrl = this.serviceUrlPrefix + "/api/verify/request";
+            let xhr = $.ajax({
+              method: "POST",
+              url: apiUrl,
+              contentType: "application/json",
+              dataType: "json",
+              data: JSON.stringify(params),
+              success: function (response, textStatus, jqXHR) {
+                if (typeof cbFunc === "function") {
+                  cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                }
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                if (typeof cbFunc === "function") {
+                  cbFunc(true, jqXHR);
+                }
+              },
+              complete: function () {
+                $loadingBar.css('opacity', 0);
+                // 배열에서 해당 xhr 제거 및 checkXhrAbort 초기화
+                let result = self.currentXhr.find(obj => obj.id === apiUrl);
+                if (result) {
+                  let index = self.currentXhr.indexOf(result);
+                  self.currentXhr.splice(index, 1);
+                }
+                self.checkXhrAbort = false;
+                self.dispatchProcessing('done');
+              }
+            });
+            // abort 적용을 위해 xhr 객체에 id를 추가해 배열에 push
+            let result = {id: apiUrl, xhr};
+            self.currentXhr.push(result);
+          },
+          validateParam: function (params) {
+            console.dir(params);
+            if (params.deployId == "") {
+              params.deployId = "0";
+            }
+            return params.serviceModelId && params.deployId && params.datasetId;
+          },
+          getHistory: function (historyId) {
+            var self = this;
+            $.ajax({
+              method: "GET",
+              url: this.serviceUrlPrefix + "/api/verify/history/" + historyId,
+              contentType: "application/json",
+              dataType: "json",
+              success: function (response, textStatus, jqXHR) {
+
+                if (response.code === 200) {
+                  self.showBeforeVerifyHistoryDialog($(self.verifyHistoryDialog.root), response.object);
+                  self.verifyHistoryDialog.open();
+                  return;
+                }
+
+                toastr.error(response.message);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+              }
+            });
+          },
+          // 상세 페이지 오픈
+          openDetailDialog: function (historyId) {
+            var self = this;
+            self.getHistory(historyId);
+          },
+          // 모델 다운로드
+          requestDeployModelDownload: function (event, deployModelName) {
+            console.log(deployModelName);
+
+            event.stopPropagation();
+            if (confirm("모델 다운로드를 하시겠습니까?")) {
+              var self = this;
+              $.ajax({
+                url: this.serviceUrlPrefix + "/resultmodelid/api/download?resultModelId=" + deployModelName,
+                method: "GET",
+                xhrFields: {
+                  responseType: "blob",
+                },
+                success: function (data, textStatus, jqXHR) {
+                  if (jqXHR.readyState == 4 && jqXHR.status == 200) {
+                    let filename = deployModelName + ".zip";
+                    let blob = new Blob([data], {type: "application/octetstream"});
+                    let link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                  } else {
+                    toastr.error("모델 다운로드에 실패했습니다.")
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  toastr.error("모델 다운로드에 실패했습니다.")
+                },
+              });
+            }
+          },
+          // 상태조회
+          selectStatus: function (event, serviceModelId, verifyId) {
+            if (!confirm("상태 조회를 하시겠습니까?")) {
+              return;
+            }
+            var self = this;
+            event.stopPropagation();
+            const jsonBody = {
+              serviceModelId: serviceModelId,
+              verifyId: verifyId
+            }
+
+            const $rowEl = $("#row-" + verifyId);
+            $rowEl.addClass("synchronizing");
+
+            $.ajax({
+              method: "GET",
+              url: this.serviceUrlPrefix + "/api/verify/history/status",
+              contentType: "application/json",
+              dataType: "json",
+              data: jsonBody,
+              success: function (response, textStatus, jqXHR) {
+                if (response.resultCode !== "0000") {
+                  toastr.error(response.resultCodeMsg, LABEL.message.API_ERROR_MESSAGE);
+                  return;
+                }
+
+                const targetItem = self.currentList.find((item) => {
+                  return item.id === verifyId;
+                });
+
+                $("#status" + verifyId).animate({'opacity': 0}, 100, function () {
+                  targetItem.status = response.status;
+                  $("#status" + verifyId).animate({'opacity': 1}, 300);
+                });
+
+                if (response.status === "COMPLETE") {
+                  self._search(self._searchCondition, $('#verifyHistoryListLoadingBar'), function (isError, data) {
+                    if (isError) {
+                      toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                    } else {
+                      self.renderDatas(data.total, data.object, self._searchCondition);
+                    }
+                  });
+                }
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                const errorMessageJson = jqXHR.responseText;
+                const errorMessage = JSON.parse(errorMessageJson);
+                toastr.error(errorMessage.error);
+              },
+              complete: function () {
+                $rowEl.removeClass("synchronizing");
+                $rowEl.addClass("is-done");
+                setTimeout(() => {
+                  $rowEl.removeClass("is-done")
+                }, 700)
+              }
+            });
+          },
+          // 재검증 요청 팝업 초기화
+          showBeforeReVerifyDialog: function ($root, data) {
+            var self = this;
+
+            var $reVerifyServiceModelSelector = $root.find('#reVerifyServiceModelSelector');
+            var $reVerifyDeployedModelSelector = $root.find('#reVerifyDeployedModelSelector');
+            var $reVerifyDatasetSelector = $root.find("#reVerifyDatasetSelector");
+            var $reVerifyDescriptionInput = $root.find('#reVerifyDescriptionInput');
+            var $reVerifyBtn = $root.find('#reVerifyBtn');
+            var $loadingBar = $root.find('#reVerifyDialogLoadingBar');
+            // 팝업 출력 내용 초기화
+            $reVerifyServiceModelSelector.data('textField').value = data.serviceModelName;
+            $reVerifyDeployedModelSelector.data('textField').value = data.deployedModelName;
+            $reVerifyDatasetSelector.data('textField').value = $.trim(data.datasetName);
+            var descriptionData = $.trim(data.description)
+            var datasetNameData = $.trim(data.datasetName)
+            if (descriptionData != null && descriptionData != undefined) {
+              $reVerifyDescriptionInput.data('textField').value = descriptionData;
+            }
+
+            $loadingBar.css('opacity', 0);
+
+            // 데이터셋 등록 버튼 처리
+            $reVerifyBtn.unbind('click').bind('click', function () {
+              if (!confirm(LABEL.message.VERIFY_REQUEST_CONFIRM)) {
+                return;
+              }
+
+              self._requestVerify({
+                serviceModelId: data.serviceModelId,
+                deployId: data.deployedModelId,
+                datasetId: data.datasetId,
+                datasetName: datasetNameData,
+                description: descriptionData
+              }, $loadingBar, function (isError, data) {
+                if (isError) {
+                  toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                } else if (data + "" === 'true') {
+                  toastr.success(LABEL.message.VERIFY_REQUEST_MESSAGE, LABEL.message.VERIFY_REQUEST_TITLE);
+                  self.reVerifyDialog.close();
+                  self.doRefresh();
+                }
+              });
+            });
+          },
+
+          // 재검증 요청
+          requestReVerify: function (event, historyId) {
+            var self = this;
+            event.stopPropagation();
+
+            var parentTr = $(event.target).closest("tr");
+            var historyData = {
+              "historyId": historyId,
+              "serviceModelId": parentTr.find('td[name=serviceModelName]').data("id"),
+              "serviceModelName": parentTr.find("td[name=serviceModelName]").text(),
+              "deployedModelId": parentTr.find('td[name=deployedModelName]').data("id"),
+              "deployedModelName": parentTr.find("td[name=deployedModelName]").text(),
+              "datasetId": parentTr.find('td[name=datasetName]').data("id"),
+              "datasetName": parentTr.find("td[name=datasetName]").text(),
+              "description": parentTr.find('td[name=description]').text()
+            }
+            self.showBeforeReVerifyDialog($(self.reVerifyDialog.root), historyData);
+            self.reVerifyDialog.open();
+          },
+          updateYn: function (event, historyId) {
+            var self = this;
+            event.stopPropagation();
+            var jsonData = {
+              historyId: historyId
+            }
+            console.log(historyId);
+            $.ajax({
+              method: "POST",
+              url: this.serviceUrlPrefix + "/api/verify/history/updateYn",
+              contentType: "application/json",
+              dataType: "json",
+              data: JSON.stringify(jsonData),
+              success: function (response, textStatus, jqXHR) {
+                if (response.resultCode === '0000') {
+                  toastr.success(LABEL.message.VERIFY_UPATE_SAVE_SUCCESS);
+                  self.doRefresh();
+                } else {
+                  toastr.error(response.resultMsg);
+                }
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+              }
+            });
+          },
+
+          /**
+           * 모달 닫을 때 데이터 요청/전송 취소
+           */
+          onCloseDialog: function () {
+            const self = this;
+            if (self.currentXhr.length !== 0) {
+              if (self.checkXhrAbort && !confirm('취소 시 저장 및 업로드가 중단됩니다.')) return;
+              [...self.currentXhr].forEach(xhrItem => xhrItem.xhr.abort())
+              self.dispatchProcessing('done');
+            }
+            if (self.currentDialog) {
+              self[self.currentDialog].close();
+              self.currentDialog = null;
+            }
+          },
+
+          /**
+           *
+           * @param state: 'process' || 'done'
+           * 디스패치 시 모달 본문에 유저 동작 방지 적용 및 닫기/취소를 제외한 버튼 비활성화
+           */
+          dispatchProcessing: function (state) {
+            let $modalSurface;
+            let $modalBtn;
+            if (state === 'process') {
+              // 닫기/취소를 제외한 버튼 선택
+              $modalBtn = $('.mdc-dialog--open .mdc-dialog__surface .mdc-button').not('.close-button');
+              // 현재 열려있는 모달 선택
+              $modalSurface = $('.mdc-dialog--open .mdc-dialog__surface');
+              $modalBtn.prop('disabled', true);
+              $modalSurface.addClass('is-processing');
+            } else if (state === 'done') {
+              // 진행 중인 모달 선택.
+              // 모달 닫는게 먼저 실행되면 .mdc-dialog--open으로 선택 불가
+              $modalBtn = $('.mdc-dialog__surface.is-processing .mdc-button').not('.close-button');
+              $modalSurface = $('.mdc-dialog__surface.is-processing');
+              $modalBtn.prop('disabled', false);
+              $modalSurface.removeClass('is-processing');
+            }
+          },
+        }
+      });
+    })();
+  </script>
+</th:block>
+</html>

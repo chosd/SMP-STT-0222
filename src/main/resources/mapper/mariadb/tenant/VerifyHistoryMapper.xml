@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.verify.history.mapper.VerifyHistoryMapper">
+
+    <select id="count" parameterType="verifyHistorySearchCondition" resultType="int">
+		/* VerifyHistoryMapper.count */
+        SELECT COUNT(HISTORY.ID)
+        FROM IAAP_STT_VERIFY_HISTORY HISTORY
+            JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = HISTORY.SERVICE_MODEL_ID
+            JOIN IAAP_STT_DEPLOY_MNG DEPLOY ON DEPLOY.ID = HISTORY.DEPLOY_ID
+        WHERE HISTORY.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+            AND HISTORY.SERVICE_MODEL_ID = #{serviceModelId}
+        </if>
+        <if test="status != null">
+            AND HISTORY.STATUS = UPPER(#{status})
+        </if>
+        <if test="datasetName != null and datasetName != ''">
+            AND HISTORY.DATASET_NAME like CONCAT('%', #{datasetName}, '%')
+        </if>
+        <if test="description != null and description != ''">
+            AND HISTORY.DESCRIPTION like CONCAT('%', #{description}, '%')
+        </if>
+        <if test="regId != null and regId != ''">
+            AND HISTORY.REG_ID like CONCAT('%', #{regId}, '%')
+        </if>
+        <choose>
+            <when test="cerFrom != null">
+                AND HISTORY.CER >= #{cerFrom}
+            </when>
+            <!--<otherwise>
+                AND HISTORY.CER >= 0
+            </otherwise>-->
+        </choose>
+        <choose>
+            <when test="cerTo != null">
+                <![CDATA[
+                AND HISTORY.CER <= #{cerTo}
+                ]]>
+            </when>
+            <!--<otherwise>
+                <![CDATA[
+                AND HISTORY.CER <= 100
+                ]]>
+            </otherwise>-->
+        </choose>
+        <choose>
+            <when test="regDtFrom != null">
+                AND HISTORY.REG_DT >= CONCAT(#{regDtFrom}, ' ', '00:00:00')
+            </when>
+            <otherwise>
+                AND HISTORY.REG_DT >= '2022-01-01 00:00:00'
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="regDtTo != null">
+                <![CDATA[
+                AND HISTORY.REG_DT <= CONCAT(#{regDtTo}, ' ', '23:59:59')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND HISTORY.REG_DT <= NOW()
+                ]]>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="search" parameterType="verifyHistorySearchCondition" resultType="verifyHistoryListDto">
+        /* VerifyHistoryMapper.search */
+        SELECT
+        	HISTORY.ID,
+			SERVICE_MODEL.SERVICE_CODE as SERVICE_MODEL_ID,
+		    SERVICE_MODEL.SERVICE_MODEL_NAME,
+		    DEPLOY.ID as DEPLOY_MODEL_ID,
+		    DEPLOY.RESULT_MODEL_ID DEPLOYED_MODEL_NAME,
+		    HISTORY.DATASET_ID,
+			HISTORY.DATASET_NAME,
+            (
+                SELECT COUNT(ID)
+                	FROM IAAP_STT_VERIFY_DATA VERIFY_DATA
+                WHERE VERIFY_DATA.DATASET_ID = HISTORY.DATASET_ID
+					AND VERIFY_DATA.USE_YN != 'N'
+            ) NUM_OF_DATA,
+            HISTORY.CER,
+            HISTORY.DESCRIPTION,
+            HISTORY.REG_ID,
+            HISTORY.REG_DT,
+            UPPER(HISTORY.STATUS) as STATUS,
+            HISTORY.SAVE_YN
+        FROM IAAP_STT_VERIFY_HISTORY HISTORY
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = HISTORY.SERVICE_MODEL_ID
+        JOIN IAAP_STT_DEPLOY_MNG DEPLOY ON DEPLOY.ID = HISTORY.DEPLOY_ID
+        WHERE HISTORY.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+            AND HISTORY.SERVICE_MODEL_ID = #{serviceModelId}
+        </if>
+        <if test="status != null">
+            AND HISTORY.STATUS = UPPER(#{status})
+        </if>
+        <if test="datasetName != null and datasetName != ''">
+            AND HISTORY.DATASET_NAME like CONCAT('%', #{datasetName}, '%')
+        </if>
+        <if test="description != null and description != ''">
+            AND HISTORY.DESCRIPTION like CONCAT('%', #{description}, '%')
+        </if>
+        <if test="regId != null and regId != ''">
+            AND HISTORY.REG_ID like CONCAT('%', #{regId}, '%')
+        </if>
+        <choose>
+            <when test="cerFrom != null">
+                AND HISTORY.CER >= #{cerFrom}
+            </when>
+            <!--<otherwise>
+                AND HISTORY.CER >= 0
+            </otherwise>-->
+        </choose>
+        <choose>
+            <when test="cerTo != null">
+                <![CDATA[
+                AND HISTORY.CER <= ifnull(#{cerTo},0)
+                ]]>
+            </when>
+        </choose>
+        <choose>
+            <when test="regDtFrom != null">
+                AND HISTORY.REG_DT >= CONCAT(#{regDtFrom}, ' ', '00:00:00')
+            </when>
+            <otherwise>
+                AND HISTORY.REG_DT >= '2022-01-01 00:00:00'
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="regDtTo != null">
+                <![CDATA[
+                AND HISTORY.REG_DT <= CONCAT(#{regDtTo}, ' ', '23:59:59')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND HISTORY.REG_DT <= NOW()
+                ]]>
+            </otherwise>
+        </choose>
+        ORDER BY HISTORY.REG_DT DESC
+        LIMIT #{size}
+        OFFSET #{start};
+    </select>
+
+    <select id="findById" resultType="verifyHistoryDto">
+		/* VerifyHistoryMapper.findById */
+        SELECT
+            COALESCE(SERVICE_MODEL.SERVICE_MODEL_NAME, '') AS SERVICE_MODEL_NAME,
+            COALESCE(DEPLOY.RESULT_MODEL_ID, '') AS DEPLOYED_MODEL_NAME,
+            COALESCE(HISTORY.DATASET_NAME, '') AS DATASET_NAME,
+            COALESCE(HISTORY.DESCRIPTION, '') AS DESCRIPTION,
+            COALESCE(HISTORY.REG_ID, '') AS regId,
+            HISTORY.START_AT,
+            HISTORY.END_AT,
+            TIMESTAMPDIFF(SECOND, date_format(HISTORY.START_AT, '%Y-%m-%d %H:%i:%s')
+            	, date_format(HISTORY.END_AT, '%Y-%m-%d %H:%i:%s')) AS TOTAL_TIME,
+            COALESCE(UPPER(HISTORY.STATUS), '') as STATUS,
+            COALESCE(HISTORY.FAIL_CAUSE, '') AS FAIL_CAUSE,
+            HISTORY.CER,
+            HISTORY.WER
+        FROM IAAP_STT_VERIFY_HISTORY HISTORY
+             JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = HISTORY.SERVICE_MODEL_ID
+             JOIN IAAP_STT_DEPLOY_MNG DEPLOY ON DEPLOY.ID = HISTORY.DEPLOY_ID
+        WHERE HISTORY.USE_YN = 'Y' AND HISTORY.ID = #{id}
+    </select>
+    
+    <select id="findLatestByServiceModelIdAndStatus" resultType="verifyHistoryDto">
+    		/* VerifyHistoryMapper.findLatestByServiceModelIdAndStatus */
+        SELECT
+        	MAX(ID) ID
+        FROM IAAP_STT_VERIFY_HISTORY
+        WHERE USE_YN = 'Y'
+        AND SERVICE_MODEL_ID = #{id}
+        AND STATUS = UPPER(#{status})
+    </select>
+
+    <insert id="save" parameterType="verifyHistorySaveDto">
+		/* VerifyHistoryMapper.save */
+        INSERT INTO IAAP_STT_VERIFY_HISTORY
+        (
+            ID,
+            DATASET_ID,
+            DATASET_NAME,
+            DEPLOY_ID,
+            STATUS,
+            DESCRIPTION,
+            START_AT,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP,
+            SERVICE_MODEL_ID,
+            SAVE_YN,
+            VERSION
+        ) VALUES
+        (
+            NEXTVAL(SEQ_IAAP_STT_VERIFY_HISTORY),
+            #{datasetId},
+            #{datasetName},
+            #{deployId},
+            UPPER(#{status}),
+            #{description},
+            NOW(),
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp},
+            #{serviceModelId},
+            'N',
+            (
+            	with A as(
+					select IFNULL(
+						(SELECT
+							case when MAX(VERSION) = null then 1 else
+							cast(right(MAX(VERSION),4) as unsigned)+1 end
+						FROM
+							IAAP_STT_VERIFY_HISTORY
+						WHERE
+							USE_YN = 'Y'
+							AND SERVICE_MODEL_ID = #{serviceModelId}
+							AND DATASET_ID = #{datasetId}
+							AND CAST(substring(VERSION,1,6) AS unsigned) = CAST(DATE_FORMAT(NOW(),'%y%m%d') AS unsigned)
+						),1
+					) as "version"
+				),
+				B as (
+					select DATE_FORMAT(SYSDATE(),'%y%m%d') as "date"
+				)
+				SELECT CONCAT(B.date,'_',LPAD(A.version,'4',0)) FROM A,B
+            )
+        )
+    </insert>
+
+    <update id="update" parameterType="verifyHistoryUpdateDto">
+		/* VerifyHistoryMapper.update */
+        UPDATE IAAP_STT_VERIFY_HISTORY
+        SET
+            STATUS = UPPER(#{status}),
+            CER = #{cer},
+            WER = #{wer},
+            FAIL_CAUSE = #{failCause},
+            END_AT = NOW()
+        WHERE ID = #{id}
+    </update>
+    
+    <update id="updateSaveYn" parameterType="Integer">
+		/* VerifyHistoryMapper.updateSaveYn */
+        UPDATE IAAP_STT_VERIFY_HISTORY
+        SET
+            SAVE_YN = 'Y'
+        WHERE ID = #{id}
+    </update>
+    
+    <update id="updateVerifyStatus" parameterType="Map">
+		/* VerifyHistoryMapper.updateVerifyStatus */
+        UPDATE IAAP_STT_VERIFY_HISTORY
+        SET
+            STATUS = #{status}
+        WHERE ID = #{id}
+    </update>
+</mapper>

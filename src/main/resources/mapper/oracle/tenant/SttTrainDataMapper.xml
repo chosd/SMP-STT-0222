@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.train.trainData.mapper.SttTrainDataMapper">
+
+    <resultMap id="trainDataResultMap" type="com.kt.smp.stt.train.trainData.domain.SttTrainDataVO">
+        <id column="ID" property="id"/>
+        <result column="DATA_TYPE" property="dataType"/>
+        <result column="SERVICE_MODEL" property="serviceModel"/>
+        <result column="SERVICE_MODEL_ID" property="serviceModelId"/>
+        <result column="CONTENTS" property="contents"/>
+        <result column="REPEAT_COUNT" property="repeatCount"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+    </resultMap>
+    
+    <resultMap id="amDataResultMap" type="com.kt.smp.stt.train.trainData.domain.SttTrainAmDataVO">
+        <id column="AM_DATA_ID" property="id"/>
+        <result column="SERVICE_MODEL" property="serviceModel"/>
+        <result column="SERVICE_MODEL_ID" property="serviceModelId"/>
+        <result column="MODEL_TYPE" property="modelType"/>
+        <result column="ANS_DATASET_NM" property="datasetName"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="TRAIN_VOICE_CNT" property="trainVoiceCount"/>
+        <result column="ANS_FILE" property="answerFileName"/>
+        <result column="VOICE_FILE" property="voiceFileName"/>
+        <result column="AM_DATA_PATH" property="amDataPath"/>
+        <result column="FIRST_PATH_YN" property="firstPathYn"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+    </resultMap>
+    
+    <resultMap id="directoryListResultMap" type="com.kt.smp.stt.comm.directory.dto.DirectoryListDto">
+        <id column="ID" property="id"/>
+        <result column="NAME" property="name"/>
+        <result column="HOME_PATH" property="homePath"/>
+        <result column="PATH" property="path"/>
+        <result column="PRIORITY" property="priority"/>
+        <result column="IN_USE" property="inUse"/>
+        <result column="REG_DT" property="regDt"/>
+        
+    </resultMap>
+    
+    <resultMap id="amDatasetResultMap" type="com.kt.smp.stt.train.trainData.dto.SttTrainDatasetListDto">
+        <id column="AM_DATASET_ID" property="id"/>
+        <result column="SERVICE_MODEL_ID" property="serviceModelId"/>
+        <result column="SERVICE_MODEL_NAME" property="serviceModelName"/>
+        <result column="DATASET_NAME" property="name"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+    </resultMap>
+
+    <!--  SELECT  -->
+    <select id="listPage"
+            parameterType="com.kt.smp.stt.train.trainData.domain.SttTrainDataSearchCondition"
+            resultMap="trainDataResultMap">
+        /* SttTrainDataMapper.listPage */
+        SELECT
+            STD.ID
+            , STD.DATA_TYPE
+            , STD.SERVICE_MODEL_ID
+            , STD.CONTENTS
+            , STD.REPEAT_COUNT
+            , STD.DESCRIPTION
+            , STD.REG_DT
+            , STD.REG_ID
+            , STD.REG_IP
+            , STD.UPD_DT
+            , STD.UPD_ID
+            , STD.UPD_IP
+            , STD.USE_YN
+        FROM
+             IAAP_STT_TRAIN_DATA STD
+        WHERE
+              STD.USE_YN = 'Y'
+        <if test="dataType != null"><![CDATA[
+            AND STD.DATA_TYPE = #{dataType}
+        ]]></if>
+        <if test="serviceModelId != null"><![CDATA[
+            AND STD.SERVICE_MODEL_ID = #{serviceModelId}
+        ]]></if>
+        <if test="contents != null and contents != ''"><![CDATA[
+            AND STD.CONTENTS LIKE '%' || #{contents} || '%'
+        ]]></if>
+        <if test="uploadedBy != null and uploadedBy != ''"><![CDATA[
+            AND STD.REG_ID LIKE '%' || #{uploadedBy} || '%'
+        ]]></if>
+        <if test="description != null and description != ''"><![CDATA[
+            AND STD.DESCRIPTION LIKE '%' || #{description} || '%'
+        ]]></if>
+        <choose>
+            <when test="from != null">
+                AND STD.REG_DT >= to_date(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND STD.REG_DT >= to_date('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+            <![CDATA[
+                AND STD.REG_DT <= to_date(#{to} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+            ]]>
+            </when>
+            <otherwise>
+            <![CDATA[
+                AND STD.REG_DT <= current_date
+            ]]>
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="directorySearch"   resultMap="directoryListResultMap">
+		/* SttTrainDataMapper.directorySearch */
+        SELECT
+            ID,
+            NAME,
+            HOME_PATH,
+            PATH,
+            PRIORITY,
+            IN_USE,
+            REG_DT
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+            AND instr(NAME , '학습') > 0
+    </select>
+    
+    <select id="amDatasetAll"   resultMap="amDatasetResultMap">
+		/* SttTrainDataMapper.amDatasetAll */
+        SELECT
+            DATASET.AM_DATASET_ID,
+            DATASET.DATASET_NAME,
+            SERVICE_MODEL.SERVICE_CODE SERVICE_MODEL_ID,
+            SERVICE_MODEL.SERVICE_MODEL_NAME
+        FROM IAAP_STT_TRAIN_DATASET DATASET
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DATASET.SERVICE_MODEL_ID)
+        WHERE DATASET.USE_YN = 'Y'
+    </select>
+    
+    <select id="amDataSearch" parameterType="com.kt.smp.stt.train.trainData.domain.SttTrainDataAmSearchCondition" resultMap="amDataResultMap">
+		/* SttTrainDataMapper.amDataSearch */
+        SELECT
+            STD.AM_DATA_ID
+            , STD.DATA_SOURCE
+            , STD.MODEL_TYPE
+            , STD.SERVICE_MODEL_ID
+            , STD.ANS_DATASET_NM
+            , STD.TRAIN_VOICE_CNT
+            , STD.DESCRIPTION
+            , STD.REG_DT
+            , STD.REG_ID
+            , STD.REG_IP
+            , STD.UPD_DT
+            , STD.UPD_ID
+            , STD.UPD_IP
+            , STD.USE_YN
+            , STD.ANS_FILE
+            , STD.VOICE_FILE
+            , STD.AM_DATA_PATH
+        FROM
+             IAAP_STT_TRAIN_AM_DATA STD
+        WHERE
+              STD.USE_YN = 'Y'
+        <if test="modelType != null"><![CDATA[
+            AND STD.MODEL_TYPE = #{modelType}
+        ]]></if>
+        <if test="serviceModelId != null"><![CDATA[
+            AND STD.SERVICE_MODEL_ID = #{serviceModelId}
+        ]]></if>
+        <if test="datasetName != null and datasetName != ''"><![CDATA[
+            AND STD.ANS_DATASET_NM LIKE '%' || #{datasetName} || '%'
+        ]]></if>
+        <if test="uploadedBy != null and uploadedBy != ''"><![CDATA[
+            AND STD.REG_ID LIKE '%' || #{uploadedBy} || '%'
+        ]]></if>
+        <if test="description != null and description != ''"><![CDATA[
+            AND STD.DESCRIPTION LIKE '%' || #{description} || '%'
+        ]]></if>
+        <choose>
+            <when test="from != null">
+                AND STD.REG_DT >= to_date(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND STD.REG_DT >= to_date('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                <![CDATA[
+                AND STD.REG_DT <= to_date(#{to} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND STD.REG_DT <= current_date
+                ]]>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="detail" parameterType="Long" resultMap="trainDataResultMap">
+		/* SttTrainDataMapper.detail */
+        SELECT
+            STD.ID
+            , STD.DATA_TYPE
+            , STD.SERVICE_MODEL_ID
+            , STD.CONTENTS
+            , STD.REPEAT_COUNT
+            , STD.DESCRIPTION
+            , STD.REG_DT
+            , STD.REG_ID
+            , STD.REG_IP
+            , STD.UPD_DT
+            , STD.UPD_ID
+            , STD.UPD_IP
+            , STD.USE_YN
+        FROM
+            IAAP_STT_TRAIN_DATA STD
+        WHERE
+            STD.ID = #{trainDataId} AND
+            STD.USE_YN = 'Y'
+    </select>
+    
+    <select id="amDetail" parameterType="Long" resultMap="amDataResultMap">
+		/* SttTrainDataMapper.amDetail */
+        SELECT
+            STD.AM_DATA_ID
+            , STD.MODEL_TYPE
+            , STD.SERVICE_MODEL_ID
+            , STD.ANS_DATASET_NM
+            , STD.TRAIN_VOICE_CNT
+            , STD.DESCRIPTION
+            , STD.ANS_FILE
+            , STD.VOICE_FILE
+            , STD.AM_DATA_PATH
+            , STD.FIRST_PATH_YN
+            , STD.REG_DT
+            , STD.REG_ID
+            , STD.REG_IP
+            , STD.UPD_DT
+            , STD.UPD_ID
+            , STD.UPD_IP
+            , STD.USE_YN
+        FROM
+            IAAP_STT_TRAIN_AM_DATA STD
+        WHERE
+            STD.AM_DATA_ID = #{amDataId} AND
+            STD.USE_YN = 'Y'
+    </select>
+
+    <select id="count" parameterType="com.kt.smp.stt.train.trainData.domain.SttTrainDataSearchCondition" resultType="int">
+		/* SttTrainDataMapper.count */
+        SELECT COUNT(1)
+        FROM
+             IAAP_STT_TRAIN_DATA STD
+        WHERE
+            1 = 1 AND
+            STD.USE_YN = 'Y'
+            <if test="dataType != null">
+				<![CDATA[
+                	AND STD.DATA_TYPE = #{dataType}
+            	]]>
+            </if>
+            <if test="serviceModelId != null">
+				<![CDATA[
+                	AND STD.SERVICE_MODEL_ID = #{serviceModelId}
+            	]]>
+            </if>
+            <if test="contents != null and contents != ''">
+				<![CDATA[
+                	AND STD.CONTENTS LIKE '%' || #{contents} || '%'
+            	]]>
+            </if>
+            <if test="uploadedBy != null and uploadedBy != ''">
+				<![CDATA[
+                	AND STD.REG_ID LIKE '%' || #{uploadedBy} || '%'
+            	]]>
+            </if>
+            <choose>
+                <when test="from != null">
+                    AND STD.REG_DT >= to_date(#{from, jdbcType=VARCHAR} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                </when>
+                <otherwise>
+                    AND STD.REG_DT >= to_date('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="to != null">
+                    AND STD.REG_DT &lt;= to_date(#{to, jdbcType=VARCHAR} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+                </when>
+                <otherwise>
+                    AND STD.REG_DT &lt;= current_date
+                </otherwise>
+            </choose>
+    </select>
+    
+    <select id="amCount" parameterType="com.kt.smp.stt.train.trainData.domain.SttTrainDataAmSearchCondition" resultType="int">
+		/* SttTrainDataMapper.amCount */
+        SELECT COUNT(1)
+        FROM
+             IAAP_STT_TRAIN_AM_DATA STD
+        WHERE
+            1 = 1 AND
+            STD.USE_YN = 'Y'
+            <if test="modelType != null">
+				<![CDATA[
+                	AND STD.MODEL_TYPE = #{modelType}
+            	]]>
+            </if>
+            <if test="serviceModelId != null">
+				<![CDATA[
+                	AND STD.SERVICE_MODEL_ID = #{serviceModelId}
+            	]]>
+            </if>
+            <if test="datasetName != null and datasetName != ''">
+				<![CDATA[
+                	AND STD.ANS_DATASET_NM LIKE '%' || #{datasetName} || '%'
+            	]]>
+            </if>
+            <if test="uploadedBy != null and uploadedBy != ''">
+				<![CDATA[
+                	AND STD.REG_ID LIKE '%' || #{uploadedBy} || '%'
+            	]]>
+            </if>
+            <choose>
+                <when test="from != null">
+                    AND STD.REG_DT >= to_date(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                </when>
+                <otherwise>
+                    AND STD.REG_DT >= to_date('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="to != null">
+                    AND STD.REG_DT &lt;= to_date(#{to} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+                </when>
+                <otherwise>
+                    AND STD.REG_DT &lt;= current_date
+                </otherwise>
+            </choose>
+    </select>
+
+
+    <select id="amDataServiceListResultAll" parameterType="int" resultType="int">
+        /* SttTrainDataMapper.serviceListResultAll */
+        SELECT COUNT(1)
+        FROM
+        IAAP_STT_TRAIN_AM_DATA STD
+        WHERE
+        1 = 1
+        <if test="serviceModelId != null">
+            <![CDATA[
+              AND STD.SERVICE_MODEL_ID = #{serviceModelId}
+          ]]>
+        </if>
+    </select>
+
+
+    <select id="exists" parameterType="Long" resultType="int">
+		/* SttTrainDataMapper.exists */
+        SELECT
+        	CASE WHEN
+        		EXISTS(SELECT 1 FROM IAAP_STT_TRAIN_DATA STD WHERE STD.ID = #{trainDataId} AND STD.USE_YN = 'Y')
+        	THEN 1 ELSE 0 END isExists 
+        FROM DUAL
+    </select>
+    
+    <select id="existsAmData" parameterType="Long" resultType="int">
+		/* SttTrainDataMapper.existsAmData */
+        SELECT
+        	CASE WHEN 
+        		EXISTS(SELECT 1 FROM IAAP_STT_TRAIN_AM_DATA STD WHERE STD.AM_DATA_ID = #{amDataId} AND STD.USE_YN = 'Y')
+        	THEN 1 ELSE 0 END isExists
+        FROM DUAL
+    </select>
+
+    <select id="existContents" parameterType="String" resultType="int">
+		/* SttTrainDataMapper.existContents */
+        SELECT
+        	CASE WHEN
+        		EXISTS(SELECT 1 FROM IAAP_STT_TRAIN_DATA STD WHERE STD.CONTENTS = #{contents} AND STD.USE_YN = 'Y')
+        	THEN 1 ELSE 0 END isExists 
+        FROM DUAL
+    </select>
+
+    <!--  INSERT  -->
+    <insert id="insert"  parameterType="com.kt.smp.stt.train.trainData.domain.SttTrainDataVO">
+		/* SttTrainDataMapper.insert */
+        INSERT INTO IAAP_STT_TRAIN_DATA(
+            ID
+            , DATA_TYPE
+            , SERVICE_MODEL_ID
+            , CONTENTS
+            , REPEAT_COUNT
+            , DESCRIPTION
+            , REG_DT
+            , REG_ID
+            , REG_IP
+            , UPD_DT
+            , UPD_ID
+            , UPD_IP
+            , USE_YN)
+        VALUES(
+            SEQ_IAAP_STT_TRAIN_DATA.NEXTVAL
+            , #{dataType}
+            , #{serviceModelId}
+            , #{contents}
+            , #{repeatCount}
+            , #{description}
+            , CURRENT_TIMESTAMP
+            , #{regId}
+            , #{regIp}
+            , NULL
+            , NULL
+            , NULL
+            , 'Y')
+    </insert>
+    
+    <insert id="amInsert" parameterType="com.kt.smp.stt.train.trainData.dto.SttTrainDataMultipartSaveDto">
+		/* SttTrainDataMapper.amInsert */
+        INSERT INTO IAAP_STT_TRAIN_AM_DATA(
+            AM_DATA_ID
+            , MODEL_TYPE
+            , SERVICE_MODEL_ID
+            , ANS_DATASET_NM
+            , TRAIN_VOICE_CNT
+            , DESCRIPTION
+            , DATA_SOURCE
+            , ANS_FILE
+            , VOICE_FILE
+            , AM_DATA_PATH
+            , DETAIL_PATH
+            , BASE_PATH
+            , REG_DT
+            , REG_ID
+            , REG_IP
+            , UPD_DT
+            , UPD_ID
+            , UPD_IP
+            , USE_YN
+            , FIRST_PATH_YN)
+        VALUES(
+              SEQ_IAAP_STT_TRAIN_AM_DATA.NEXTVAL
+            , #{modelType}
+            , #{serviceModelId}
+            , #{datasetName}
+            , #{trainVoiceCount}
+            , #{description}
+            , #{dataSource}
+            , #{answerFileName}
+            , #{voiceFileName}
+            , #{amDataPath}
+            , #{detailPath}
+            , #{basePath}
+            , CURRENT_TIMESTAMP
+            , #{regId}
+            , #{regIp}
+            , NULL
+            , NULL
+            , NULL
+            , 'Y'
+            , 'N'
+            )
+    </insert>
+
+    <insert id="amDirectInsert" parameterType="com.kt.smp.stt.train.trainData.dto.SttTrainDataMultipartSaveDto">
+      /* SttTrainDataMapper.amDirectInsert */
+      INSERT INTO IAAP_STT_TRAIN_AM_DATA(
+             AM_DATA_ID
+            , MODEL_TYPE
+            , SERVICE_MODEL_ID
+            , ANS_DATASET_NM
+            , TRAIN_VOICE_CNT
+            , DESCRIPTION
+            , ANS_FILE
+            , VOICE_FILE
+            , AM_DATA_PATH
+            , DETAIL_PATH
+            , BASE_PATH
+            , REG_DT
+            , REG_ID
+            , REG_IP
+            , UPD_DT
+            , UPD_ID
+            , UPD_IP
+            , USE_YN
+            , FIRST_PATH_YN)
+      VALUES ( SEQ_IAAP_STT_TRAIN_AM_DATA.NEXTVAL
+             , #{modelType}
+             , #{serviceModelId}
+             , #{datasetName}
+             , #{trainVoiceCount}
+             , #{description}
+             , #{answerFileName}
+             , #{voiceFileName}
+             , #{amDataPath}
+             , #{detailPath}
+             , #{basePath}
+             , CURRENT_TIMESTAMP
+             , #{regId}
+             , #{regIp}
+             , NULL
+             , NULL
+             , NULL
+             , 'Y'
+             , 'Y')
+    </insert>
+
+    <insert id="insertBulk"  parameterType="com.kt.smp.stt.train.trainData.dto.SttTrainDataSaveReqDto">
+		/* SttTrainDataMapper.insertBulk */
+        INSERT INTO IAAP_STT_TRAIN_DATA(
+                 ID
+               , DATA_TYPE
+               , SERVICE_MODEL_ID
+               , CONTENTS
+               , REPEAT_COUNT
+               , DESCRIPTION
+               , REG_DT
+               , REG_ID
+               , REG_IP
+               , UPD_DT
+               , UPD_ID
+               , UPD_IP
+               , USE_YN)
+        VALUES(
+                SEQ_IAAP_STT_TRAIN_DATA.NEXTVAL
+              , #{dataType}
+              , #{serviceModelId}
+              , #{contents}
+              , #{repeatCount}
+              , #{description}
+              , CURRENT_TIMESTAMP
+              , #{uploadedBy}
+              , #{regIp}
+              , NULL
+              , NULL
+              , NULL
+              , 'Y')
+    </insert>
+
+    <!--  UPDATE  -->
+    <update id="update" parameterType="com.kt.smp.stt.train.trainData.domain.SttTrainDataVO">
+		/* SttTrainDataMapper.update */
+        UPDATE
+            IAAP_STT_TRAIN_DATA
+        SET
+             DATA_TYPE = #{dataType}
+          ,  SERVICE_MODEL_ID = #{serviceModelId}
+          ,  CONTENTS = #{contents}
+          ,  REPEAT_COUNT = #{repeatCount}
+          ,  DESCRIPTION = #{description}
+          ,  UPD_DT = CURRENT_TIMESTAMP
+          ,  UPD_ID = #{updId}
+          ,  UPD_IP = #{updIp}
+        WHERE
+            ID = #{id} AND
+            USE_YN = 'Y'
+    </update>
+    
+    <update id="amUpdate" parameterType="com.kt.smp.stt.train.trainData.domain.SttTrainAmDataVO">
+		/* SttTrainDataMapper.amUpdate */
+        UPDATE
+            IAAP_STT_TRAIN_AM_DATA
+        SET
+             ANS_DATASET_NM = #{datasetName}
+          ,  DESCRIPTION = #{description}
+          ,  UPD_DT = CURRENT_TIMESTAMP
+          ,  UPD_ID = #{updId}
+          ,  UPD_IP = #{updIp}
+        WHERE
+            AM_DATA_ID = #{id} AND
+            USE_YN = 'Y'
+    </update>
+
+    <update id="delete" parameterType="Long">
+		/* SttTrainDataMapper.delete */
+        UPDATE
+            IAAP_STT_TRAIN_DATA
+        SET
+            CONTENTS = CONTENTS || '_' || ID
+            , USE_YN = 'N'
+        WHERE
+            ID IN
+        <foreach collection="trainDataIdList" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+    
+    <update id="amDelete" parameterType="Long">
+		/* SttTrainDataMapper.amDelete */
+        UPDATE
+            IAAP_STT_TRAIN_AM_DATA
+        SET
+            ANS_DATASET_NM = ANS_DATASET_NM || '_' || AM_DATA_ID
+            , USE_YN = 'N'
+        WHERE
+            AM_DATA_ID IN
+        <foreach collection="trainDataIdList" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="countDuplicateContents" parameterType="String" resultType="int">
+		/* SttTrainDataMapper.countDuplicateContents */
+        SELECT COUNT(1)
+        FROM IAAP_STT_TRAIN_DATA STD
+        WHERE 
+        	1=1
+        	AND STD.CONTENTS IN (#{contents}, #{encryptedContents})
+        	AND STD.SERVICE_MODEL_ID = #{serviceModelId} 
+        	AND USE_YN='Y'
+    </select>
+    
+    <select id="countDuplicateDatasetName" parameterType="String" resultType="int">
+		/* SttTrainDataMapper.countDuplicateDatasetName */
+        SELECT 
+        	COUNT(1)
+        FROM IAAP_STT_TRAIN_AM_DATA
+        WHERE ANS_DATASET_NM = #{dataset} AND SERVICE_MODEL_ID = #{serviceModelId} AND USE_YN='Y'
+    </select>
+    
+    <select id="countDuplicateDirectoryPath" parameterType="String" resultType="int">
+		/* SttTrainDataMapper.countDuplicateDirectoryPath */
+        SELECT 
+        	COUNT(1)
+        FROM IAAP_STT_TRAIN_AM_DATA
+        WHERE DETAIL_PATH = #{path} AND SERVICE_MODEL_ID = #{serviceModelId} AND USE_YN='Y'
+    </select>
+
+    <select id="countServiceModelDirectPath" parameterType="String" resultType="int">
+        /* SttTrainDataMapper.countServiceModelDirectPath */
+        SELECT
+            COUNT(1)
+        FROM IAAP_STT_TRAIN_AM_DATA
+        WHERE SERVICE_MODEL_ID = #{serviceModelId} AND FIRST_PATH_YN='Y'
+    </select>
+    
+</mapper>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.common.mapper.AttachMapper">
+
+    <select id="getAtSeq" resultType="String">
+        /* AttachMapper.getAtSeq */
+        SELECT NEXTVAL(SEQ_CM_ATTACH)
+    </select>
+
+    <select id="list" parameterType="com.kt.smp.common.domain.AttachVO" resultType="com.kt.smp.common.domain.AttachVO">
+        /* AttachMapper.list */
+        SELECT AT_SEQ
+             , AT_NO
+             , AT_PATH
+             , AT_ORIG_NM
+             , AT_SAVE_NM
+             , AT_SZ
+             , REG_DT
+             , REG_ID
+             , REG_IP
+             , UPD_DT
+             , UPD_ID
+             , UPD_IP
+             , USE_YN
+        FROM CM_ATTACH
+        WHERE AT_SEQ = #{atSeq}
+          AND USE_YN = 'Y'
+        ORDER BY AT_NO
+    </select>
+
+    <select id="detail" parameterType="com.kt.smp.common.domain.AttachVO" resultType="com.kt.smp.common.domain.AttachVO">
+        /* AttachMapper.detail */
+        SELECT AT_SEQ
+             , AT_NO
+             , AT_PATH
+             , AT_ORIG_NM
+             , AT_SAVE_NM
+             , AT_SZ
+             , REG_DT
+             , REG_ID
+             , REG_IP
+             , UPD_DT
+             , UPD_ID
+             , UPD_IP
+             , USE_YN
+        FROM CM_ATTACH
+        WHERE AT_SEQ = #{atSeq}
+          AND AT_NO = #{atNo}
+          AND USE_YN = 'Y'
+    </select>
+
+    <insert id="insert" parameterType="com.kt.smp.common.domain.AttachVO">
+        /* AttachMapper.insert */
+        INSERT INTO CM_ATTACH ( AT_SEQ
+                              , AT_NO
+                              , AT_PATH
+                              , AT_ORIG_NM
+                              , AT_SAVE_NM
+                              , AT_SZ
+                              , REG_DT
+                              , REG_ID
+                              , REG_IP
+                              , UPD_DT
+                              , UPD_ID
+                              , UPD_IP
+                              , USE_YN)
+        VALUES ( #{atSeq}
+               , #{atNo}
+               , #{atPath}
+               , #{atOrigNm}
+               , #{atSaveNm}
+               , #{atSz}
+               , CURRENT_TIMESTAMP
+               , #{regId}
+               , #{regIp}
+               , CURRENT_TIMESTAMP
+               , #{updId}
+               , #{updIp}
+               , #{useYn})
+    </insert>
+
+    <update id="update" parameterType="com.kt.smp.common.domain.AttachVO">
+        /* AttachMapper.update */
+        UPDATE CM_ATTACH
+        <trim prefix="SET" prefixOverrides=",">
+            <if test='atPath != null'>
+                , AT_PATH = #{atPath}
+            </if>
+            <if test='atOrigNm != null'>
+                , AT_ORIG_NM = #{atOrigNm}
+            </if>
+            <if test='atSaveNm != null'>
+                , AT_SAVE_NM = #{atSaveNm}
+            </if>
+            <if test='atSz != null'>
+                , AT_SZ = #{atSz}
+            </if>
+            , UPD_DT = CURRENT_TIMESTAMP
+            <if test='updId != null'>
+                , UPD_ID = #{updId}
+            </if>
+            <if test='updIp != null'>
+                , UPD_IP = #{updIp}
+            </if>
+            <if test='useYn != null'>
+                , USE_YN = #{useYn}
+            </if>
+        </trim>
+        WHERE AT_SEQ = #{atSeq}
+        AND AT_NO = #{atNo}
+    </update>
+
+    <delete id="delete" parameterType="com.kt.smp.common.domain.AttachVO">
+        /* AttachMapper.delete */
+        DELETE
+        FROM CM_ATTACH
+        WHERE AT_SEQ = #{atSeq}
+        <if test='atNo != null and atNo != ""'>
+            AND AT_NO = #{atNo}
+        </if>
+    </delete>
+</mapper>

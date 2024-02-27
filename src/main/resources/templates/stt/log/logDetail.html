@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <link th:href='${smpServiceUriPrefix + "/css/audio.css"}' rel="stylesheet" />
+    <style>
+        .page {
+            overflow: auto;
+        }
+    </style>
+    <div class="infoRoot contentRoot">
+        <div class="content-header">
+            <h2>STT결과 상세</h2>
+            <div class="button-group">
+                <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--default" @click="goList">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon">keyboard_backspace</i>
+                    <span class="mdc-button__label">목록으로</span>
+                </button>
+            </div>
+        </div>
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">
+                    <div class="form-row md-size">
+                        <div class="flex-auto"><h4>콜정보</h4></div>
+                        <button id="logDeleteBtn"
+                                class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-error mdc-theme--error-bg"
+                                @click="doDeleteLog">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">delete</i>
+                            <span class="mdc-button__label">삭제</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" id="content-top">
+                    <div class="form-row-stack">
+                        <div class="form-row">
+                            <div id="callKeyInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto flex-ratio-two">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">콜키</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div id="statusInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">완결여부</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div id="serviceModelNameInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">채널구분</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div id="directionInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">TXRX</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div id="startAtInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">시작일시</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  form 영역  -->
+                </div>
+            </div>
+        </div>
+    </div>
+	<div class="card-record-play">
+		<div class="card-body">
+			<div class="wave">
+				<div class="media-area w-auto mt-4">
+					<div id="waveForm" class="mb-2"></div>
+					<div class="sound-info">
+						<div class="ftl">
+							<span class="time">
+								<i id="time-current" class="txt-green">00:00</i>
+								/
+								<i id="time-total">00:00</i>
+							</span>
+							<span>
+								<img th:src='${smpServiceUriPrefix + "/img/icon-volume.png"}' atl="볼륨" />
+							</span>
+							<input id="audioVolume" type="range" min="0" max="1" value="0.5" step="0.1" />
+						</div>
+						<div class="ftr">
+							<div>
+								<div>
+									<a href="javascript:void(0);" class="playBackRate" data-value="0.5">x0.5</a>
+									<a href="javascript:void(0);" class="playBackRate playBackRateOn"
+										data-value="1">x1.0</a>
+									<a href="javascript:void(0);" class="playBackRate" data-value="1.5">x1.5</a>
+									<a href="javascript:void(0);" class="playBackRate" data-value="2">x2.0</a>
+									<a href="javascript:void(0);" id="audioStop"><img width="53"
+											th:src='${smpServiceUriPrefix + "/img/icon-pause.png"}' alt="일시정지" /></a>
+									<a href="javascript:void(0);" id="audioPlay"><img width="53"
+											th:src='${smpServiceUriPrefix + "/img/icon-play.png"}' alt="재생" /></a>
+									<a href="javascript:void(0);" id="audioPlayLoop" class="playLoop">반복재생</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="detailRoot contentRoot">
+        <div class="content-body h-100">
+            <div class="card">
+				<div class="card-header">
+					<div class="form-row md-size">
+						<div class="flex-auto">
+							<h4>STT 결과</h4>
+						</div>
+					</div>
+				</div>
+				<!-- loading bar -->
+				<div id="log-detail-loadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate"
+					hidden>
+					<div class="mdc-linear-progress__buffering-dots"></div>
+					<div class="mdc-linear-progress__buffer"></div>
+					<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+						<span class="mdc-linear-progress__bar-inner"></span>
+					</div>
+					<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+						<span class="mdc-linear-progress__bar-inner"></span>
+					</div>
+				</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <div class="mdc-data-table">
+                            <div class="mdc-data-table__table-container">
+                                <table class="mdc-data-table__table">
+                                    <thead>
+                                    <tr class="mdc-data-table__header-row">
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            No
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            STT결과
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            신뢰도
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            음원선택
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            발화시작
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            LM학습데이터 등록
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            전사데이터 등록
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                            scope="col">
+                                            전사데이터 등록여부
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="mdc-data-table__content border-bottom" v-if="0 == logList.length">
+                                    <tr class="mdc-data-table__row is-non-clickable" aria-selected="false">
+                                        <td class="text-center" colspan="8">등록된 STT결과가 없습니다.</td>
+                                    </tr>
+                                    </tbody>
+                                    <tbody class="mdc-data-table__content border-bottom" v-if="0 < logList.length">
+                                    <tr v-for="(item, idx) in logList" :data-id="item.id"
+                                        class="mdc-data-table__row log-row is-non-clickable">
+                                        <td class="mdc-data-table__cell text-center" scope="row">{{idx + 1}}</td>
+                                        <td class="mdc-data-table__cell transcript" scope="row">{{item.transcript}}</td>
+                                        <td class="mdc-data-table__cell text-center" scope="row">{{item.cer}}</td>
+                                        <td class="mdc-data-table__cell text-center" scope="row">
+                                            <button
+                                                class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-theme--primary playWavFileBtn"
+                                                :data-id="item.id">volume_up
+                                            </button>
+                                        </td>
+                                        <td class="mdc-data-table__cell text-center" scope="row">{{item.transcriptStart}}</td>
+                                        <td class="mdc-data-table__cell text-center" scope="row">
+                                            <button
+                                                class="trainDataAddBtn mdc-button mdc-button--outlined mdc-ripple-upgraded h-75">
+                                                <span class="mdc-button__ripple"></span>
+                                                <span class="mdc-button__label">등록</span>
+                                            </button>
+                                        </td>
+                                        <td class="mdc-data-table__cell text-center" scope="row">
+                                            <button v-if="item.usedAsDictation == 'N'"
+                                                    class="dictationAddBtn mdc-button mdc-button--outlined mdc-ripple-upgraded h-75">
+                                                <span class="mdc-button__ripple"></span>
+                                                <span class="mdc-button__label">등록</span>
+                                            </button>
+                                            <button v-else="item.usedAsDictation"
+                                                    class="dictationDetailBtn mdc-button mdc-button--outlined mdc-ripple-upgraded h-75"
+                                                    :data-id="item.id">
+                                                <span class="mdc-button__ripple"></span>
+                                                <span class="mdc-button__label">바로가기</span>
+                                            </button>
+                                        </td>
+                                        <td class="mdc-data-table__cell text-center" scope="row">
+                                            <span>{{item.usedAsDictation}}</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="trainDataAddDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description" tabindex="-1">
+        <div class="mdc-dialog__scrim"></div>
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <div class="mdc-dialog__header">
+                    <h2 class="mdc-dialog__title">LM학습데이터 등록</h2>
+                    <button class="mdc-icon-button material-icons close-button" tabindex="-1">
+                        close
+                    </button>
+                </div>
+                <!-- loading bar -->
+                <div id="trainDataAddDialogLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+                    <div class="mdc-linear-progress__buffering-dots"></div>
+                    <div class="mdc-linear-progress__buffer"></div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                </div>
+                <section class="mdc-dialog__content form-row-stack">
+                    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+                        *모든 항목은 필수입력사항입니다.
+                    </p>
+                    <div class="form-row">
+                        <div id="newTrainDataTranscriptInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >STT결과</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row multiline-align-top">
+                        <div id="newTrainDataContentInput" class="mdc-text-field text-field mdc-text-field--fullwidth mdc-text-field--no-label mdc-text-field--textarea">
+                            <textarea class="mdc-text-field__input" rows="5" cols="50"></textarea>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >학습데이터(일반)</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div id="newTrainDataWeightInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                            <input type="number" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >가중치</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div id="newTrainDataServiceModelSelector" class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">서비스모델</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-deprecated-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div id="newTrainDataDescriptionInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >설명</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <footer class="mdc-dialog__actions">
+                    <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg close-button">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">취소</span>
+                    </button>
+                    <button id="addTrainDataBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">등록</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+    <input type="hidden" readonly id="projectCode" th:value="${projectCode}">
+
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript" th:src='${smpServiceUriPrefix + "/js/wavesurferV2.js"}'></script>
+    <script type="text/javascript">
+        (function () {
+
+            const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+            const projectCode = $("#projectCode").val();
+            const DICTATION_DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/dictation/{dictationId}";
+
+            const LABEL = {
+                message: {
+                    // 공통
+                    API_ERROR_TITLE: "실패",
+                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+                    NOT_EXIST_LOG_ID: "존재하지 않는 STT결과 입니다.",
+
+                    DELETE_LOG_CONFIRM: "STT결과를 삭제하시겠습니까?",
+						
+					// wavesurfer
+					NOT_EXIST_AUDIO_FILE: "음원 파일이 존재하지 않습니다.",
+					
+                    // LM학습데이터 등록
+                    TRAIN_DATA_ADD_CONFIRM: "LM학습데이터를 등록하시겠습니까?",
+                    TRAIN_DATA_ADD_TITLE: "LM학습데이터 등록",
+                    TRAIN_DATA_ADD_MESSAGE: "LM학습데이터가 등록되었습니다.",
+                    TRAIN_DATA_ADDN_FAIL: "LM학습데이터 등록에 실패하였습니다. 입력된 정보를 확인 후 다시 등록해 주세요.",
+
+                }
+            };
+
+            const wavesurfer = WaveSurfer.create({
+                container: "#waveForm",
+                height: 60,
+                waveColor: '#14BBB3',
+                normalize: true,
+                autoplay: true,
+                fillParent: true,
+                xhr: {
+                    requestHeaders: [
+                        {
+                            key: 'x-smp-project-code',
+                            value: projectCode
+                        }
+                    ]
+                }
+            });
+
+            new Vue({
+                el: ".infoRoot",
+                data: {
+                    LABEL: LABEL,
+                    moment: moment,
+                    fn: fn,
+                    serviceUrlPrefix: serviceUrlPrefix,
+
+                    // 로그 정보
+                    callKey: null,
+                    logList: []
+
+                },
+                created: function () {
+                    this.initPage(location.href);
+                },
+                mounted: function () {
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						$("#audioStop").click();	// 화면 바뀔 때 오디오를 꺼줍니다.
+                    });
+					
+					$("#content-top").append($(".card-record-play"));
+					
+                    var self = this;
+
+                    if (_.isEmpty(this.callKey)) {
+                        toastr.error(LABEL.message.NOT_EXIST_LOG_ID, LABEL.message.API_ERROR_TITLE);
+                    } else {
+                        this.getLog();
+                    }
+                },
+                methods: {
+
+                    /**
+                     * 초기 url을 기준으로 화면 내용 설정
+                     */
+                    initPage: function (href) {
+                        var self = this;
+                        // 현 URL에서 groupId를 추출함
+                        this.callKey = href.slice(href.lastIndexOf('/')+1);
+                    },
+
+                    /**
+                     * 구글 Material component 초기화
+                     */
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0));
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            var $select = mdc.select.MDCSelect.attachTo(el);
+                            var $el = $(el);
+                            var value = $el.attr('data-value');
+                            // 초기값 설정
+                            _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+                            $el.data('select', $select);
+                        }
+                    },
+
+                    getLog: function() {
+                        var self = this;
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/log/" + this.callKey,
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if (response.code === 200) {
+                                    self.$nextTick(function() {
+                                        self.initMaterialUx();
+                                        self.renderDatas(response.object);
+                                        detailRoot.renderLogList(response.object);
+                                    });
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+
+                    /**
+					* 입력된 정보를 기준으로 화면에 데이터를 출력한다.
+					* NOTE :: Google Material Input을 자연스럽게 사용하기 위해서 직접 찾아서 데이터를 제공
+					*/
+                    renderDatas: function (log) {
+
+                        var self = this;
+                        self.logList = log.logList;
+                        var $callKeyInput = $('#callKeyInput');
+                        var $statusInput = $('#statusInput');
+                        var $serviceModelNameInput = $("#serviceModelNameInput");
+                        var $directionInput = $("#directionInput");
+                        var $startAtInput = $("#startAtInput");
+
+                        // 로그 삭제 버튼 클릭 처리
+                        $("#logDeleteBtn").unbind('click').bind('click', function() {
+
+                        });
+
+                        //초기값 설정
+                        $callKeyInput.data('textField').value = log.callKey;
+                        $statusInput.data('textField').value = log.status;
+                        $serviceModelNameInput.data('textField').value = log.serviceModelName;
+                        $directionInput.data('textField').value = log.direction;
+                        $startAtInput.data('textField').value = moment(log.startAt).format("YYYY-MM-DD HH:mm:ss");
+
+                    },
+
+                    /**
+                     * 리스트 화면으로 돌아간다.
+                     * NOTE :: history back이 아닌 리스트로 돌아감.
+                     */
+                    goList: function () {
+                        history.back();
+                    },
+
+                    /**
+                     * 로그를 삭제한다.
+                     */
+                    doDeleteLog: function() {
+                        var self = this;
+
+                        if (!confirm("STT결과를 삭제하시겠습니까?")) {
+                            return ;
+                        }
+
+                        var params = {
+                            targetCallKeyList : [this.callKey]
+                        };
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/log/delete",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    toastr.success("STT결과 삭제가 완료했습니다.");
+                                    self.goList();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    }
+                }
+            });
+            
+            
+            const detailRoot = new Vue({
+                el: ".detailRoot",
+                data: {
+                    LABEL: LABEL,
+                    moment: moment,
+                    fn: fn,
+                    serviceUrlPrefix: serviceUrlPrefix,
+                    wavesurfer: wavesurfer,
+                    serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+
+                    // 로그 정보
+                    callKey: null,
+
+                    // STT결과 목록
+                    logList: [],
+
+                    // 새로운 LM학습데이터
+                    newTrainData: {
+                        content: "",
+                        weight: "1",
+                        description: "",
+                        serviceCode: ""
+                    },
+
+                    // LM학습데이터 추가 팝업 Dialog
+                    trainDataAddDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#trainDataAddDialog')),
+					logDetailLoadingBar: $("#log-detail-loadingBar"),
+
+                    // etc
+                    currentXhr: [],			// 모달 내 XHR 중단할 때 사용
+                    checkXhrAbort: false,	// 모달 내에서 등록/저장 등 업로드 시엔 컨펌 추가
+                    currentDialog: null     // vue data에서 정의한 모달의 key. ( :string)
+                },
+                created: function () {
+                    this.initPage(location.href);
+                },
+                mounted: function () {
+
+                    var self = this;
+
+                    this.trainDataAddDialog.scrimClickAction = '';
+
+                    // 경로 팝업 show 후처리
+                    this.trainDataAddDialog.listen('MDCDialog:opened', function() {
+                        self.showAfterTrainDataAddDialog($(self.trainDataAddDialog.root));
+                    });
+						
+                    this.initMaterialUx();
+                    this.initWavesurfer();
+
+                    // 모달 닫기 및 xhr 종료 이벤트 바인딩
+                    $('.close-button').off('click').on('click', function () {
+                      self.onCloseDialog();
+                    })
+                    $('.mdc-dialog').on('keydown', function (e) {
+                      if (e.key === 'Escape') self.onCloseDialog();
+                    })
+                },
+                methods: {
+
+                    initPage: function (href) {
+                        var self = this;
+                        // 현 URL에서 groupId를 추출함
+                        this.callKey = href.slice(href.lastIndexOf('/')+1);
+                    },
+
+                    /**
+                     * 구글 Material component 초기화
+                     */
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0));
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            var $select = mdc.select.MDCSelect.attachTo(el);
+                            var $el = $(el);
+                            var value = $el.attr('data-value');
+                            // 초기값 설정
+                            _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+                            $el.data('select', $select);
+                        }
+                    },
+                    initWavesurfer: function() {
+
+                        var self = this;
+                        this.wavesurfer.on('ready', function() {
+                            $("#time-current").text(self.toHHMMSS(self.wavesurfer.getCurrentTime()));
+                            $("#time-total").text(self.toHHMMSS(self.wavesurfer.getDuration()));
+                        });
+						
+                        this.wavesurfer.on('audioprocess', function() {
+                            $("#time-current").text(self.toHHMMSS(self.wavesurfer.getCurrentTime()));
+                        });
+
+                        this.wavesurfer.on('finish', function() {
+                            self.wavesurfer.seekTo(0);
+                            if(self.playLoop) {
+                                self.wavesurfer.play();
+                            }
+                        });
+
+                        this.wavesurfer.on('seeking', function(progress) {
+                            var progressInSecond = self.wavesurfer.getDuration() * progress;
+                        });
+                        
+                        this.wavesurfer.on('error', function(error) {
+                            toastr.error(LABEL.message.NOT_EXIST_AUDIO_FILE, LABEL.message.API_ERROR_TITLE);
+                        });
+
+                        $("#audioPlay").click(function() {
+                            self.wavesurfer.play();
+                        });
+
+                        $("#audioStop").click(function() {
+                            self.wavesurfer.pause();
+                        });
+
+                        $("#audioVolume").on('input', function() {
+                            self.wavesurfer.setVolume($("#audioVolume").val());
+                        });
+
+                        $("#audioPlayLoop").click(function() {
+                            self.playLoop = !self.playLoop;
+
+                            if(self.playLoop) {
+                                $("#audioPlayLoop").addClass("playLoopOn");
+                            }
+                            else {
+                                $("#audioPlayLoop").removeClass("playLoopOn");
+                            }
+                        });
+
+                        $(".playBackRate").click(function(event) {
+                            var rate = event.target.getAttribute("data-value");
+                            $(".playBackRate").removeClass('playBackRateOn');
+                            event.target.classList.add('playBackRateOn');
+                            self.wavesurfer.setPlaybackRate(rate);
+                        });
+
+                    },
+                    loadWavFile: async function(logId) {
+                        var url = this.serviceUrlPrefix + "/api/log/" + logId + "/wav";
+						try {
+							this.setDialogLoading(this.logDetailLoadingBar, true);
+							await this.wavesurfer.load(url);
+						} catch(e) {
+							this.wavesurfer.empty();
+							toastr.error(LABEL.message.NOT_EXIST_AUDIO_FILE, LABEL.message.API_ERROR_TITLE);
+						} finally {
+							this.setDialogLoading(this.logDetailLoadingBar, false);
+						}
+                    },
+                    toHHMMSS: function(param) {
+                        var sec_num = parseInt(param, 10);
+                        var hours   = Math.floor(sec_num / 3600);
+                        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+                        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+                        if (hours   < 10) {hours   = "0"+hours;}
+                        if (minutes < 10) {minutes = "0"+minutes;}
+                        if (seconds < 10) {seconds = "0"+seconds;}
+                        return hours+':'+minutes+':'+seconds;
+                    },
+                    getLogList: function() {
+
+                        var self = this;
+
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/log/" + this.callKey,
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if (response.code === 200) {
+                                    self.$nextTick(function() {
+                                        self.initMaterialUx();
+                                        self.renderLogList(response.object);
+                                    });
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 입력된 정보를 기준으로 화면에 데이터를 출력한다.
+                     * NOTE :: Google Material Input을 자연스럽게 사용하기 위해서 직접 찾아서 데이터를 제공
+                     */
+                    renderLogList: function (log) {
+
+                        this.logList = log.logList || [];
+                        var self = this;
+
+                        // google switch 버튼을 초기화
+                        this.$nextTick(function () {
+
+                            $(".playWavFileBtn").unbind('click').bind('click', function(ev) {
+
+                                var logId = ev.currentTarget.dataset.id;
+                                self.loadWavFile(logId);
+                            });
+
+                            $(".trainDataAddBtn").unbind('click').bind('click', function(ev) {
+
+                                var tr = $(ev.target).closest("tr");
+                                var transcript = $(tr).children(".transcript").text();
+                                self.showBeforeTrainDataAddDialog(transcript, $(self.trainDataAddDialog.root));
+                                self.trainDataAddDialog.open();
+                                self.currentDialog = 'trainDataAddDialog';
+                            });
+
+                            $(".dictationAddBtn").unbind("click").bind("click", function(ev) {
+
+                                var tr = $(ev.target).closest("tr");
+                                var logId = $(tr).attr('data-id');
+                                self.addDictation(logId);
+                            });
+
+                            $(".dictationDetailBtn").unbind("click").bind("click", function(ev) {
+                                const sttLogId = ev.currentTarget.dataset.id;
+                                self.goDictationDetailBySttLogId(sttLogId);
+                            });
+                        });
+                    },
+					goDictationDetailBySttLogId: function(sttLogId) {
+						$.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/dictation/id?sttLogId=" + sttLogId,
+                            contentType: "application/json",
+                            dataType: "json",
+                        })
+                        .done((response)=>{
+							window.index.movePage(DICTATION_DETAIL_PAGE_SERVICE_URI.replace("{dictationId}", response.object));
+						});
+					},
+                    /**
+                     * 학습데이터 추가 팝업 초기화
+                     */
+                    showBeforeTrainDataAddDialog: function (transcript, $root) {
+
+                        var $transcriptInput = $root.find("#newTrainDataTranscriptInput");
+                        var $contentInput = $root.find("#newTrainDataContentInput");
+                        var $weightInput = $root.find("#newTrainDataWeightInput");
+                        var $serviceModelSelector = $root.find("#newTrainDataServiceModelSelector");
+                        var $descriptionInput = $root.find("#newTrainDataDescriptionInput");
+                        var $loadingBar = $root.find("#trainDataAddDialogLoadingBar");
+                        var $addBtn = $root.find("#addTrainDataBtn");
+
+                        $transcriptInput.data('textField').value = transcript;
+                        $contentInput.data('textField').value =  "";
+                        $weightInput.data('textField').value = 1;
+                        $descriptionInput.data('textField').value = "";
+                        $serviceModelSelector.data('select').value = "";
+
+                        $loadingBar.css('opacity', 0);
+                        $addBtn.prop('disabled', true);
+
+                        this.newTrainData = {
+                            content: "",
+                            weight: "1",
+                            description: "",
+                            serviceCode: "",
+                        };
+
+                        this.initServiceModelSelector();
+                    },
+
+                    /**
+                     * 학습데이터 추가 팝업 이벤트 바인딩 & 값 설정
+                     */
+                    showAfterTrainDataAddDialog: function ($root) {
+
+                        var self = this;
+                        var $contentInput = $root.find("#newTrainDataContentInput");
+                        var $weightInput = $root.find("#newTrainDataWeightInput");
+                        var $serviceModelSelector = $root.find("#newTrainDataServiceModelSelector");
+                        var $descriptionInput = $root.find("#newTrainDataDescriptionInput");
+                        var $loadingBar = $root.find("#trainDataAddDialogLoadingBar");
+                        var $addBtn = $root.find("#addTrainDataBtn");
+
+                        var registrationActiveFunc = function () {
+                            if(!_.isEmpty(self.newTrainData.content) && _.isEqual(self.newTrainData.content, $.trim($contentInput.data('textField').value)) &&
+                                !_.isEmpty(self.newTrainData.weight) && _.isEqual(self.newTrainData.weight, $.trim($weightInput.data('textField').value)) &&
+                                !_.isEmpty(self.newTrainData.serviceCode) && _.isEqual(self.newTrainData.serviceCode, $.trim($serviceModelSelector.data('select').value))) {
+                                $addBtn.prop('disabled', false);
+                            } else {
+                                $addBtn.prop('disabled', true);
+                            }
+                        };
+
+                        $serviceModelSelector.data('select').unlisten("MDCSelect:change");
+                        $serviceModelSelector.data('select').listen('MDCSelect:change', function(ev) {
+                            self.newTrainData.serviceCode = ev.detail.value;
+                            registrationActiveFunc();
+                        });
+
+                        $contentInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+                            self.newTrainData.content = $contentInput.data('textField').value;
+                            registrationActiveFunc();
+                        });
+
+                        $weightInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+                            self.newTrainData.weight = $weightInput.data('textField').value;
+                            registrationActiveFunc();
+                        });
+
+                        $descriptionInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+                            self.newTrainData.description = $descriptionInput.data('textField').value;
+                        });
+
+                        $addBtn.unbind('click').bind('click', function () {
+                            if (!confirm(LABEL.message.TRAIN_DATA_ADD_CONFIRM)) {
+                                return ;
+                            }
+
+                            self.addTrainData({
+                                content: self.newTrainData.content,
+                                weight: self.newTrainData.weight,
+                                serviceCode: self.newTrainData.serviceCode,
+                                description: self.newTrainData.description
+                            }, $loadingBar, function (isError, data) {
+                                if (isError) {
+                                    toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                                } else if(data+"" === 'true') {
+                                    toastr.success(LABEL.message.TRAIN_DATA_ADD_MESSAGE, LABEL.message.TRAIN_DATA_ADD_TITLE);
+                                    self.trainDataAddDialog.close();
+                                }
+                            });
+                        });
+                    },
+
+                    initServiceModelSelector: function() {
+                        var serviceModelListHtml = this.getDefaultListElement();
+                        for(var serviceModel of this.serviceModelList) {
+                            serviceModelListHtml += this.getListElement(serviceModel.serviceModelName, serviceModel.serviceCode);
+                        }
+
+                        $("#newTrainDataServiceModelSelector ul").html(serviceModelListHtml);
+                        this.initSelector("#newTrainDataServiceModelSelector");
+                    },
+
+                    initSelector: function(selectorId) {
+
+                        const $selector = $(selectorId)[0];
+                        $($selector).data('select').destroy();
+                        const newSelector = new mdc.select.MDCSelect($selector);
+                        $($selector).data('select', newSelector);
+
+                    },
+
+                    getListElement: function(text, value) {
+                        var element = '<li class="mdc-deprecated-list-item" data-value="{value}"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">{text}</span></li>'
+                        element = element.replace('{text}', text);
+                        element = element.replace('{value}', value);
+
+                        return element;
+                    },
+
+                    getDefaultListElement: function() {
+                        return '<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value=" " aria-selected="true"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">선택</span></li>'
+                    },
+
+                    addTrainData: function(params, $loadingBar, cbFunc) {
+                        this.setDialogLoading($loadingBar, true);
+                        this.checkXhrAbort = true;
+                        this.dispatchProcessing('process');
+                        const self = this;
+                        let apiUrl = this.serviceUrlPrefix + "/api/log/trainData/save";
+                        let xhr = $.ajax({
+                            method: "POST",
+                            url: apiUrl,
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                self.setDialogLoading($loadingBar, false);
+                                // 배열에서 해당 xhr 제거 및 checkXhrAbort 초기화
+                                let result = self.currentXhr.find(obj => obj.id === apiUrl);
+                                if (result) {
+                                    let index = self.currentXhr.indexOf(result);
+                                    self.currentXhr.splice(index, 1);
+                                }
+                                self.checkXhrAbort = false;
+                                self.dispatchProcessing('done');
+                            }
+                        });
+                        // abort 적용을 위해 xhr 객체에 id를 추가해 배열에 push
+                        let result = {id: apiUrl, xhr};
+                        self.currentXhr.push(result);
+                    },
+
+					addDictation: function (logId) {
+
+						if (!confirm("전사데이터를 등록하시겠습니까?")) {
+							return;
+						}
+
+						var self = this;
+
+						$.ajax({
+							method: "POST",
+							url: this.serviceUrlPrefix + "/api/log/" + logId + "/dictation/save",
+							contentType: "application/json",
+							dataType: "json",
+							success: function (response, textStatus, jqXHR) {
+
+								if (response.code === 200) {
+									self.getLogList();
+									toastr.success("전사데이터 등록이 완료되었습니다.");
+									alert("[바로가기]버튼을 클릭하여 전사데이터 화면에서 확인하세요.");
+									return;
+								}
+
+								toastr.error(response.message);
+							},
+							error: function (jqXHR, textStatus, errorThrown) {
+								toastr.error("전사데이터 등록에 실패했습니다");
+							}
+						});
+					},
+					setDialogLoading: function (loadingBarJqueryEl, option) {
+						if (option == true) {
+							// loadingBarJqueryEl.show();
+							loadingBarJqueryEl.css('opacity', 1);
+							return;
+						}
+						// loadingBarJqueryEl.hide();
+                        loadingBarJqueryEl.css('opacity', 0);
+					},
+
+                    /**
+                     * 모달 닫을 때 데이터 요청/전송 취소
+                     */
+                    onCloseDialog: function () {
+                        const self = this;
+                        if (self.currentXhr.length !== 0) {
+                            if (self.checkXhrAbort && !confirm('취소 시 저장 및 업로드가 중단됩니다.')) return;
+                            [...self.currentXhr].forEach(xhrItem => xhrItem.xhr.abort())
+                            self.dispatchProcessing('done');
+                        }
+                        if (self.currentDialog) {
+                            self[self.currentDialog].close();
+                            self.currentDialog = null;
+                        }
+                    },
+
+                    /**
+                     *
+                     * @param state: 'process' || 'done'
+                     * 디스패치 시 모달 본문에 유저 동작 방지 적용 및 닫기/취소를 제외한 버튼 비활성화
+                     */
+                    dispatchProcessing: function (state) {
+                        let $modalSurface;
+                        let $modalBtn;
+                        if (state === 'process') {
+                            // 닫기/취소를 제외한 버튼 선택
+                            $modalBtn = $('.mdc-dialog--open .mdc-dialog__surface .mdc-button').not('.close-button');
+                            // 현재 열려있는 모달 선택
+                            $modalSurface = $('.mdc-dialog--open .mdc-dialog__surface');
+                            $modalBtn.prop('disabled', true);
+                            $modalSurface.addClass('is-processing');
+                        } else if (state === 'done') {
+                            // 진행 중인 모달 선택.
+                            // 모달 닫는게 먼저 실행되면 .mdc-dialog--open으로 선택 불가
+                            $modalBtn = $('.mdc-dialog__surface.is-processing .mdc-button').not('.close-button');
+                            $modalSurface = $('.mdc-dialog__surface.is-processing');
+                            $modalBtn.prop('disabled', false);
+                            $modalSurface.removeClass('is-processing');
+                        }
+                    },
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>

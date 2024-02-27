@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <div id="errorWrapper" class="w-100 h-100">
+        <h1>403 FORBIDDEN</h1>
+        <div class="message">
+            <h1>Access to this page is restricted</h1>
+            <p>Please check with the site admin if you believe this is a mistake.</p>
+        </div>
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+
+</th:block>
+</html>

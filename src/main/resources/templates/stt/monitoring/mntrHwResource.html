@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+	<style>
+		
+		@keyframes blink-overload {
+			0%, 100% {
+				border-color: transparent;
+				background-color: transparent;
+			}
+			50% {
+				background-color:rgba(255, 99, 71, 0.1);
+			}
+		}
+		
+		@-webkit-keyframes myAnimation {
+			0%, 100% {
+				border-color: transparent;
+				background-color: transparent;
+			}
+			50% {
+				background-color:rgba(255, 99, 71, 0.1);
+			}
+		}
+		
+		.card {
+			overflow: scroll !important;
+		}
+		.overload {
+			animation: blink-overload 1.5s step-end infinite;
+			-webkit-animation: blink-overload 1.5s step-end infinite;
+		}
+	</style>
+	
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>HW 리소스</h2>
+        </div>
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">
+                    <!-- >>> 검색 바 -->
+                    <div class="form-row md-size">
+                        <!-- >> 검색 단위 선택 -->
+                        <div class="">
+                            <div class="mdc-form-field">
+                                <span>검색 단위</span>
+                            </div>
+                            <div class="mdc-form-field">
+                                <div class="mdc-radio">
+                                    <input class="mdc-radio__native-control" type="radio" id="radio-search-unit-raw"
+                                           name="searchUnit" checked @click="onClickSearchUnit"
+                                           value="RAW">
+                                    <div class="mdc-radio__background">
+                                        <div class="mdc-radio__outer-circle"></div>
+                                        <div class="mdc-radio__inner-circle"></div>
+                                    </div>
+                                    <div class="mdc-radio__ripple"></div>
+                                    <div class="mdc-radio__focus-ring"></div>
+                                </div>
+                                <label for="radio-search-unit-raw">Raw</label>
+                            </div>
+                            <div class="mdc-form-field">
+                                <div class="mdc-radio">
+                                    <input class="mdc-radio__native-control" type="radio" id="radio-search-unit-hour"
+                                           name="searchUnit" @click="onClickSearchUnit"
+                                           value="HOUR">
+                                    <div class="mdc-radio__background">
+                                        <div class="mdc-radio__outer-circle"></div>
+                                        <div class="mdc-radio__inner-circle"></div>
+                                    </div>
+                                    <div class="mdc-radio__ripple"></div>
+                                    <div class="mdc-radio__focus-ring"></div>
+                                </div>
+                                <label for="radio-search-unit-hour">시간</label>
+                            </div>
+                            <div class="mdc-form-field">
+                                <div class="mdc-radio">
+                                    <input class="mdc-radio__native-control" type="radio" id="radio-search-unit-day"
+                                           name="searchUnit" @click="onClickSearchUnit"
+                                           value="DAY">
+                                    <div class="mdc-radio__background">
+                                        <div class="mdc-radio__outer-circle"></div>
+                                        <div class="mdc-radio__inner-circle"></div>
+                                    </div>
+                                    <div class="mdc-radio__ripple"></div>
+                                    <div class="mdc-radio__focus-ring"></div>
+                                </div>
+                                <label for="radio-search-unit-day">일</label>
+                            </div>
+                            <div class="mdc-form-field">
+                                <div class="mdc-radio">
+                                    <input class="mdc-radio__native-control" type="radio" id="radio-search-unit-month"
+                                           name="searchUnit" @click="onClickSearchUnit"
+                                           value="MONTH">
+                                    <div class="mdc-radio__background">
+                                        <div class="mdc-radio__outer-circle"></div>
+                                        <div class="mdc-radio__inner-circle"></div>
+                                    </div>
+                                    <div class="mdc-radio__ripple"></div>
+                                    <div class="mdc-radio__focus-ring"></div>
+                                </div>
+                                <label for="radio-search-unit-month">월</label>
+                            </div>
+                        </div>
+                        <!-- << 검색 단위 선택 -->
+                        <!-- >> 검색 기간 -->
+                        <div class="form-row flex-auto">
+                            <div class="flex-auto flex-ratio-two">
+                                <div id="start-date-mdc"
+                                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.startSearchDate" disabled="true"/>
+									<div class="mdc-notched-outline mdc-notched-outline--upgraded">                                	
+									<div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label">통계 시작일</label>
+                                    </div>
+									<div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto">
+                                <div id="start-time-mdc"
+                                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.startSearchTime" disabled="true"
+                                    />
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+										<div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                    		<label class="mdc-floating-label">통계 시작 시간</label>
+                                    	</div>
+                                    	<div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto flex-ratio-two">
+                                <div id="end-date-mdc" class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.endSearchDate" disabled="true"
+                                    />
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                    		<label class="mdc-floating-label">통계 종료일</label>
+                                    	</div>
+                                    	<div class="mdc-notched-outline__trailing"></div>
+                                 	</div>
+                                </div>
+                            </div>
+                            <div class="flex-auto">
+                                <div id="end-time-mdc"
+                                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                     <input type="text" class="mdc-text-field__input ps-3"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           :value="searchCondition.endSearchTime" disabled="true"
+                                    />
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+										<div class="mdc-notched-outline__leading"></div>
+										 <div class="mdc-notched-outline__notch">
+                                    		<label class="mdc-floating-label">통계 종료 시간</label>
+                                    	</div>
+                                    	<div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- << 검색 기간 -->
+                        <!-- >> 정렬 기준 선택 -->
+                        <div class="mdc-select mdc-select--outlined mdc-select--no-label">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">정렬 기준</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-deprecated-list">
+                                    <li v-for="sp in orderTypes" class="mdc-deprecated-list-item"
+                                        :data-value="sp.key"
+                                        @click="searchCondition.orderType = sp.key"
+                                        :class="{'mdc-deprecated-list-item--selected': searchCondition.orderType == sp.key} "
+                                        :aria-selected="searchCondition.orderType == sp.key ? 'true' : 'false'">
+
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">{{ sp.value }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- << 정렬 기준 선택 -->
+
+                        <!--    검색 버튼    -->
+                        <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded"
+                                @click="search(false)">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon me-1">search</i>
+                            <span class="mdc-button__label">검색</span>
+                        </button>
+                        <!--    검색 버튼    -->
+                    </div>
+                    <!-- <<< 검색 바 -->
+                </div>
+                <div class="chart_area">
+                    <div id="chartOption" class="form-row" style="height: 2.5rem !important; justify-content: end; margin: 20px 0; display: none;">
+						<!-- <<< 그래프 모양 선택 -->
+						<div id="chartTypeSelect" class="mdc-select mdc-select--outlined mdc-select--no-label w-10">
+	                        <div class="mdc-select__anchor">
+	                            <div class="mdc-notched-outline">
+	                                <span class="mdc-notched-outline__leading"></span>
+	                                <div class="mdc-notched-outline__notch">
+	                                    <label class="mdc-floating-label">차트 타입</label>
+	                                </div>
+	                                <span class="mdc-notched-outline__trailing"></span>
+	                            </div>
+	                            <span class="mdc-select__selected-text-container overflow-hidden">
+				            		<span class="mdc-select__selected-text"></span>
+				        		</span>
+	                            <span class="mdc-select__dropdown-icon"></span>
+	                        </div>
+	                        <div class="mdc-menu-surface--fixed" style="z-index: 9999">
+	                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+	                                <ul class="mdc-deprecated-list">
+	                                    <li v-for="type in chartTypes" class="mdc-deprecated-list-item"
+	                                        :data-value="type.id"
+	                                        @click="chartType = type.id"
+	                                        :class="{'mdc-deprecated-list-item--selected': chartType == type.id}"
+	                                        :aria-selected="chartType == type.id? 'true' : 'false'">
+	                                        <span class="mdc-deprecated-list-item__ripple"></span>
+	                                        <span class="mdc-deprecated-list-item__text">{{type.name}}</span>
+	                                    </li>
+	                                </ul>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <!-- <<< 임계선 색상 선택 -->
+						<div id="thresholdLineColor" class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--label-floating w-10" style="width: 6vw; margin: 0 15px 0 10px;">
+							<input type="color" aria-describedby="text-field-outlined-helper-text" value="#ff6384" class="mdc-text-field__input p-1" style="cursor: pointer;" @change="thresholdColorChange"/>
+							<div class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+								<div class="mdc-notched-outline__leading"></div>
+								<div class="mdc-notched-outline__notch" style="width: 50px;">
+									<label class="mdc-floating-label mdc-floating-label--float-above">임계선 색상</label>
+								</div>
+								<div class="mdc-notched-outline__trailing"></div>
+							</div>
+						</div>
+					</div>
+                    <div style="position: relative;" class="chart-container">
+                        <div id="noDataTextField"
+                             style="text-align: center; width: 100%; height: 100%; position: absolute; left: 0; top: 38%; display: none;">
+                            <p>데이터가 없습니다.</p>
+                        </div>
+                        <div v-for="(serverName, index) in serverList">
+                        	<div style="display: flex; justify-content: space-evenly;">
+								<div style="display: flex; align-items: center; font-size: 13px; font-weight: 600;">
+									{{ serverName }}
+								</div>
+								<div class="canvas-wrap" :id="'canvas-wrap-' + serverName + '-cpu'" style="position: relative; padding: 5px; height: 25vh; width: 25vw; border: 3px solid transparent;">
+	                            </div>
+	                            <div class="canvas-wrap" :id="'canvas-wrap-' + serverName + '-memory'" style="position: relative; padding: 5px; height: 25vh; width: 25vw; border: 3px solid transparent;">
+	                            </div>
+	                            <div class="canvas-wrap" :id="'canvas-wrap-' + serverName + '-storage'" style="position: relative; padding: 5px; height: 25vh; width: 25vw; border: 3px solid transparent;">
+	                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-controls form-row md-size">
+                        <div class="table-result-info flex-auto">
+                            <h4>검색결과 : <span>{{ pageInfo.total }}</span>건</h4>
+                        </div>
+                        <!-- >>> 페이지 사이즈 조절 -->
+                        <div class="mdc-select mdc-select--outlined mdc-select--no-label">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">레코드 수</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-deprecated-list">
+                                    <li v-for="ps in pageSizes" class="mdc-deprecated-list-item"
+                                        :data-value="ps"
+                                        @click="searchCondition.pageSize = ps; search(true); currentPage = 1;"
+                                        :class="{'mdc-deprecated-list-item--selected': searchCondition.pageSize == ps} "
+                                        :aria-selected="searchCondition.pageSize == ps ? 'true' : 'false'">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">{{ ps }}개</span>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- <<< 페이지 사이즈 조절 -->
+                    </div>
+			
+                    <!-- loading bar -->
+                    <div v-show="searching" role="progressbar"
+                         class="mdc-linear-progress mdc-linear-progress--indeterminate"
+                         style="opacity: 1;">
+                        <div class="mdc-linear-progress__buffering-dots"></div>
+                        <div class="mdc-linear-progress__buffer"></div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                    </div>
+
+                    <div class="table-container min-h-250px">
+                        <div class="mdc-data-table">
+                            <div class="mdc-data-table__table-container">
+                                <table class="mdc-data-table__table">
+                                    <thead>
+                                    <tr>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            일시
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            서버명
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            CPU 사용율
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            maxMemorySize
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            freeMemorySize
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            maxAppStorageSize
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            freeAppStorageSize
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            네트워크 bps</small>
+                                        </th>
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader">
+                                            네트워크 pps</small>
+                                        </th>
+                                    </tr>
+
+                                    </thead>
+                                    <tbody class="mdc-data-table__content">
+                                    <tr v-if="searchResults.length == 0" class="mdc-data-table__row is-non-clickable"
+                                        aria-selected="false">
+                                        <td class="mdc-data-table__cell text-center" colspan="9">
+                                            검색된 결과가 없습니다.
+                                        </td>
+                                    </tr>
+                                    <tr v-else v-for="(row, i) in searchResults"
+                                        class="detail-service-row mdc-data-table__row is-non-clickable"
+                                        aria-selected="false">
+                                        <td class="mdc-data-table__cell text-center">{{ row.lastCheckTime }}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.serverName }}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.cpuUsed }}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.maxMemorySize}}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.freeMemorySize }}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.maxAppStorageSize }}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.freeAppStorageSize }}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.bps }}</td>
+                                        <td class="mdc-data-table__cell text-center">{{ row.pps }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- pagination -->
+                    <div class="table-pagination mdc-data-table__pagination">
+                        <div class="mdc-data-table__pagination-trailing mdc-chip-set mdc-chip-set--choice">
+                            <div class="mdc-data-table__pagination-navigation">
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-first-page="true" @click="gotoPage(1)">
+                                    <div class="mdc-button__icon">first_page</div>
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-prev-page="true" @click="gotoPage(currentPage - 1)">
+                                    <div class="mdc-button__icon">chevron_left</div>
+                                </button>
+
+                                <button v-for="(paging, index) in pages"
+                                        class="mdc-chip mdc-data-table__pagination-button fs-6 bg-transparent"
+                                        :class="{ 'mdc-chip--selected' : paging == currentPage }"
+                                        @click="gotoPage(paging)">
+                                    {{ paging }}
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-next-page="true" @click="gotoPage(currentPage + 1)">
+                                    <div class="mdc-button__icon">chevron_right</div>
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-last-page="true" @click="gotoPage(pageInfo.pages)">
+                                    <div class="mdc-button__icon">last_page</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+    <input type="hidden" readonly id="defaultPageSize" th:value="${defaultPageSize}">
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript" th:src='${smpServiceUriPrefix + "/js/chartjsMomentAdapter.js"}'></script>
+	<script type="text/javascript" th:src='${smpServiceUriPrefix + "/js/chartjs-plugin-annotation/dist/chartjs-plugin-annotation.min.js"}'></script>
+    <script type="text/javascript">
+        (function () {
+			let REAL_TIME_INTERVAL = 10000;
+            var siteCode = "[[${siteCode}]]";
+            var projectCode = "[[${projectCode}]]";
+			var LABEL = {
+				resourceList : ["cpu", "memory", "storage"],
+                graphAxisUnit: {
+					MONTH: "yyyy-MM",
+					HOUR: "yyyy-MM-DD HH",
+					DAY: "yyyy-MM-DD",
+					MINUTE: "yyyy-MM-DD HH:mm",
+					SECOND: "yyyy-MM-DD HH:mm:ss",
+					
+				},
+				colorList : [
+					"rgba(0, 153, 204, 0.7)",
+			        "rgba(51, 204, 51, 0.7)",
+			        "rgba(3, 4, 94, 0.7)",
+				],
+				dateformat: {
+					RAW: "yyyy-MM-DD HH:mm:ss",
+					MONTH: "yyyy-MM",
+					HOUR: "yyyy-MM-DD HH",
+					DAY: "yyyy-MM-DD",
+				}
+			}
+            var sttobj = {
+
+                // 요청통계
+                getRequestStatSearchObj: function () {
+                    return JSON.parse(JSON.stringify({
+                        "pageSize": $("#defaultPageSize").val(), // 페이지 수 기본값
+                        "serverId": 0,
+                        "serverName" : "",
+                        "searchUnit": "RAW",
+                        "startSearchDate": moment(new Date()).format("YYYY-MM-DD"),
+                        "startSearchTime": "00:00",
+                        "endSearchDate": moment(new Date()).format("YYYY-MM-DD"),
+                        "endSearchTime": "23:59",
+                        "orderType": "DESC"
+                    }))
+                },
+                getRequestStatOrderTypes: function () {
+                    return [
+                        {
+                            key: "DESC",
+                            value: "일시 내림차순"
+                        },
+                        {
+                            key: "ASC",
+                            value: "일시 오름차순"
+                        }
+                    ]
+                }
+            };
+
+            var ObjectUtils = {
+                deleteNullOrDefaultFields: function (obj) {
+                    for (var key of Object.keys(obj)) {
+                        if (obj[key] == null || obj[key] == undefined) {
+                            delete obj[key];
+                        }
+                        if (typeof obj[key] == "number" && obj[key] == 0) {
+                            delete obj[key];
+                        }
+                        if (typeof obj[key] == "string" && obj[key] == '') {
+                            delete obj[key];
+                        }
+                    }
+                },
+                copy: function (obj) {
+                    return JSON.parse(JSON.stringify(obj));
+                },
+                getDefaultString: function (val, defaultString = "") {
+                    if (val == null || val == undefined || val.trim().length == 0) {
+                        return defaultString;
+                    } else {
+                        return val.trim();
+                    }
+                }
+            }
+            
+            // 차트가 실제로 담기는 배열
+            let myChartList = [];
+
+            new Vue({
+                el: ".contentRoot",
+                data: {
+                    baseUrl: "",
+                    // 검색
+                    searchCondition: sttobj.getRequestStatSearchObj(),
+                    orderTypes: sttobj.getRequestStatOrderTypes(),
+                    searching: false, // 검색중
+                    searchResults: [], // 검색 결과
+                    // pagination
+                    pageSizes: [10, 20, 30, 40, 50], // page size 목록
+                    currentPage: 1,
+                    pageInfo: {
+                        pages: 0,
+                        total: 0
+                    },
+                    pageNumLists: [1],
+                    
+                    // 차트 v2에 사용되는 데이터 (2024-02-02 추가)
+                    chartTypes: [{id: "line", name: "선형"}, {id: "bar", name: "막대형"}],
+                    realTimeDataInterval: null,
+                    serverList: [],
+                    chartType: "bar",
+                    chartSearchUnit: "",
+                    thresholdMap: {},
+                    
+                },
+                computed: {
+                    pages: function () {
+                        const list = [];
+                        for (let index = this.startPage; index <= this.endPage; index += 1) {
+                            list.push(index);
+                        }
+                        return list;
+                    },
+                    startPage() {
+                        return parseInt((this.currentPage - 1) / 5) * 5 + 1;
+                    },
+                    endPage() {
+                        var lastPage = parseInt((this.currentPage - 1) / 5 + 1) * 5;
+                        return lastPage <= this.pageInfo.pages ? lastPage : this.pageInfo.pages;
+                    }
+                },
+                created: function () {
+                    // Base url 받아오기
+                    const baseUrl = document.querySelector('#smpServiceUriPrefix').value;
+                    this.baseUrl = baseUrl;
+                },
+                mounted: function () {
+					const self = this;
+                    // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+                        console.log("page move out");
+
+                        // MaterialDatepicker가 화면을 종료해도 자동으로 종료되지 않아 이벤트 unbinding 추가
+                        var $startDateMdc = $('#start-date-mdc');
+                        var $startTimeMdc = $('#start-time-mdc');
+                        var $endDateMdc = $('#end-date-mdc');
+                        var $endTimeMdc = $('#end-time-mdc');
+                        $startDateMdc.data('datepicker').destroy();
+                        $($startTimeMdc.data('instance').input).timepicker('remove');
+                        $endDateMdc.data('datepicker').destroy();
+                        $($endTimeMdc.data('instance').input).timepicker('remove');
+                        
+                        // 현재 데이터 가져오는 인터벌 종료
+                        if(self.realTimeDataInterval) {
+							clearInterval(self.realTimeDataInterval);
+						}
+                    });
+
+                    this.initMaterialUx();
+                    this.initSearchBarEvents();
+
+                    $('#defaultData').click();
+                    
+                    
+					this.realTimeDataInterval = setInterval(() => {
+						if (this.chartSearchUnit === "RAW") {
+							this.realTimeData();
+						}
+					}, REAL_TIME_INTERVAL);	
+					
+                    
+                },
+                methods: {
+                    // 화면 초기화
+                    initMaterialUx: function () {
+
+						const self = this;
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            el.class
+                            mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0);
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const textField of textFields) {
+                            const mdcTextField = mdc.textField.MDCTextField.attachTo(textField);
+                            $(textField).data('instance', mdcTextField); //
+                        }
+
+                        // select material ux 적용
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            const select = mdc.select.MDCSelect.attachTo(el);
+                            $(el).data('instance', select); //
+                        }
+	 					const $chartTypeSelect = $("#chartTypeSelect");
+	                    $chartTypeSelect.data('instance').unlisten("MDCSelect:change");
+	                    $chartTypeSelect.data('instance').listen('MDCSelect:change', function() {
+							self.chartType = $chartTypeSelect.data('instance').value;
+	                        self.changeAllChartType();
+	                    });
+						
+                        this.initMaterialDatepickers();
+                        this.initTimepickers();
+                    },
+                    initMaterialDatepickers: function () {
+
+                        // datepicker 적용
+                        var self = this;
+                        var $startAtInput = $('#start-date-mdc');
+                        var $endAtInput = $('#end-date-mdc');
+
+                        var today = moment(new Date()).format("YYYY-MM-DD");
+
+                        // https://github.com/FreddyFY/material-datepicker
+                        var datepickerOption = {
+                            lang: "en",
+                            orientation: "portrait",
+                            color: document.defaultView.getComputedStyle(document.documentElement).getPropertyValue("--mdc-theme-primary"),
+                            closeAfterClick: false,
+                            outputFormat: 'YYYY-MM-DD',
+                            topHeaderFormat: 'YYYY MM',
+                            headerFormat: 'Do' // 1st 2nd ... 30th 31st
+                        };
+
+                        if ($startAtInput.data('datepicker') != null) {
+                            $startAtInput.data('datepicker').destroy();
+                        }
+
+                        $startAtInput.data('datepicker', new MaterialDatepicker($startAtInput.data('instance').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+                                var finalDate = moment(date).format("YYYY-MM-DD");
+
+                                if (_.isEmpty($startAtInput.data('instance').value)) {
+                                    finalDate = today;
+                                }
+
+                                $startAtInput.data('instance').value = finalDate;
+                                self.searchCondition.startSearchDate = finalDate;
+
+                                if (self.searchCondition.endSearchDate < finalDate) {
+                                    self.searchCondition.endSearchDate = finalDate;
+                                    $endAtInput.data('instance').value = finalDate;
+                                }
+
+                                // 날짜 변경에 따른 timepicker 설정. 검색 시작-종료날짜 같은 경우 timepicker의 min-max 값 설정
+                                if (self.searchCondition.startSearchDate == self.searchCondition.endSearchDate) {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', self.searchCondition.endSearchTime);
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', self.searchCondition.startSearchTime);
+                                } else {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', "23:59");
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', "00:00");
+                                }
+                            }
+                        })));
+
+                        if ($endAtInput.data('datepicker') != null) {
+                            $endAtInput.data('datepicker').destroy();
+                        }
+
+                        $endAtInput.data('datepicker', new MaterialDatepicker($endAtInput.data('instance').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+                                var finalDate = moment(date).format("YYYY-MM-DD");
+
+                                if (_.isEmpty($endAtInput.data('instance').value)) {
+                                    finalDate = today;
+                                }
+
+                                $endAtInput.data('instance').value = finalDate;
+                                self.searchCondition.endSearchDate = finalDate;
+
+                                if (self.searchCondition.startSearchDate > finalDate) {
+                                    self.searchCondition.startSearchDate = finalDate;
+                                    $startAtInput.data('instance').value = finalDate;
+                                }
+
+                                // 날짜 변경에 따른 timepicker 설정. 검색 시작-종료날짜 같은 경우 timepicker의 min-max 값 설정
+                                if (self.searchCondition.startSearchDate == self.searchCondition.endSearchDate) {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', self.searchCondition.endSearchTime);
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', self.searchCondition.startSearchTime);
+                                } else {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', "23:59");
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', "00:00");
+                                }
+                            }
+                        })));
+                    },
+                    initTimepickers: function () {
+
+                        // timepicker 적용
+                        var self = this;
+                        var $startAtInput = $('#start-time-mdc');
+                        var $endAtInput = $('#end-time-mdc');
+
+
+                        // https://github.com/jonthornton/jquery-timepicker
+                        var timepickerOptions = {
+                            timeFormat: 'H:i',
+                            step: 10,
+                            show2400: true,
+                            maxTime: "23:59"
+                        };
+
+                        $($startAtInput.data('instance').input).timepicker(timepickerOptions)
+                            .on('change', function (e) {
+                                $startAtInput.data('instance').value = e.target.value;
+                                self.searchCondition.startSearchTime = e.target.value;
+
+                                // 검색 시작-종료 날짜가 같은 경우, 종료 timepicker의 최소 시간 = 시작 timepicker의 시간
+                                if (self.searchCondition.startSearchDate == self.searchCondition.endSearchDate) {
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', self.searchCondition.startSearchTime);
+                                } else {
+                                    $($("#end-time-mdc").data('instance').input).timepicker('option', 'minTime', "00:00");
+                                }
+                            });
+                        $($endAtInput.data('instance').input).timepicker(timepickerOptions)
+                            .on('change', function (e) {
+                                $endAtInput.data('instance').value = e.target.value;
+                                self.searchCondition.endSearchTime = e.target.value;
+
+                                // 검색 시작-종료 날짜가 같은 경우, 시작 timepicker의 최대 시간 = 종료 timepicker의 시간
+                                if (self.searchCondition.startSearchDate == self.searchCondition.endSearchDate) {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', self.searchCondition.endSearchTime);
+                                } else {
+                                    $($("#start-time-mdc").data('instance').input).timepicker('option', 'maxTime', "23:59");
+                                }
+                            });
+                    },
+                    initSearchBarEvents: function () {
+                        var self = this;
+                        $('.search-bar input').on("keydown", function (e) {
+                            if (e.keyCode == 13) {
+                                self.search();
+                            }
+                        });
+                    },
+                    // 검색
+                    _convertDatetime: function (searchCondition, isStart) {
+                        var searchUnit = searchCondition['searchUnit'];
+
+                        var sDate = searchCondition.startSearchDate;
+                        var eDate = searchCondition.endSearchDate;
+                        var sTime = searchCondition.startSearchTime;
+                        var eTime = searchCondition.endSearchTime;
+
+                        var finalDate = isStart ? sDate : eDate;
+                        var finalTime = isStart ? sTime : eTime;
+
+                        if (searchUnit == "MONTH") {
+                            var targetDate = "";
+                            if (isStart) {
+                                var sDateObject = new Date(sDate);
+                                targetDate = new Date(sDateObject.getFullYear(), sDateObject.getMonth(), 1);
+                                finalTime = "00:00";
+                            } else {
+                                var eDateObject = new Date(eDate);
+                                targetDate = new Date(eDateObject.getFullYear(), eDateObject.getMonth() + 1, 0);
+                                finalTime = "23:59";
+                            }
+                            finalDate = moment(targetDate).format("YYYY-MM-DD");
+                        }
+
+                        if (searchUnit == "HOUR") {
+                            if (isStart) {
+                                finalTime = sTime.split(":")[0] + ":00";
+                            } else {
+                                finalTime = eTime.split(":")[0] + ":59";
+                            }
+                        }
+
+                        return finalDate + " " + finalTime;
+                    },
+                    _makeSearchConditionQueryString: function (isPagingSearch) {
+                        var searchConditions = {...this.searchCondition}
+                        searchConditions['page'] = this.currentPage;
+
+                        // 날짜, 시간 변경
+                        var startDatetime = this._convertDatetime(searchConditions, true);
+                        var endDatetime = this._convertDatetime(searchConditions, false);
+
+                        searchConditions['startSearchDate'] = startDatetime;
+                        searchConditions['endSearchDate'] = endDatetime;
+                        searchConditions['isPagingSearch'] = isPagingSearch;
+
+                        // 검색 시간, 분 필드 삭제
+                        delete searchConditions['startSearchTime'];
+                        delete searchConditions['endSearchTime'];
+
+                        ObjectUtils.deleteNullOrDefaultFields(searchConditions);
+
+                        var queryString = Qs.stringify(searchConditions);
+                        return queryString;
+                    },
+                    search: function (isPagingSearch) {
+						const self = this;
+                        this._setSearching(true);
+						
+                        var queryString = this._makeSearchConditionQueryString(isPagingSearch);
+						
+						// 과부하 애니메이션 모두 제거
+						$(".overload").removeClass("overload");
+						
+                        $.ajax({
+                            url: this.baseUrl + "/monitoring/api/hwResource/listPage?" + queryString,
+                            method: "get",
+                            contentType: 'application/json; charset=UTF-8',
+                            dataType: "json"
+                        }).done(data => {
+                            this._setSearchResultsPageInfo(data); // 검색 결과 페이지 정보 저장
+                            this._setSearchResults(data.result); // 검색 결과 목록
+                            this.chartSearchUnit = this.searchCondition.searchUnit;
+                            if (!isPagingSearch) {
+								if (this.chartSearchUnit === "RAW") {
+									this.realTimeData();
+								} else {
+									this.thresholdMap = data.chartResponse.hwResourcethreshold;
+									this._setChart(data.chartResponse.chartData);
+								}
+							}
+                        }).always(() => {
+                            this._setSearching(false);
+                            this.chartSearchUnit = this.searchCondition.searchUnit;
+                        });
+                    },
+                    _setSearchResults: function (result) {
+                        this.searchResults = result;
+                    },
+                    _setSearchResultsPageInfo: function (data) {
+                        this.pageInfo.pages = data.pages;
+                        this.pageInfo.total = data.total;
+                    },
+                    _setSearching: function (searching) {
+                        this.searching = searching;
+                    },
+                    /**
+                    * 실시간 HW 리소스 정보 조회
+                    *
+                    * @author rapeech 
+                    */
+                    realTimeData: function () {
+                        $.ajax({
+                            url: this.baseUrl + "/monitoring/api/hwResource/realtimeData",
+                            method: "get",
+                            contentType: 'application/json; charset=UTF-8',
+                            dataType: "json"
+                        }).done(data => {
+                            if(data.resultCode === "0000") {
+	                        	this.thresholdMap = data.result.hwResourcethreshold;
+								this._setChart(data.result.chartData);
+								this.loadCheck(data.result.chartData, this.thresholdMap);
+	                        }
+	                        else {
+								toastr.info("최신 데이터가 없습니다.", "알림");
+							}
+                        }).always(() => {
+                        })
+                    },
+					_setChart: function (chartData) {
+						const self = this;
+						
+                        // 데이터 없을 시
+                        if (chartData.length !== 0) {
+							$('#noDataTextField')[0].style.display = 'none';
+                            $('#chartOption')[0].style.display = '';
+                        } else {
+							myChartList = [];
+                            $('#noDataTextField')[0].style.display = '';
+							$('#chartOption')[0].style.display = 'none';
+                        }
+                        
+                        if (myChartList.length > 0) {
+							// 차트를 새로 만들 지 않고 데이터만 업데이트
+							chartData.forEach((newChart)=>{
+								myChartList.forEach((myChart)=>{
+									if (newChart.serverName in myChart) {
+										const serverName = newChart.serverName;
+										newChart.datasets.forEach((dataset)=>{
+											const label = dataset.label === "disk" ? "storage" : dataset.label;
+											self.updateChartDataAndTimeOptions(myChart[serverName][label], dataset.data);
+										});
+									}
+								})
+							});
+						} else {
+	                        this.serverList = []; // 차트 목록 초기화
+	                        $(".chart-canvas").remove(); 
+	                        
+	                        chartData.forEach((server)=>{
+								self.serverList.push(server.serverName);
+							});
+							
+	                        setTimeout(function(){
+								chartData.forEach(function(data){
+			                    	self.createChart(data, self.chartSearchUnit);
+								});
+							},300);
+						}
+                    },
+                    /**
+                     * 차트 데이터와 차트 시간 포맷 업데이트 
+                     */
+                    updateChartDataAndTimeOptions: function(chart, data) {
+						if (!chart) {
+							toastr.error("업데이트 할 차트가 없습니다.");
+						}
+						chart.config.data.datasets[0].data = data;
+						chart.config.options.scales.x.time.unit = this.chartSearchUnit ==  "RAW" ? "second" : this.chartSearchUnit.toLowerCase();
+						chart.config.options.scales.x.time.tooltipFormat = LABEL.dateformat[this.chartSearchUnit];
+						chart.update();
+					},
+					/**
+					 * 차트 생성 후 myChartList에 담음
+					 */
+                    createChart: function(chartData, searchUnit) {
+						const self = this;
+						const serverName = chartData.serverName;
+						
+						const chartObj = {
+							[serverName]: {}
+						}
+						
+						LABEL.resourceList.forEach((resource, index)=>{
+							const canvas = document.createElement('canvas'); 
+							
+	                        canvas.setAttribute('id', 'chart_' + chartData.serverName + "_" + resource);
+    	                    canvas.setAttribute('class', 'chart-canvas');
+    	                    
+        	                document.querySelector('#canvas-wrap-' +chartData.serverName + '-' + resource).appendChild(canvas); 
+
+							const chartParam = {
+								index: index,
+								chartData: chartData,
+								resource: resource,
+								searchUnit: searchUnit
+							}
+							const ctx = canvas.getContext('2d');
+							
+							chartObj[serverName][resource] = new Chart(ctx, this.getChartObject(chartParam));
+						});
+						myChartList.push(chartObj);
+					},
+					/**
+					 * 차트 생성 시 필요한 차트 데이터 및 옵션 세팅 후 차트 객체 반환
+					 */
+					getChartObject: function(chartParam) {
+						const dateUnit = chartParam.searchUnit === "RAW" ? "second" :  chartParam.searchUnit.toLowerCase();
+						
+						let dateFormat;
+						switch(chartParam.searchUnit) {
+							case "HOUR":
+								dateFormat = LABEL.graphAxisUnit.HOUR;
+								break;
+							case "DAY":
+								dateFormat = LABEL.graphAxisUnit.DAY;
+								break;
+							case "MONTH":
+								dateFormat = LABEL.graphAxisUnit.MONTH;
+							default:
+								dateFormat = LABEL.graphAxisUnit.SECOND;
+								break;
+						}
+						
+						return {
+					        type: this.chartType,
+					        data: {
+								datasets: [
+									{ 
+										barPercentage: 0.9,
+                       					backgroundColor: LABEL.colorList[chartParam.index],
+                       					borderColor: LABEL.colorList[chartParam.index],
+                        				pointHoverRadius: 0.1,
+                        				pointRadius: 0.5,
+										data: chartParam.chartData.datasets[chartParam.index].data,
+										label: chartParam.resource
+									}
+								]
+							},
+					        options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										type: "time",
+										time: {
+											unit: dateUnit,
+											tooltipFormat: dateFormat,
+											displayFormats: {
+												second: LABEL.graphAxisUnit.SECOND,
+												minute: LABEL.graphAxisUnit.MINUTE,
+												day: LABEL.graphAxisUnit.DAY,
+												hour: LABEL.graphAxisUnit.HOUR,
+												month: LABEL.graphAxisUnit.MONTH
+											}
+										},
+									},
+									y: {
+										max: 100,
+										beginAtZero: true,
+										ticks: {
+	                                        precision: 0,
+	                                        callback: function(value, index, ticks) {
+	                                            return value+"%"
+	                                        }
+	                                    },
+									}
+								},
+								plugins: {
+									legend: {
+										display: true,
+										labels: {
+											padding: 15
+										}
+									},
+									annotation: {
+										annotations: {
+											line: {
+												type: "line",
+												yMin: this.thresholdMap[chartParam.resource],
+												yMax: this.thresholdMap[chartParam.resource],
+          										borderColor: '#ff6384',
+												borderWidth: 1,
+												borderDash: [4, 4]
+											}	
+										}
+									},
+									tooltip: {
+										callbacks: {
+											label: function(context) {
+												let label = context.dataset.label || '';
+												
+												if(label) {
+													label += ": ";
+												}
+												if (context.parsed.y !== null) {
+													label += context.parsed.y + " %"
+												}
+												
+												return label;
+											}
+										}
+									}
+								}
+							}
+					      };
+					},
+					/**
+					 * 차트 타입 변경 시 실제 차트 반영
+					 */
+					changeAllChartType: function() {
+						myChartList.forEach((myChart)=>{
+							const entries = Object.entries(myChart);
+							
+							entries.forEach((value)=>{
+								const resourceCharts = value[1];
+								resourceCharts.cpu.config.type = this.chartType;
+								resourceCharts.memory.config.type = this.chartType;
+								resourceCharts.storage.config.type = this.chartType;
+								
+								resourceCharts.cpu.update();
+								resourceCharts.memory.update();
+								resourceCharts.storage.update();
+							});
+							
+						})
+					},
+					/**
+                     * 임계선 색상 변경 시 모든 차트 반영
+                     */
+                    thresholdColorChange: function(e) {
+						const color = e.target.value;						
+						
+						myChartList.forEach((myChart)=>{
+							const entries = Object.entries(myChart);
+		
+							entries.forEach((value)=>{
+								const resourceCharts = value[1];
+								resourceCharts.cpu.config.options.plugins.annotation.annotations.line.borderColor = color;
+								resourceCharts.memory.config.options.plugins.annotation.annotations.line.borderColor = color;
+								resourceCharts.storage.config.options.plugins.annotation.annotations.line.borderColor = color;
+								
+								resourceCharts.cpu.update();
+								resourceCharts.memory.update();
+								resourceCharts.storage.update();
+							});
+							
+						})
+					},
+					/**
+					 * 과부하(임계치 넘음) 여부 체크 후 overload 클래스 추가 혹은 제거
+					 */
+					loadCheck: function(chartData, thresholdMap) {
+						chartData.forEach((data)=>{
+							const serverName = data.serverName;
+							data.datasets.forEach((dataset)=>{
+								const resource = dataset.label; // cpu, memory, disk
+								const threshold = thresholdMap[resource];
+								const recentData = dataset.data.slice(-3);
+								const alertCondition = recentData.some(value => value.y > threshold);
+								const $chart = $("#chart_" + serverName + "_" + resource);
+								if (alertCondition) {
+									$chart.addClass("overload");
+								} else {
+									$chart.removeClass("overload");
+								}
+							})
+						});
+					},
+                    onClickSearchUnit: function (e) {
+                        this.searchCondition.searchUnit = e.target.value;
+						
+                        if (this.searchCondition.searchUnit == "RAW") {
+							$($("#start-date-mdc").data('instance')).prop("disabled", true);
+                            $($("#end-date-mdc").data('instance')).prop("disabled", true);
+                            $($("#start-time-mdc").data('instance')).prop("disabled", true);
+                            $($("#end-time-mdc").data('instance')).prop("disabled", true);
+
+                        } else if (this.searchCondition.searchUnit == "HOUR") {
+							$($("#start-date-mdc").data('instance')).prop("disabled", false);
+                            $($("#end-date-mdc").data('instance')).prop("disabled", false);
+                            $($("#start-time-mdc").data('instance')).prop("disabled", false);
+                            $($("#end-time-mdc").data('instance')).prop("disabled", false);
+
+                            // 시작시간 00:00, timepicker 분 간격 60분
+                            $($("#start-time-mdc").data('instance').input).timepicker('setTime', "00:00");
+                            $($("#start-time-mdc").data('instance').input).timepicker('option', 'step', '60');
+
+                            // 종료시간 23:59, timepicker 분 간격 60분
+                            $($("#end-time-mdc").data('instance').input).timepicker('setTime', "23:59");
+                            $($("#end-time-mdc").data('instance').input).timepicker('option', 'step', '60');
+
+                        } else if (this.searchCondition.searchUnit == "DAY") {
+							$($("#start-date-mdc").data('instance')).prop("disabled", false);
+                            $($("#end-date-mdc").data('instance')).prop("disabled", false);
+                            $($("#start-time-mdc").data('instance')).prop("disabled", true);
+                            $($("#end-time-mdc").data('instance')).prop("disabled", true);
+
+                            // 시작시간 00:00
+                            $($("#start-time-mdc").data('instance').input).timepicker('setTime', "00:00");
+                            // 종료시간 23:59
+                            $($("#end-time-mdc").data('instance').input).timepicker('setTime', "23:59");
+
+                        } else { // MONTH
+                        	$($("#start-date-mdc").data('instance')).prop("disabled", false);
+                            $($("#end-date-mdc").data('instance')).prop("disabled", false);
+                            $($("#start-time-mdc").data('instance')).prop("disabled", true);
+                            $($("#end-time-mdc").data('instance')).prop("disabled", true);
+
+                            // 시작시간 00:00
+                            $($("#start-time-mdc").data('instance').input).timepicker('setTime', "00:00");
+                            // 종료시간 23:59
+                            $($("#end-time-mdc").data('instance').input).timepicker('setTime', "23:59");
+                        }
+                    },
+                    // 페이지네이션
+                    gotoPage: function (pageNum) {
+                        let validPageNum = pageNum;
+                        if (pageNum < 1) {
+                            validPageNum = 1;
+                        } else if (pageNum > this.pageInfo.pages) {
+                            validPageNum = this.pageInfo.pages;
+                        }
+
+                        this.currentPage = validPageNum;
+                        this.search(true);
+                    },
+                }
+            });
+            
+        }) ();
+        
+    </script>
+</th:block>
+
+
+</html>

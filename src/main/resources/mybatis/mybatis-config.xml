@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="false"/>
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <setting name="defaultStatementTimeout" value="25000"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="jdbcTypeForNull" value="NULL"/>
+    </settings>
+
+    <typeAliases>
+
+        <!--서비스연동 관리-->
+        <typeAlias type="com.kt.smp.multitenancy.dto.ConfigDto" alias="configDto"/>
+        <typeAlias type="com.kt.smp.multitenancy.dto.ConfigSaveDto" alias="configSaveDto"/>
+        <typeAlias type="com.kt.smp.multitenancy.dto.ConfigUpdateDto" alias="configUpdateDto"/>
+
+         <!--디렉토리 관리-->
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectoryGroupSearchCondition" alias="directoryGroupSearchCondition"/>
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectoryGroupListDto" alias="directoryGroupListDto"/>
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectoryGroupDto" alias="directoryGroupDto"/>
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectoryGroupSaveDto" alias="directoryGroupSaveDto"/>
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectoryGroupUpdateDto" alias="directoryGroupUpdateDto"/>
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectoryListDto" alias="directoryListDto"/>
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectoryDto" alias="directoryDto"/>
+        <typeAlias type="com.kt.smp.stt.comm.directory.dto.DirectorySaveDto" alias="directorySaveDto"/>
+
+        <!-- 검증관리 -->
+        <typeAlias type="com.kt.smp.stt.verify.dataset.dto.VerifyDatasetSearchCondition" alias="verifyDatasetSearchCondition"/>
+        <typeAlias type="com.kt.smp.stt.verify.dataset.dto.VerifyDatasetListDto" alias="verifyDatasetListDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.dataset.dto.VerifyDatasetDto" alias="verifyDatasetDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.dataset.dto.VerifyDatasetSaveDto" alias="verifyDatasetSaveDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.dataset.dto.VerifyDatasetUpdateDto" alias="verifyDatasetUpdateDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.dataset.dto.VerifyDatasetDeleteDto" alias="verifyDatasetDeleteDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.data.dto.VerifyDataSearchCondition" alias="verifyDataSearchCondition"/>
+        <typeAlias type="com.kt.smp.stt.verify.data.dto.VerifyDataListDto" alias="verifyDataListDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.data.dto.VerifyDataDto" alias="verifyDataDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.data.dto.VerifyDataSaveDto" alias="verifyDataSaveDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.data.dto.VerifyDataUpdateDto" alias="verifyDataUpdateDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.data.dto.VerifyDataDeleteDto" alias="verifyDataDeleteDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.history.dto.VerifyHistorySearchCondition" alias="verifyHistorySearchCondition"/>
+        <typeAlias type="com.kt.smp.stt.verify.history.dto.VerifyHistoryListDto" alias="verifyHistoryListDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.history.dto.VerifyHistoryDto" alias="verifyHistoryDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.history.dto.VerifyHistorySaveDto" alias="verifyHistorySaveDto"/>
+        <typeAlias type="com.kt.smp.stt.verify.history.dto.VerifyHistoryUpdateDto" alias="verifyHistoryUpdateDto"/>
+
+        <!-- STT결과 -->
+        <typeAlias type="com.kt.smp.stt.log.dto.LogSearchCondition" alias="logSearchCondition"/>
+        <typeAlias type="com.kt.smp.stt.log.dto.LogListDto" alias="logListDto"/>
+        <typeAlias type="com.kt.smp.stt.log.dto.LogDto" alias="logDto"/>
+        <typeAlias type="com.kt.smp.stt.log.dto.LogSaveDto" alias="logSaveDto"/>
+        <typeAlias type="com.kt.smp.stt.log.dto.LogDeleteDto" alias="logDeleteDto"/>
+
+        <!-- 전사데이터 -->
+        <typeAlias type="com.kt.smp.stt.dictation.dto.DictationSearchCondition" alias="dictationSearchCondition"/>
+        <typeAlias type="com.kt.smp.stt.dictation.dto.DictationListDto" alias="dictationListDto"/>
+        <typeAlias type="com.kt.smp.stt.dictation.dto.DictationDto" alias="dictationDto"/>
+        <typeAlias type="com.kt.smp.stt.dictation.dto.DictationSaveDto" alias="dictationSaveDto"/>
+        <typeAlias type="com.kt.smp.stt.dictation.dto.DictationUpdateDto" alias="dictationUpdateDto"/>
+        <typeAlias type="com.kt.smp.stt.dictation.dto.DictationDeleteDto" alias="dictationDeleteDto"/>
+        <typeAlias type="com.kt.smp.stt.dictation.dto.UsageDto" alias="usageDto"/>
+        <typeAlias type="com.kt.smp.stt.dictation.dto.UsageSaveDto" alias="usageSaveDto"/>
+        
+        <!-- 상담 내역 청취 -->
+        <typeAlias type="com.kt.smp.stt.callinfo.dto.CallInfoSearchConditionDto" alias="callInfoSearchConditionDto"/>
+        <typeAlias type="com.kt.smp.stt.callinfo.dto.CallInfoSearchResponseDto" alias="callInfoSearchResponseDto"/>
+        <typeAlias type="com.kt.smp.stt.callinfo.dto.SttCallInfoDetailResponseDto" alias="SttCallInfoDetailResponseDto"/>
+        <typeAlias type="com.kt.smp.stt.callinfo.dto.CallInfoLogVO" alias="callInfoLogVO"/>
+        <typeAlias type="com.kt.smp.stt.callinfo.dto.SttCallInfoDto" alias="SttCallInfoDto"/>
+        <typeAlias type="com.kt.smp.stt.callinfo.dto.StreamUrlParamsVO" alias="StreamUrlParamsVO"/>
+        
+        <!-- 재처리 -->
+        <typeAlias type="com.kt.smp.stt.reprocess.dto.ReprocessLogDto" alias="reprocessLogDto"/>
+        <typeAlias type="com.kt.smp.stt.reprocess.dto.ReprocessStatusDto" alias="reprocessStatusDto"/>
+
+        <!-- 인식률 추이 -->
+        <typeAlias type="com.kt.smp.stt.recognition.dto.SttRecognitionSearchCondition" alias="sttRecognitionSearchCondition"/>
+        <typeAlias type="com.kt.smp.stt.recognition.dto.SttRecognitionVO" alias="sttRecognitionVO"/>
+        <typeAlias type="com.kt.smp.stt.recognition.dto.SttRecognitionDetailVO" alias="sttRecognitionDetailVO"/>
+
+		<!-- 환경 설정-->
+		<typeAlias type="com.kt.smp.stt.comm.preference.dto.PreferenceCodeDto" alias="PreferenceCodeDto"/>
+		<typeAlias type="com.kt.smp.stt.comm.preference.dto.SchedulerConfigUpdateDto" alias="SchedulerConfigUpdateDto"/>
+		<typeAlias type="com.kt.smp.stt.comm.preference.dto.ThresholdConfigDto" alias="ThresholdConfigDto"/>
+		<typeAlias type="com.kt.smp.stt.comm.preference.dto.AgentConfigDto" alias="AgentConfigDto"/>
+		<typeAlias type="com.kt.smp.stt.comm.preference.dto.EtcConfigDto" alias="EtcConfigDto"/>
+		<typeAlias type="com.kt.smp.stt.comm.preference.dto.EncryptConfigDto" alias="EncryptConfigDto"/>
+
+    </typeAliases>
+    
+    <typeHandlers>
+		<typeHandler handler="com.kt.smp.stt.comm.preference.hanlder.DatasToRemoveTypeHandler"/>
+		<typeHandler handler="com.kt.smp.stt.comm.preference.hanlder.FilesToRemoveTypeHandler"/>
+	</typeHandlers>
+</configuration>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorate="layouts/nolayout">
+	<th:block layout:fragment="html">
+		<div class="contentRoot mdc-layout-grid__inner pb-3">
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+				<h2>프로젝트 화면 구성 관리</h2>
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2">
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2 mdc-form-field">
+				<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+				    <div class="mdc-select__anchor" aria-required="true">
+				        <div class="mdc-notched-outline">
+				            <span class="mdc-notched-outline__leading"></span>
+				            <div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label mdc-floating-label--required">사이트</label>
+							</div>
+				            <span class="mdc-notched-outline__trailing"></span>
+				        </div>
+				        <span class="mdc-select__selected-text-container overflow-hidden">
+				            <span class="mdc-select__selected-text"></span>
+				        </span>
+				        <span class="mdc-select__dropdown-icon"></span>
+				    </div>
+				    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+				        <ul class="mdc-deprecated-list">
+				            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="5" aria-selected="true">
+				                <span class="mdc-deprecated-list-item__ripple"></span>
+				                <span class="mdc-deprecated-list-item__text">신한금융_운영</span>
+				            </li>
+				            <li class="mdc-deprecated-list-item" data-value="10" >
+				                <span class="mdc-deprecated-list-item__ripple"></span>
+				                <span class="mdc-deprecated-list-item__text">하나금융</span>
+				            </li>
+				        </ul>
+				    </div>
+				</div>
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2 mdc-form-field">
+				<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+				    <div class="mdc-select__anchor" aria-required="true">
+				        <div class="mdc-notched-outline">
+				            <span class="mdc-notched-outline__leading"></span>
+				            <div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label mdc-floating-label--required">프로젝트</label>
+							</div>
+				            <span class="mdc-notched-outline__trailing"></span>
+				        </div>
+				        <span class="mdc-select__selected-text-container overflow-hidden">
+				            <span class="mdc-select__selected-text"></span>
+				        </span>
+				        <span class="mdc-select__dropdown-icon"></span>
+				    </div>
+				    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+				        <ul class="mdc-deprecated-list">
+				            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="5" aria-selected="true">
+				                <span class="mdc-deprecated-list-item__ripple"></span>
+				                <span class="mdc-deprecated-list-item__text">신한은행P</span>
+				            </li>
+				            <li class="mdc-deprecated-list-item" data-value="10" >
+				                <span class="mdc-deprecated-list-item__ripple"></span>
+				                <span class="mdc-deprecated-list-item__text">신한카드P</span>
+				            </li>
+				        </ul>
+				    </div>
+				</div>
+			</div>
+			
+			<div class="mdc-layout-grid__cell--span-3">
+				<div class="border-bottom " style="height: 28px;">
+					<h4 class="">레이아웃</h4>
+				</div>
+				<div class="mdc-layout-grid__inner pt-4">
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<div class="mdc-elevation--z2 w-100 text-center py-5" style="cursor:pointer;">
+							레이아웃 1<br/>이미지
+						</div>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<div class="mdc-elevation--z2 w-100 text-center py-5" style="cursor:pointer;">
+							레이아웃 2<br/>이미지
+						</div>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<div class="mdc-elevation--z2 w-100 text-center py-5" style="cursor:pointer;">
+							레이아웃 3<br/>이미지
+						</div>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<div class="mdc-elevation--z2 w-100 text-center py-5" style="cursor:pointer;">
+							레이아웃 4<br/>이미지
+						</div>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<div class="mdc-elevation--z2 w-100 text-center py-5" style="cursor:pointer;">
+							레이아웃 5<br/>이미지
+						</div>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<div class="mdc-elevation--z2 w-100 text-center py-5" style="cursor:pointer;">
+							레이아웃 6<br/>이미지
+						</div>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<div class="mdc-elevation--z2 w-100 text-center py-5" style="cursor:pointer;">
+							레이아웃 7<br/>이미지
+						</div>
+					</div>
+				</div>
+				
+				<div class="mt-3">
+					<div>Toast</div>
+					<div class="mt-1">
+						<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.error('일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.', '실패');">API 처리 실패</button>
+						<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.success('변경된 화면구성 내용이 저장되었습니다.', '화면구성 저장')">화면구성 저장 완료</button>
+					</div>
+				</div>
+			</div>
+				
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-9 mdc-layout-grid__inner">
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12 border-bottom" style="height: 50px;">
+					<div class="mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+							<h4 class="mdc-layout-grid__cell--span-4">레이아웃 설정</h4>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg w-100" onclick="confirm('변경된 정보를 되돌리시겠습니까?');">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">undo</i>
+								<span class="mdc-button__label">되돌리기</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('변경된 정보를 저장하시겠습니까?');">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">save</i>
+								<span class="mdc-button__label">저장</span>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-3">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">헤더 위치 고정</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">적용</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">해제</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-3">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">메뉴 위치 고정</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">적용</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">해제</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-3">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">메뉴 접기</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">적용</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">해제</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-3">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">박스형 레이아웃 적용</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">적용</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">해제</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+					
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12" style="height: 30px;">
+					<h4 class="mdc-layout-grid__cell--span-4" >메뉴 구성</h4>
+				</div>
+					
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+					<div class="mdc-card demo-card-shaped w-100">
+						<div class="demo-card__primary mdc-form-field pb-0 ">
+							<h2 class="menu-change-dialog-btn mdc-list-item__text demo-card__title mdc-typography mdc-typography--headline6 mdc-theme--primary hover-target">SMP</h2>
+							<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+							<div class="mdc-card__action-icons">
+								<button class="mdc-icon-button material-icons">keyboard_control_key</button>
+								<button class="mdc-icon-button material-icons">keyboard_arrow_down</button>
+							</div>
+						</div>
+						<ul class="mdc-list mdc-list--avatar-list w-100">
+							<li class="mdc-list-item mdc-ripple-upgraded" tabindex="0" style="cursor: n-resize;">
+								<span class="menu-change-dialog-btn mdc-list-item__text hover-target">시스템 관리자 관리</span>
+								<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+								<span class="mdc-list-item__meta material-icons">dehaze</span>
+							</li>
+							<li class="mdc-list-item mdc-ripple-upgraded" tabindex="-1" style="cursor: n-resize;">
+								<span class="menu-change-dialog-btn mdc-list-item__text hover-target">시스템 인증 관리</span>
+								<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+								<span class="mdc-list-item__meta material-icons">dehaze</span>
+							</li>
+							<li class="mdc-list-item mdc-ripple-upgraded" tabindex="-1" style="cursor: n-resize;">
+								<span class="menu-change-dialog-btn mdc-list-item__text hover-target">서비스 연동 관리</span>
+								<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+								<span class="mdc-list-item__meta material-icons">dehaze</span>
+							</li>
+							<li class="mdc-list-item mdc-ripple-upgraded" tabindex="-1" style="cursor: n-resize;">
+								<span class="menu-change-dialog-btn mdc-list-item__text hover-target">사이트 관리</span>
+								<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+								<span class="mdc-list-item__meta material-icons">dehaze</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+				
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+					<div class="mdc-card demo-card-shaped w-100">
+						<div class="demo-card__primary mdc-form-field pb-0 ">
+							<h2 class="menu-change-dialog-btn mdc-list-item__text demo-card__title mdc-typography mdc-typography--headline6 mdc-theme--primary hover-target">KT NLP 1.0</h2>
+							<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+							<div class="mdc-card__action-icons">
+								<button class="mdc-icon-button material-icons">keyboard_control_key</button>
+								<button class="mdc-icon-button material-icons">keyboard_arrow_down</button>
+							</div>
+						</div>
+						<ul class="mdc-list mdc-list--avatar-list w-100">
+							<li class="mdc-list-item mdc-ripple-upgraded" tabindex="0" style="cursor: n-resize;">
+								<span class="menu-change-dialog-btn mdc-list-item__text hover-target">NLP 학습데이터 관리</span>
+								<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+								<span class="mdc-list-item__meta material-icons">dehaze</span>
+							</li>
+							<li class="mdc-list-item mdc-ripple-upgraded" tabindex="-1" style="cursor: n-resize;">
+								<span class="menu-change-dialog-btn mdc-list-item__text hover-target">검증셋 관리</span>
+								<button class="menu-change-dialog-btn mdc-icon-button material-icons hover-view-target">edit</button>
+								<span class="mdc-list-item__meta material-icons">dehaze</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="menu-change-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">메뉴 이름 변경</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner pt-2">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" value="NLP 학습데이터 관리" required readonly/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label"  >기존 이름</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" value="" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label"  >새 이름</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">close</i>
+								<span class="mdc-button__label">취소</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('메뉴 이름을 변경하시겠습니까?');">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">edit</i>
+								<span class="mdc-button__label">변경</span>
+							</button>
+						</div>
+					</footer>
+				</div>
+			</div>
+		</div>
+		
+	</th:block>
+	<th:block layout:fragment="script">
+		<script type="text/javascript">
+		(function () {
+			new Vue({
+				el: ".contentRoot",
+				data: {
+					
+				},
+				created: function () {
+					
+				},
+				mounted: function () {
+					// 페이지 이동시 처리 
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						console.log("page move out");
+					});
+					
+					this.initMaterialUx();
+					
+					// 메뉴명 변경 팝업
+					var modal1 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#menu-change-dialog'));
+					$('.menu-change-dialog-btn').unbind('click').bind('click', function (ev) {
+						ev.preventDefault();
+						ev.stopPropagation();
+						modal1.open();
+					});
+					
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							el.class
+							mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0);
+						}
+						
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const textField of textFields) {
+							mdc.textField.MDCTextField.attachTo(textField);
+						}
+						
+						// select material ux 적용
+						const selects = document.querySelectorAll('.mdc-select');
+						for (const el of selects) {
+							const select = mdc.select.MDCSelect.attachTo(el);
+							select.listen('MDCSelect:change', (evt) => {
+								console.log(evt);
+							});
+						}
+						 
+						// list material ux 적용
+						const lists = document.querySelectorAll('.mdc-list');
+						for (const el of lists) {
+							let list = mdc.list.MDCList.attachTo(el);
+							list.wrapFocus = true;
+						}
+						
+					}
+				}
+			});
+		})();
+		</script>
+	</th:block>
+</html>

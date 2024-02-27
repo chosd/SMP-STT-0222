@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+	<div id="sttHwResourceWidget" class="contentRoot mdc-layout-grid__inner pb-3">
+    	<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+            <!-- loading bar -->
+            <div class="content-item resource-wrap">
+                <div id="noData"
+                     class="chart_area mdc-layout-grid__cell mdc-layout-grid__cell--span-12 text-center d-none">
+                    <p>데이터가 없습니다.</p>
+                </div>
+                <div class="resource-header form-row">
+                    <div class="resource-name resource-server-name"><span>서버명</span></div>
+                    <div class="resource-name flex-auto text-center"><span>CPU</span></div>
+                    <div class="resource-name flex-auto text-center"><span>Memory</span></div>
+                    <div class="resource-name flex-auto text-center"><span>디스크</span></div>
+                    <div class="resource-name flex-auto text-center"><span>bps</span></div>
+                    <div class="resource-name flex-auto text-center"><span>pps</span></div>
+                </div>
+                <div class="resource-list">
+                    <div class="resource-item form-row multiline-align-top"
+                         v-for="(resource, index) in hwResourceList">
+                        <div class="resource-server-name">
+                            <span>{{ resource.server }}</span>
+                        </div>
+                        <div class="gauge-wrap flex-auto">
+                            <div class="gauge-outer">
+                                <div
+                                    :style="[{width: resource.cpuData.value + '%'}, {backgroundColor: resource.cpuData.color}]"
+                                    class="gauge-inner"></div>
+                                <span class="gauge-value">{{ resource.cpuData.value }}%</span>
+                            </div>
+                        </div>
+                        <div class="gauge-wrap flex-auto">
+                            <div class="gauge-outer">
+                                <div
+                                    :style="[{width: resource.memData.value + '%'}, {backgroundColor: resource.memData.color}]"
+                                    class="gauge-inner"></div>
+                                <span class="gauge-value">{{ resource.memData.value }}%</span>
+                            </div>
+                        </div>
+                        <div class="gauge-wrap flex-auto">
+                            <div class="gauge-outer">
+                                <div
+                                    :style="[{width: resource.strData.value + '%'}, {backgroundColor: resource.strData.color}]"
+                                    class="gauge-inner"></div>
+                                <span class="gauge-value">{{ resource.strData.value }}%</span>
+                            </div>
+                        </div>
+                        <div class="gauge-wrap flex-auto">
+                            <div class="value-wrap">
+                                <span>{{ resource.bpsData.value }}kb</span>
+                            </div>
+                        </div>
+                        <div class="gauge-wrap flex-auto">
+                            <div class="value-wrap">
+                                <span>{{ resource.ppsData.value }}kb</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+		</div>
+	</div>
+	<input type="hidden" readonly id="sttSmpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+	
+</th:block>
+<th:block layout:fragment="script">
+    <script type="application/javascript"> 
+        (function () {
+            var siteCode = "[[${siteCode}]]";
+            var projectCode = "[[${projectCode}]]";
+
+            const sttHwResourceWidgdt = new Vue({
+//                el: ".contentRoot",
+                el: "#sttHwResourceWidget",
+                data: {
+
+                    baseUrl: "",
+                    
+                    // 리소스 그래프
+                    hwResourceList: [{
+						server: "",
+	                    cpuData: {
+							value: null,
+							color: ""
+						},
+	                    memData: {
+							value: null,
+							color: ""
+						},
+	                    strData: {
+							value: null,
+							color: ""
+						},
+	                    bpsData: {
+							value: null,
+							color: ""
+						},
+	                    ppsData: {
+							value: null,
+							color: ""
+						}
+					}],
+                },
+                created: function () {
+                    // Base url 받아오기
+                    const baseUrl = document.querySelector('#sttSmpServiceUriPrefix').value;
+                    this.baseUrl = baseUrl;
+                    console.log('> created : ' + baseUrl);
+                },
+                mounted: function () {
+                    this.initMaterialUx();
+                    
+                    this.nowData();
+                    
+                    setInterval(() => {
+						this.nowData();
+					}, 10000);
+                },
+                methods: {
+                    // 화면 초기화
+                    initMaterialUx: function () {
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0));
+                        }
+                    },
+                    
+                    nowData: function () {
+                        $.ajax({
+                            url: this.baseUrl + "/monitoring/api/hwResource/nowData",
+                            method: "get",
+                            contentType: 'application/json; charset=UTF-8',
+                            dataType: "json"
+                        }).done(data => {
+							console.log('> nowData ', data)
+                            //this._setChart(data); // 차트 그리기
+                            if(data && data.lastchecktime && this.isNow(data.lastchecktime)) {
+	                        	this._setHwResourceData(data.chartList);
+	                        }
+	                        else {
+								toastr.error("최신 데이터가 없습니다.", "error");
+							}
+                        }).always(() => {
+                        })
+                    },
+                    _setHwResourceData: function(data) {
+						console.log('data >>', data)
+						const resourceList = this.hwResourceList
+						const newChartList = [];
+						data.forEach((hwResource, i)=>{
+							const resourceData = 
+							{
+									server: hwResource.cpuData.labels[0],
+				                    cpuData: {
+										value: hwResource.cpuData.datasets[0].data[0],
+										color: this._calcRangeColor(hwResource.cpuData.datasets[0].data[0])
+									},
+				                    memData: {
+										value: hwResource.memData.datasets[0].data[0],
+										color: this._calcRangeColor(hwResource.memData.datasets[0].data[0])
+									},
+				                    strData: {
+										value: hwResource.strData.datasets[0].data[0],
+										color: this._calcRangeColor(hwResource.strData.datasets[0].data[0])
+									},
+				                    bpsData: {
+										value: hwResource.bpsData.datasets[0].data[0],
+										color: this._calcRangeColor(hwResource.bpsData.datasets[0].data[0])
+									},
+				                    ppsData: {
+										value: hwResource.ppsData.datasets[0].data[0],
+										color: this._calcRangeColor(hwResource.ppsData.datasets[0].data[0])
+									}
+								};
+								
+							newChartList.push(resourceData);
+						});
+						this.hwResourceList = newChartList;
+						
+					},
+                    _calcRangeColor: function(value) {
+						let color
+						if (value > 80) {
+							color = 'red'
+						} else if (value > 70 && value <= 80) {
+							color = 'orange'
+						} else if (value > 60 && value <= 70) {
+							color = 'green'
+						} else if (value <= 60) {
+							color = 'blue'
+						}
+						return color
+					},
+                    isNow: function(dateString) {
+						console.log('> ' + dateString);
+						var dtFrom = new Date(dateString);
+						var nowDt = new Date();
+						nowDt.setSeconds(nowDt.getSeconds() - 21);
+						if(dtFrom < nowDt) return false;
+						return true;
+					}
+                }
+            });
+            
+        }) ();
+        
+    </script>
+</th:block>
+</html>

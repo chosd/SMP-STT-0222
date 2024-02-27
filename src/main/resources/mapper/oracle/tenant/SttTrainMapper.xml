@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.train.train.mapper.SttTrainMapper">
+
+    <resultMap id="trainResultMap" type="com.kt.smp.stt.train.train.domain.SttTrainVO">
+        <result column="ID" property="id"/>
+        <result column="SERVICE_MODEL_ID" property="serviceModelId"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="UPDATED_BY" property="updatedBy"/>
+        <result column="REQUESTED_AT" property="requestedAt"/>
+        <result column="COMPLETED_AT" property="completedAt"/>
+        <result column="DURATION" property="duration"/>
+        <result column="DATA_NUM" property="dataNum"/>
+        <result column="RESULT_MODEL_ID" property="resultModelId"/>
+        <result column="RESULT_CODE" property="resultCode"/>
+        <result column="RESULT_MSG" property="resultMsg"/>
+        <result column="STATUS" property="status"/>
+        <result column="MODEL_TYPE" property="modelType"/>
+        <result column="MODEL_PATH" property="modelPath"/>
+        <result column="MODEL_AUTH_KEY" property="modelAuthKey"/>
+        <result column="TRAIN_DATA_PATH" property="trainDataPath"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+        <result column="USE_YN" property="useYn"/>
+        <result column="E2ESL_DATAPATH_LIST" property="trainE2ESLDataPathList"
+                javaType="java.util.ArrayList" jdbcType="LONGVARCHAR"
+                typeHandler="com.kt.smp.stt.train.train.handler.SttTrainProcessHandler"/>
+        <result column="E2ESL_WAVPATH_LIST" property="trainE2ESLWavPathList"
+                javaType="java.util.ArrayList" jdbcType="LONGVARCHAR"
+                typeHandler="com.kt.smp.stt.train.train.handler.SttTrainProcessHandler"/>
+        <result column="E2EUSL_WAVPATH_LIST" property="trainE2EUSLWavPathList"
+                javaType="java.util.ArrayList" jdbcType="LONGVARCHAR"
+                typeHandler="com.kt.smp.stt.train.train.handler.SttTrainProcessHandler"/>
+        <result column="AM_DATASET_LIST" property="trainAmDatasetList"
+                javaType="java.util.ArrayList" jdbcType="LONGVARCHAR"
+                typeHandler="com.kt.smp.stt.train.train.handler.SttTrainProcessHandler"/>
+        <result column="DATA_TIME" property="dataTime"/>
+    </resultMap>
+
+
+    <sql id="vo_fields">
+        TM.id
+        , TM.service_model_id
+        , TM.description
+        , TM.updated_by
+        , TM.requested_at
+        , TM.completed_at
+        , TM.duration
+        , TM.data_num
+        , TM.result_model_id
+        , TM.result_code
+        , TM.result_msg
+        , TM.status
+        , TM.model_type
+        , TM.model_path
+        , TM.model_auth_key
+        , TM.train_data_path
+		, TM.REG_DT
+		, TM.REG_ID
+		, TM.REG_IP
+		, TM.UPD_DT
+		, TM.UPD_ID
+		, TM.UPD_IP
+        , TM.USE_YN
+        , E2ESL_DATAPATH_LIST
+        , E2ESL_WAVPATH_LIST
+        , E2EUSL_WAVPATH_LIST
+        , AM_DATASET_LIST
+        , TM.DATA_TIME
+    </sql>
+
+    <!--  SELECT  -->
+
+    <select id="list" parameterType="com.kt.smp.stt.train.train.domain.SttTrainSearchCondition" resultMap="trainResultMap">
+		/* SttTrainMapper.list */
+        SELECT
+            <include refid="vo_fields"/>
+        FROM
+            IAAP_STT_TRAIN_MNG TM
+        WHERE
+        1 = 1
+            AND TM.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+			<![CDATA[
+            	AND TM.SERVICE_MODEL_ID = #{serviceModelId}
+        	]]>
+        </if>
+        <if test="updatedBy != null and updatedBy != ''">
+			<![CDATA[
+            	AND TM.UPDATED_BY LIKE '%' || #{updatedBy} || '%'
+        	]]>
+        </if>
+        <if test="status != null and status != ''">
+			<![CDATA[
+            	AND TM.STATUS = #{status}
+        	]]>
+        </if>
+        <choose>
+            <when test="from != null">
+                AND TM.REQUESTED_AT >= TO_DATE(#{from} || ' ' || '00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND TM.REQUESTED_AT >= TO_DATE('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                <![CDATA[
+                AND TM.REQUESTED_AT <= TO_DATE(#{to} || ' ' || '23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND TM.REQUESTED_AT <= current_date
+                ]]>
+            </otherwise>
+        </choose>
+      <if test="description != null and description != ''">
+        <![CDATA[
+            	AND TM.DESCRIPTION LIKE '%' || #{description} || '%'
+        	]]>
+      </if>
+    </select>
+
+    <select id="detail" parameterType="Long" resultMap="trainResultMap">
+		/* SttTrainMapper.detail */
+        SELECT
+            <include refid="vo_fields"/>
+        FROM
+            IAAP_STT_TRAIN_MNG TM
+        WHERE
+            TM.ID = #{trainId}
+        AND
+            TM.USE_YN = 'Y'
+    </select>
+
+    <select id="detailLastOne" parameterType="string" resultMap="trainResultMap">
+		/* SttTrainMapper.detailLastOne */
+        SELECT *
+        FROM (
+        	SELECT A.*, ROWNUM AS RNUM, COUNT(*) OVER() AS TOTCNT
+        	FROM (
+        		SELECT
+		            <include refid="vo_fields"/>
+		        FROM
+		            IAAP_STT_TRAIN_MNG TM
+		        WHERE
+		            TM.SERVICE_MODEL_ID = #{serviceModelId}
+		        AND
+		            TM.USE_YN = 'Y'
+		        ORDER BY
+		            TM.REQUESTED_AT DESC
+        	) A)
+        WHERE 
+        	<![CDATA[
+        		RNUM <= 1
+        	]]>
+    </select>
+
+    <select id="detailByResultModelId" parameterType="String" resultMap="trainResultMap">
+		/* SttTrainMapper.detailByResultModelId */
+        SELECT
+            <include refid="vo_fields"/>
+        FROM
+            IAAP_STT_TRAIN_MNG TM
+        WHERE
+            TM.RESULT_MODEL_ID = #{resultModelId}
+        AND
+            TM.USE_YN = 'Y'
+    </select>
+
+    <select id="count" parameterType="com.kt.smp.stt.train.train.domain.SttTrainSearchCondition" resultType="int">
+		/* SttTrainMapper.count */
+        SELECT COUNT(1)
+            FROM IAAP_STT_TRAIN_MNG TM
+        WHERE
+        1 = 1
+            AND TM.USE_YN = 'Y'
+        <if test="serviceModelId != null"><![CDATA[
+            AND TM.SERVICE_MODEL_ID = #{serviceModelId}
+        ]]></if>
+        <if test="updatedBy != null and updatedBy != ''"><![CDATA[
+            AND TM.UPDATED_BY = #{updatedBy}
+        ]]></if>
+        <if test="status != null and status != ''"><![CDATA[
+            AND TM.STATUS = #{status}
+        ]]></if>
+        <choose>
+            <when test="from != null">
+                AND TM.REQUESTED_AT >= TO_DATE(#{from} || ' ' || '00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND TM.REQUESTED_AT >= TO_DATE('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                <![CDATA[
+                AND TM.REQUESTED_AT <= TO_DATE(#{to} || ' ' || '23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND TM.REQUESTED_AT <= current_date
+                ]]>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="exists" parameterType="Long" resultType="int">
+		/* SttTrainMapper.exists */
+        SELECT
+        	CASE WHEN
+        		EXISTS(SELECT 1 FROM IAAP_STT_TRAIN_MNG TM WHERE TM.ID = #{trainId} AND TM.USE_YN = 'Y')
+        THEN 1 ELSE 0 END isExists 
+        FROM DUAL
+    </select>
+
+
+    <!--  INSERT  -->
+
+    <insert id="insert" parameterType="com.kt.smp.stt.train.train.domain.SttTrainVO">
+		/* SttTrainMapper.insert */
+        INSERT INTO IAAP_STT_TRAIN_MNG (id
+            , service_model_id
+            , description
+            , updated_by
+            , requested_at
+            , completed_at
+            , duration
+            , data_num
+            , result_model_id
+            , result_code
+            , result_msg
+            , status
+            , model_type
+            , model_path
+            , model_auth_key
+            , train_data_path
+            , REG_DT
+            , REG_ID
+            , REG_IP
+            , UPD_DT
+            , UPD_ID
+            , UPD_IP
+            , USE_YN
+            , E2ESL_DATAPATH_LIST
+            , E2ESL_WAVPATH_LIST
+            , E2EUSL_WAVPATH_LIST
+            , AM_DATASET_LIST
+            )
+        VALUES(
+        	  SEQ_IAAP_STT_TRAIN_MNG.NEXTVAL
+              , #{serviceModelId}
+              , #{description}
+              , #{updatedBy}
+              , current_date
+              , #{completedAt}
+              , #{duration}
+              , #{dataNum}
+              , #{resultModelId}
+              , #{resultCode}
+              , #{resultMsg}
+              , #{status}
+              , #{modelType}
+              , #{modelPath}
+              , #{modelAuthKey}
+              , #{trainDataPath}
+              , current_date
+              , #{regId}
+              , #{regIp}
+              , current_date
+              , #{updId}
+              , #{updIp}
+              , 'Y'
+              , #{trainE2ESLDataPathList, typeHandler=com.kt.smp.stt.train.train.handler.SttTrainProcessHandler}
+              , #{trainE2ESLWavPathList, typeHandler=com.kt.smp.stt.train.train.handler.SttTrainProcessHandler}
+              , #{trainE2EUSLWavPathList, typeHandler=com.kt.smp.stt.train.train.handler.SttTrainProcessHandler}
+              , #{trainAmDatasetList, typeHandler=com.kt.smp.stt.train.train.handler.SttTrainProcessHandler}
+              )
+    </insert>
+
+    <!--  UPDATE  -->
+    <update id="update" parameterType="com.kt.smp.stt.train.train.domain.SttTrainVO">
+		/* SttTrainMapper.update */
+        UPDATE
+            IAAP_STT_TRAIN_MNG
+        SET
+            DESCRIPTION = #{description}
+          , UPD_DT = current_date
+          , UPD_ID = #{updId}
+          , UPD_IP = #{updIp}
+          <if test="requestedAt != null">
+          , REQUESTED_AT = current_date
+          </if>
+          <if test="dataNum != null">
+          , DATA_NUM = #{dataNum}
+          </if>
+          <if test="dataTime != null">
+          , DATA_TIME = #{dataTime}
+          </if>
+          <if test="resultCode != null">
+          , RESULT_CODE = #{resultCode}
+          </if>
+          <if test="resultMsg != null">
+          , RESULT_MSG = #{resultMsg}
+          </if>
+          <if test="resultCode != null">
+          , COMPLETED_AT = current_date
+          </if>
+          <if test="resultCode != null">
+          , DURATION = current_date - TO_DATE(#{requestedAt}, 'YYYY-MM-DD HH24:MI:SS')
+          </if>
+          <if test="status != null">
+          , STATUS = #{status}
+          </if>
+          <if test="modelType != null">
+          , MODEL_TYPE = #{modelType}
+          </if>
+          <if test="modelPath != null">
+          , MODEL_PATH = #{modelPath}
+          </if>
+          <if test="modelAuthKey != null">
+          , MODEL_AUTH_KEY = #{modelAuthKey}
+          </if>
+        WHERE
+            ID = #{id}
+        AND
+            USE_YN = 'Y'
+    </update>
+
+  <update id="detailUpdate" parameterType="com.kt.smp.stt.train.train.domain.SttTrainVO">
+    /* SttTrainMapper.detailUpdate */
+    UPDATE
+    IAAP_STT_TRAIN_MNG
+    SET
+    DESCRIPTION = #{description}
+    WHERE
+      ID = #{id}
+    AND
+      USE_YN = 'Y'
+  </update>
+
+    <update id="updateCallbackFields" parameterType="com.kt.smp.stt.train.train.domain.SttTrainVO">
+		/* SttTrainMapper.updateCallbackFields */
+        UPDATE
+            IAAP_STT_TRAIN_MNG
+        SET
+            RESULT_CODE = null
+            , RESULT_MSG = null
+            , STATUS = null
+            , MODEL_TYPE = null
+            , MODEL_PATH = null
+            , MODEL_AUTH_KEY = null
+            , COMPLETED_AT = null
+            , DURATION = null
+        WHERE
+            ID = #{id}
+        AND
+            USE_YN = 'Y'
+    </update>
+</mapper>

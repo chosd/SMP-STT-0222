@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <div id="sttSampleWidgetLoadingBar"  role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 0;">
+        <div class="mdc-linear-progress__buffering-dots"></div>
+        <div class="mdc-linear-progress__buffer"></div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+    </div>
+    <div id="sttSampleWidget" class="p-2">
+        <div class="mdc-layout-grid__inner">
+            <h2 class="mdc-layout-grid__cell--span-12 mdc-form-field">샘플위젯입니다.</h2>
+            <div class="mdc-layout-grid__cell--span-12 mdc-form-field">
+                <div id="timeDisplayInput"  class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                    <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required value=""/>
+                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                        <div class="mdc-notched-outline__leading"></div>
+                        <div class="mdc-notched-outline__notch">
+                            <label class="mdc-floating-label">시간</label>
+                        </div>
+                        <div class="mdc-notched-outline__trailing"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+<th:block layout:fragment="script">
+    <script type="application/javascript"> 
+        (function () {
+            new Vue({
+                el: "#sttSampleWidget",
+                data: {
+                    moment: moment,
+                    paramsJson: "",
+                    refreshTimer: null,
+
+                },
+                created: function () {
+                    console.log("sampleWidget widget created");
+                },
+                mounted: function () {
+                    var self = this;
+                    var $el = $(this.$el);
+
+                    this.initMaterialUx();
+
+                    this.doRefresh();
+
+                    $el.unbind('widget.move').bind('widget.move', function (ev) {
+                        if (self.refreshTimer != null) {
+                            clearTimeout(self.refreshTimer);
+                            self.refreshTimer = null;
+                        }
+                        console.log("sampleWidget", 'widget.move');
+                    });
+
+                    $el.unbind('widget.update').bind('widget.update', function (ev, params) {
+                        console.log("sampleWidget", 'widget.update', params);
+                        self.paramsJson = JSON.stringify(params);
+                    });
+
+                },
+                methods: {
+                    /**
+                     * 구글 Material component 초기화
+                     */
+                    initMaterialUx: function () {
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0));
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+                    },
+
+                    doRefresh: function () {
+                        var self = this;
+                        var $loadingBar = $('#sttSampleWidgetLoadingBar');
+
+                        if (this.refreshTimer != null) {
+                            clearTimeout(this.refreshTimer);
+                            this.refreshTimer = null;
+                        }
+
+                        $('#timeDisplayInput').data('textField').value = new moment().format('YYYY-MM-DD HH:mm:ss');
+
+                        self.refreshTimer = setTimeout(function () {
+                            if (self.refreshTimer != null) {
+                                self.doRefresh();
+                            }
+                        }, 300);
+                    },
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>

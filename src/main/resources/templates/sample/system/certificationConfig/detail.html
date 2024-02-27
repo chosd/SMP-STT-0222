@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ko"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorate="layouts/nolayout">
+	<th:block layout:fragment="html">
+		<div class="contentRoot mdc-layout-grid__inner pb-3">
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+				<h2>시스템 인증 상세 <span class="mdc-form-field">신한금융_운영 > 신한은행P</span></h2>
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2"></div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2 mdc-form-field">
+				<button class="mdc-button mdc-button--raised mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg w-100">
+					<span class="mdc-button__ripple"></span>
+					<i class="material-icons mdc-button__icon">keyboard_backspace</i>
+					<span class="mdc-button__label">목록으로</span>
+				</button>
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2 mdc-form-field">
+				<button id="alert-server-interworking-dialog-btn" class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100">
+					<span class="mdc-button__ripple"></span>
+					<i class="material-icons mdc-button__icon">link</i>
+					<span class="mdc-button__label">문자/메일 서버 연동</span>
+				</button>
+			</div>
+			
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2">
+				<div class="border-bottom w-100 ">
+					<h4 style="margin-block-end: 0.46em;">인증 방법</h4>
+				</div>
+				<ul class="mdc-list w-100">
+					<li class="mdc-list-item mdc-ripple-upgraded text-truncate" tabindex="-1">상위 설정에 따름</li>
+					<li class="mdc-list-item mdc-list-item--activated mdc-ripple-upgraded text-truncate" aria-selected="true">SMP 로그인</li>
+					<li class="mdc-list-item mdc-ripple-upgraded text-truncate" tabindex="-1">SSO 연동</li>
+					<li class="mdc-list-item mdc-ripple-upgraded text-truncate" tabindex="-1">LDAP 연동</li>
+					<li class="mdc-list-item mdc-ripple-upgraded text-truncate" tabindex="-1">AD 연동</li>
+				</ul>
+				
+				<div>Toast</div>
+				<div class="mt-1">
+					<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.error('일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.', '실패');">API 처리 실패</button>
+					<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.success('변경된 정보가 저장되었습니다.', '저장')">저장 완료</button>
+				</div>
+			</div>
+			
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-10 mdc-layout-grid__inner">
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12 mdc-layout-grid__inner border-bottom" style="height: 50px;">
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+						<h4>인증 설정</h4>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2"></div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2">
+						<button class="mdc-button mdc-button--raised mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg w-100" onclick="confirm('변경된 정보를 되돌리시겠습니까?');">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">undo</i>
+							<span class="mdc-button__label">되돌리기</span>
+						</button>
+					</div>
+					<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2">
+						<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('변경된 정보를 저장하시겠습니까?');">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">save</i>
+							<span class="mdc-button__label">저장</span>
+						</button>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">동시 접속 설정</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">접속 허용</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">접속 차단</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">추가 인증 설정</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					        	<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">없음</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">OPT 인증</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">이미지 인식</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="2" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">텍스트 인식</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">계정 변경 알림</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					        	<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">없음</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">문자</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">메일</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="2" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">문자/메일</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-5">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">로그인 실패 관리</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					        	<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">없음</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">5회 연속 실패 시 30분 정지</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">5회 연속 실패 시 60분 정지</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="2" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">10회 연속 실패 시 계정 잠김</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-1">
+					<button id="login-failed-custom-config-dialog-btn" class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 h-100">
+						<span class="mdc-button__ripple"></span>
+						<i class="material-icons mdc-button__icon">dashboard_customize</i>
+						<span class="mdc-button__label">개별<br/>설정</span>
+					</button>
+				</div>
+				
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-5">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">휴면 계정 관리</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					        	<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">없음</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">30일이상 휴면 계정 잠김</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">30일이상 휴면 계정 잠김</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="2" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">365일이상 휴면 계정 삭제</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-1">
+					<button id="sleeper-account-custom-config-dialog-btn" class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 h-100">
+						<span class="mdc-button__ripple"></span>
+						<i class="material-icons mdc-button__icon">dashboard_customize</i>
+						<span class="mdc-button__label">개별<br/>설정</span>
+					</button>
+				</div>
+
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12" style="height: 40px;">
+					<h4 class="mdc-layout-grid__cell--span-4">SMP 로그인 설정</h4>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">초기 비밀번호 설정</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">고정</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">관리자 이름</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">관리자 연락처</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">관리자 조직</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">비밀번호 변경 주기</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">없음</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">6개월</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">1년</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >초기 비밀번호</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >초기 비밀번호 확인</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+					<div class="mdc-text-field-helper-line">
+						<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error">
+							비밀번호와 비밀번호 확인이 일치하지 않습니다. 확인 후 입력해 주세요.
+						</p>
+					</div>
+				</div>
+				
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >비밀번호 접두어</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >비밀번호 접미어</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+			
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12" style="height: 40px;">
+					<h4 class="mdc-layout-grid__cell--span-4">SSO 연동 설정</h4>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+					    <div class="mdc-select__anchor" aria-required="true">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label mdc-floating-label--required">SSO 연동 모듈</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">Boot Spring Security SSO version 1.0</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">Boot Spring Security SSO version 2.0</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-3">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >SSO Secret 필드명</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-9">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >SSO Secret 필드 값</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+					
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-3">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">SSO 인증 요청 Method</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">GET</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">POST</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">PUT</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">DELETE</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-9">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >SSO 인증 요청 URL</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+					
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-3">
+					<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+					    <div class="mdc-select__anchor">
+					        <div class="mdc-notched-outline">
+					            <span class="mdc-notched-outline__leading"></span>
+					            <div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">SSO 정보 요청 Method</label>
+								</div>
+					            <span class="mdc-notched-outline__trailing"></span>
+					        </div>
+					        <span class="mdc-select__selected-text-container overflow-hidden">
+					            <span class="mdc-select__selected-text"></span>
+					        </span>
+					        <span class="mdc-select__dropdown-icon"></span>
+					    </div>
+					    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+					        <ul class="mdc-deprecated-list">
+					            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">GET</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">POST</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">PUT</span>
+					            </li>
+					            <li class="mdc-deprecated-list-item" data-value="1" >
+					                <span class="mdc-deprecated-list-item__ripple"></span>
+					                <span class="mdc-deprecated-list-item__text">DELETE</span>
+					            </li>
+					        </ul>
+					    </div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-9">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >SSO 정보 요청 URL</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12" style="height: 40px;">
+					<h4 class="mdc-layout-grid__cell--span-4">SSO 연동 테스트</h4>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-5">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >아이디</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-5">
+					<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+						<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >비밀번호</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2">
+					<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 h-100">
+						<span class="mdc-button__ripple"></span>
+						<i class="material-icons mdc-button__icon">play_arrow</i>
+						<span class="mdc-button__label">호출</span>
+					</button>
+				</div>
+				<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<div class="mdc-text-field text-field mdc-text-field--fullwidth mdc-text-field--no-label mdc-text-field--textarea">
+						<textarea class="mdc-text-field__input" rows="10"></textarea>
+						<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+							<div class="mdc-notched-outline__leading"></div>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label" >호출결과</label>
+							</div>
+							<div class="mdc-notched-outline__trailing"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="alert-server-interworking-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title ">문자/메일 서버 연동</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner pt-2">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >문자 서버</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+							<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded w-100 h-100">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">link</i>
+								<span class="mdc-button__label">연동 확인</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >메일 서버</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
+							<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded w-100 h-100">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">link</i>
+								<span class="mdc-button__label">연동 확인</span>
+							</button>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">close</i>
+								<span class="mdc-button__label">취소</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('변경된 정보를 저장하시겠습니까?');">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">save</i>
+								<span class="mdc-button__label">저장</span>
+							</button>
+						</div>
+					</footer>
+				</div>
+			</div>
+		</div>
+		
+		<div id="login-failed-custom-config-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">로그인 실패 관리</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner pt-2">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="number" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >연속 실패 횟수</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+								<div class="mdc-select__anchor">
+									<div class="mdc-notched-outline">
+										<span class="mdc-notched-outline__leading"></span>
+										<div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label">실패 계정 관리 방안</label>
+										</div>
+										<span class="mdc-notched-outline__trailing"></span>
+									</div>
+									<span class="mdc-select__selected-text-container overflow-hidden">
+							            <span class="mdc-select__selected-text"></span>
+							        </span>
+									<span class="mdc-select__dropdown-icon"></span>
+								</div>
+								<div class="mdc-layout-grid__inner mdc-menu-surface--fixed" style="z-index: 9999;">
+									<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+										<ul class="mdc-deprecated-list">
+											<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+												<span class="mdc-deprecated-list-item__ripple"></span>
+												<span class="mdc-deprecated-list-item__text">정지</span>
+											</li>
+											<li class="mdc-deprecated-list-item" data-value="1" >
+												<span class="mdc-deprecated-list-item__ripple"></span>
+												<span class="mdc-deprecated-list-item__text">잠김</span>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="number" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >정지 시간(분)</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">close</i>
+								<span class="mdc-button__label">취소</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('변경된 정보를 저장하시겠습니까?');">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">save</i>
+								<span class="mdc-button__label">저장</span>
+							</button>
+						</div>
+					</footer>
+				</div>
+			</div>
+		</div>
+		
+		<div id="sleeper-account-custom-config-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">휴면 계정 관리</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner pt-2">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="number" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >휴면 조건 일수(일)</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+							    <div class="mdc-select__anchor">
+							        <div class="mdc-notched-outline">
+							            <span class="mdc-notched-outline__leading"></span>
+							            <div class="mdc-notched-outline__notch">
+											<label class="mdc-floating-label">휴면 계정 관리 방안</label>
+										</div>
+							            <span class="mdc-notched-outline__trailing"></span>
+							        </div>
+							        <span class="mdc-select__selected-text-container overflow-hidden">
+							            <span class="mdc-select__selected-text"></span>
+							        </span>
+							        <span class="mdc-select__dropdown-icon"></span>
+							    </div>
+							    <div class="mdc-layout-grid__inner mdc-menu-surface--fixed" style="z-index: 9999;">
+								    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+								        <ul class="mdc-deprecated-list">
+								            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="0" aria-selected="true">
+								                <span class="mdc-deprecated-list-item__ripple"></span>
+								                <span class="mdc-deprecated-list-item__text">잠김</span>
+								            </li>
+								            <li class="mdc-deprecated-list-item" data-value="1" >
+								                <span class="mdc-deprecated-list-item__ripple"></span>
+								                <span class="mdc-deprecated-list-item__text">삭제</span>
+								            </li>
+								        </ul>
+								    </div>
+							    </div>
+							</div>
+						</div>
+						
+					</section>
+					<footer class="mdc-dialog__actions mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100 mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">close</i>
+								<span class="mdc-button__label">취소</span>
+							</button>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+							<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('변경된 정보를 저장하시겠습니까?');">
+								<span class="mdc-button__ripple"></span>
+								<i class="material-icons mdc-button__icon">save</i>
+								<span class="mdc-button__label">저장</span>
+							</button>
+						</div>
+					</footer>
+				</div>
+			</div>
+		</div>
+	</th:block>
+	<th:block layout:fragment="script">
+		<script type="text/javascript">
+		(function () {
+			new Vue({
+				el: ".contentRoot",
+				data: {
+					
+				},
+				created: function () {
+					
+				},
+				mounted: function () {
+					// 페이지 이동시 처리 
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						console.log("page move out");
+					});
+					
+					this.initMaterialUx();
+					
+
+					// 문자/메일 서버 연동 팝업
+					var modal0 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#alert-server-interworking-dialog'));
+					$('#alert-server-interworking-dialog-btn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						var inputs = modal0.root.querySelectorAll('input');
+						for (const el of inputs) {
+							el.value = "";
+						}
+						
+						modal0.open();
+					});
+					
+					// 로그인 실패 관리 팝업
+					var modal1 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#login-failed-custom-config-dialog'));
+					$('#login-failed-custom-config-dialog-btn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						var inputs = modal1.root.querySelectorAll('input');
+						for (const el of inputs) {
+							el.value = "";
+						}
+						
+						modal1.open();
+					});
+					
+					// 휴면 계정 관리 팝업
+					var modal2 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#sleeper-account-custom-config-dialog'));
+					$('#sleeper-account-custom-config-dialog-btn').unbind('click').bind('click', function () {
+						// 팝업 초기화
+						var inputs = modal2.root.querySelectorAll('input');
+						for (const el of inputs) {
+							el.value = "";
+						}
+						
+						modal2.open();
+					});
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							el.class
+							mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0);
+						}
+						
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const textField of textFields) {
+							mdc.textField.MDCTextField.attachTo(textField);
+						}
+						
+						// select material ux 적용
+						const selects = document.querySelectorAll('.mdc-select');
+						for (const el of selects) {
+							const select = mdc.select.MDCSelect.attachTo(el);
+							select.listen('MDCSelect:change', (evt) => {
+								console.log(evt);
+							});
+						}
+						
+						// list material ux 적용
+						const lists = document.querySelectorAll('.mdc-list');
+						for (const el of lists) {
+							let list = mdc.list.MDCList.attachTo(el);
+							list.wrapFocus = true;
+						}
+					}
+				}
+			});
+		})();
+		</script>
+	</th:block>
+</html>

@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>검증 데이터셋 관리</h2>
+            <div class="button-group">
+                <button id="datasetAddDialogBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon">add</i>
+                    <span class="mdc-button__label">데이터셋 등록</span>
+                </button>
+            </div>
+        </div>
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header pb-4">
+                    <div class="form-row md-size multiline-align-top">
+                        <div id="searchServiceModelSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">서비스모델</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-deprecated-list">
+                                    <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value=" " aria-selected="true">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">전체</span>
+                                    </li>
+                                    <li v-for="(item, index) in serviceModelList" class="mdc-deprecated-list-item" :data-value="item.serviceCode" >
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">{{item.serviceModelName}}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flex-auto flex-ratio-two">
+                            <div class="form-row h-100">
+                                <div id="searchRegDtFromInput" class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <i class="material-icons mdc-text-field__icon">event</i>
+                                    <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label" >등록일(from)</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                                <div id="searchRegDtToInput" class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <i class="material-icons mdc-text-field__icon">event</i>
+                                    <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label" >등록일(to)</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg">
+                                    등록일이 없는 경우는 전체 기간을 뜻합니다.
+                                </p>
+                            </div>
+                        </div>
+                        <div id="searchNameInput" class="mdc-text-field text-field mdc-text-field--outlined">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" v-model="name" @keyup.enter="doSearch"/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >검증데이터셋</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                        <div id="searchRegIdInput" class="mdc-text-field text-field mdc-text-field--outlined">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" v-model="regId" @keyup.enter="doSearch"/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label">작성자</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                        <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="doSearch">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">search</i>
+                            <span class="mdc-button__label">검색</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="table-controls form-row md-size">
+                        <div class="table-result-info flex-auto">
+                            <h4>검색결과 : <span>{{fn.addComma(0 < itemFromNum ? itemToNum+1 : 0)}}</span> ~ <span>{{fn.addComma(itemFromNum)}}</span> / 총 <span>{{fn.addComma(totalCount)}}</span>건</h4>
+                        </div>
+                        <button
+                                class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--error"
+                                @click="doDelete">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">delete</i>
+                            <span class="mdc-button__label">선택 삭제</span>
+                        </button>
+                        <div id="sizeSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">레코드 수</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-deprecated-list">
+                                    <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value="5" aria-selected="true" @click="size=5;">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">5개</span>
+                                    </li>
+                                    <li class="mdc-deprecated-list-item" data-value="10" @click="size=10;">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">10개</span>
+                                    </li>
+                                    <li class="mdc-deprecated-list-item " data-value="50" @click="size=50;">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">50개</span>
+                                    </li>
+                                    <li class="mdc-deprecated-list-item " data-value="100" @click="size=100;">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">100개</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="mdc-data-table-wrapper">
+                            <!-- loading bar -->
+                            <div id="datasetListLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+                                <div class="mdc-linear-progress__buffering-dots"></div>
+                                <div class="mdc-linear-progress__buffer"></div>
+                                <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                                    <span class="mdc-linear-progress__bar-inner"></span>
+                                </div>
+                                <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                                    <span class="mdc-linear-progress__bar-inner"></span>
+                                </div>
+                            </div>
+                            <div class="mdc-data-table">
+                                <div class="mdc-data-table__table-container">
+                                    <table class="mdc-data-table__table">
+                                        <thead>
+                                        <tr class="mdc-data-table__header-row">
+                                            <th class="mdc-data-table__header-cell mdc-data-table__header-cell--checkbox text-center"
+                                                role="columnheader" scope="col">
+                                                <div
+                                                    class="mdc-checkbox mdc-data-table__header-row-checkbox mdc-checkbox--upgraded mdc-checkbox--selected mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                                                    <input id="chk-all" type="checkbox"
+                                                           class="mdc-checkbox__native-control"
+                                                           aria-checked="mixed"/>
+                                                    <div class="mdc-checkbox__background">
+                                                        <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                            <path class="mdc-checkbox__checkmark-path" fill="none"
+                                                                  d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                                        </svg>
+                                                        <div class="mdc-checkbox__mixedmark"></div>
+                                                    </div>
+                                                    <div class="mdc-checkbox__ripple"></div>
+                                                </div>
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">No.
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">서비스모델
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">검증데이터셋
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">검증데이터수
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">설명
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">작성자
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">등록일시
+                                            </th>
+                                            <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                                scope="col">다운로드
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="mdc-data-table__content" v-if="0 == currentList.length">
+                                        <tr class="mdc-data-table__row" aria-selected="false">
+                                            <td class="text-center" colspan="9">검색 결과가 없습니다.</td>
+                                        </tr>
+                                        </tbody>
+                                        <tbody class="mdc-data-table__content" v-if="0 < currentList.length">
+                                        <tr v-for="(item, idx) in currentList" :data-id="item.id"
+                                            class="dataset-info-row mdc-data-table__row" aria-selected="false"
+                                            style="cursor: pointer;">
+                                            <td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
+                                                <div
+                                                    class="mdc-checkbox mdc-data-table__row-checkbox mdc-checkbox--upgraded mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                                                    <input type="checkbox" class="mdc-checkbox__native-control chk-row"
+                                                           aria-labelledby="u60" :value="item.id"/>
+                                                    <div class="mdc-checkbox__background">
+                                                        <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                            <path class="mdc-checkbox__checkmark-path" fill="none"
+                                                                  d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                                        </svg>
+                                                        <div class="mdc-checkbox__mixedmark"></div>
+                                                    </div>
+                                                    <div class="mdc-checkbox__ripple"></div>
+                                                </div>
+                                            </td>
+                                            <td class="mdc-data-table__cell text-center">{{itemFromNum - idx}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.serviceModelName}}</td>
+                                            <td class="mdc-data-table__cell">{{item.name}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.numOfData}}</td>
+                                            <td class="mdc-data-table__cell">{{item.description}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.regId}}</td>
+                                            <td class="mdc-data-table__cell text-center">
+                                                {{moment(item.regDt).format("YYYY-MM-DD HH:mm:ss")}}
+                                            </td>
+                                            <td class="mdc-data-table__cell text-center">
+                                                <button
+                                                    class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-theme--primary"
+                                                    :data-id="item.id" @click="download($event, item.id)">
+                                                    file_download
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-pagination mdc-data-table__pagination" v-if="0 < currentList.length">
+                        <div class="mdc-data-table__pagination-trailing mdc-chip-set mdc-chip-set--choice">
+                            <div class="mdc-data-table__pagination-navigation">
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-first-page="true" v-bind:disabled="!(1 < currentPageNum)" @click="goPage(1)">
+                                    <div class="mdc-button__icon">first_page</div>
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-prev-page="true" v-bind:disabled="!(1 < currentPageNum)" @click="goPage(Math.max(1, currentPageNum-1))">
+                                    <div class="mdc-button__icon">chevron_left</div>
+                                </button>
+                                <button v-for="page in pagingNumbers" class="mdc-chip mdc-data-table__pagination-button fs-6 bg-transparent" :class="{'mdc-chip--selected': currentPageNum==page}" @click="goPage(page)">
+                                    {{page}}
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-next-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)" @click="goPage(Math.min(currentPageNum+1, lastPageNum))">
+                                    <div class="mdc-button__icon">chevron_right</div>
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6" data-last-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)" @click="goPage(lastPageNum)">
+                                    <div class="mdc-button__icon">last_page</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="datasetAddDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+        <div class="mdc-dialog__scrim"></div>
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <div class="mdc-dialog__header">
+                    <h2 class="mdc-dialog__title">검증데이터셋 등록</h2>
+                    <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+                        close
+                    </button>
+                </div>
+                <!-- loading bar -->
+                <div id="datasetAddDialogLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+                    <div class="mdc-linear-progress__buffering-dots"></div>
+                    <div class="mdc-linear-progress__buffer"></div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                </div>
+                <section class="mdc-dialog__content form-row-stack">
+                    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+                            *모든 항목은 필수입력사항입니다.
+                        </p>
+                    <div class="form-row multiline-align-top">
+                        <div class="flex-auto">
+                            <div id="newDatasetNameInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">데이터셋 이름</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p id="duplicateNewDatasetNameMessage"
+                                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    사용 가능한 데이터셋 이름입니다
+                                </p>
+                            </div>
+                        </div>
+                        <button id="newDatasetNameCheckBtn"
+                                class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">content_copy</i>
+                            <span class="mdc-button__label">중복확인</span>
+                        </button>
+                    </div>
+                    <div class="form-row">
+                        <div id="newDatasetServiceModelSelector"
+                             class="mdc-select mdc-select--outlined mdc-select--no-label flex-auto">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">서비스모델</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                <span class="mdc-select__selected-text"></span>
+                            </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-deprecated-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row multiline-align-top">
+                        <div class="flex-auto">
+                            <div id="newDatasetDirectorySelector"
+                                 class="mdc-select mdc-select--outlined mdc-select--no-label w-100 lg-size">
+                                <div class="mdc-select__anchor">
+                                    <div class="mdc-notched-outline">
+                                        <span class="mdc-notched-outline__leading"></span>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">음원파일 저장 디렉토리</label>
+                                        </div>
+                                        <span class="mdc-notched-outline__trailing"></span>
+                                    </div>
+                                        <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                                    <span class="mdc-select__dropdown-icon"></span>
+                                </div>
+                                <div class="mdc-menu-surface--fixed" style="z-index: 9999">
+                                    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                        <ul class="mdc-deprecated-list"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p id="duplicateNewDatasetDirectoryMessage"
+                                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    사용 가능한 디렉토리입니다
+                                </p>
+                            </div>
+                        </div>
+                        <button id="newDatasetDirectoryCheckBtn"
+                                class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">content_copy</i>
+                            <span class="mdc-button__label">중복확인</span>
+                        </button>
+                    </div>
+                    <div class="form-row">
+                        <div id="newDatasetDescriptionInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >데이터셋 설명</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <footer class="mdc-dialog__actions">
+                    <button id="newDatasetAddBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">등록</span>
+                    </button>
+                    <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">취소</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+    </div>
+    <div id="datasetDetailDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+        <div class="mdc-dialog__scrim"></div>
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <div class="mdc-dialog__header">
+                    <h2 class="mdc-dialog__title">검증데이터셋 상세</h2>
+                    <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+                        close
+                    </button>
+                </div>
+                <!-- loading bar -->
+                <div id="datasetDetailDialogLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+                    <div class="mdc-linear-progress__buffering-dots"></div>
+                    <div class="mdc-linear-progress__buffer"></div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                </div>
+                <section class="mdc-dialog__content form-row-stack">
+                    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end">
+                            *모든 항목은 필수입력사항입니다.
+                        </p>
+                    <div class="form-row">
+                        <div id="savedDatasetIdInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >데이터셋 ID</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row multiline-align-top">
+                        <div class="flex-auto">
+                            <div id="savedDatasetNameInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">데이터셋 이름</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p id="duplicateSavedDatasetNameMessage"
+                                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    사용 가능한 데이터셋 이름입니다
+                                </p>
+                            </div>
+                        </div>
+                        <button id="savedDatasetNameCheckBtn"
+                                class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">content_copy</i>
+                            <span class="mdc-button__label">중복확인</span>
+                        </button>
+                    </div>
+                    <div class="form-row">
+                        <div id="savedDatasetServiceModelInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >서비스모델</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div id="savedDatasetDirectoryInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >디렉토리 경로</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div id="savedDatasetDescriptionInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >데이터셋 설명</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <footer class="mdc-dialog__actions">
+                    <button id="savedDatasetUpdateBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">등록</span>
+                    </button>
+                    <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">취소</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        (function () {
+
+            const DEFAULT_PAGE_START = 0;
+            const DEFAULT_PAGE_SIZE = 5;
+            const PAGING_BTN_SIZE = 5;
+            const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+            const LABEL = {
+                message: {
+                    // 공통
+                    API_ERROR_TITLE: "실패",
+                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+
+                    INVALID_DATASET_NAME_ERROR: "올바른 데이터셋 이름을 입력해 주세요.",
+                    CONFLICT_DATASET_NAME_ERROR: "이미 등록되어 있거나 올바르지 않은 데이터셋 이름 입니다.",
+                    VALID_DATASET_NAME: "사용 가능한 데이터셋 이름 입니다.",
+                    INVALID_DATASET_DIRECTORY_ERROR: "디렉토리를 선택해 주세요.",
+                    CONFLICT_DATASET_DIRECTORY_ERROR: "이미 등록되어 있거나 올바르지 않은 디렉토리 입니다.",
+                    VALID_DATASET_DIRECTORY: "사용 가능한 디렉토리 입니다.",
+                    DATASET_ADD_CONFIRM: "신규 데이터셋을 등록하시겠습니까?",
+                    DATASET_ADD_TITLE: "데이터셋 등록",
+                    DATASET_ADD_MESSAGE: "신규 데이터셋이 등록되었습니다.",
+                    DATASET_ADD_FAIL: "데이터셋 등록에 실패하였습니다. 입력된 정보를 확인 후 다시 등록해 주세요.",
+                    DATASET_UPDATE_CONFIRM: "데이터셋을 수정하시겠습니까?",
+                    DATASET_UPDATE_TITLE: "데이터셋 수정",
+                    DATASET_UPDATE_MESSAGE: "데이터셋이 수정되었습니다.",
+                    DATASET_UPDATE_FAIL: "데이터셋 수정에 실패하였습니다. 입력된 정보를 확인 후 다시 등록해 주세요.",
+                    DATASET_DOWNLOAD_FAIL : "데이터셋 다운로드에 실패하였습니다. 서버 저장 경로를 확인해 주세요."
+                }
+            };
+            new Vue({
+                el: ".contentRoot",
+                data: {
+                    LABEL: LABEL,
+                    moment: moment,
+                    fn: fn,
+                    serviceUrlPrefix: serviceUrlPrefix,
+
+                    //검색조건
+                    serviceModeId: "",
+                    regFrom: "",
+                    regDt: "",
+                    name: "",
+                    regId: "",
+                    start: DEFAULT_PAGE_START,
+                    size: DEFAULT_PAGE_SIZE,
+
+                    // 현재 적용되어 있는 검색 조건
+                    _searchCondition: {
+                        serviceModelId: "",
+                        regDtFrom: "",
+                        regDtTo: "",
+                        name: "",
+                        regId: "",
+                        start: 0,
+                        size: 0,
+                    },
+
+                    // 검색 결과
+                    totalCount: 0,
+                    currentPageNum: 0,
+                    lastPageNum: 0,
+                    itemFromNum: 0,
+                    itemToNum: 0,
+                    currentList: [],
+                    pagingNumbers: [],
+
+                    // etc
+                    initSearched: false,		// 초기 검색이 제공되었는지 여부
+
+                    // 그룹 등록 Dialog 변수들
+                    newDatasetName: "",
+                    newDatasetServiceModelId: "",
+                    newDatasetDirectoryId: "",
+                    newDatasetDescription: "",
+
+                    modifiedDatasetName: "",
+                    modifiedDatasetDescription: "",
+
+                    datasetAddDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#datasetAddDialog')),
+                    datasetDetailDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#datasetDetailDialog')),
+
+                    serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+                    directoryList: JSON.parse("[[${directoryList}]]".replaceAll("\\","/").replaceAll('&quot;', "\""))
+                },
+                created: function () {
+                    var self = this;
+                    
+                    this.initPage(location.search.slice(1));
+                    this.$nextTick(function () {
+                        self.doRefresh();
+                    });
+
+                    this.initDatasetAddDialogSelector();
+                },
+                mounted: function () {
+                    var self = this;
+
+                    // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+                        console.log("page move out");
+                        var $searchRegDtFromInput = $('#searchRegDtFromInput');
+                        var $searchRegDtToInput = $('#searchRegDtToInput');
+                        $searchRegDtFromInput.data('datepicker').destroy();
+                        $searchRegDtToInput.data('datepicker').destroy();
+                    });
+
+                    this.initMaterialUx();
+
+                    // 팝업 이외 영역 클릭 시 아무런 처리 하지 않음 default close
+                    this.datasetAddDialog.scrimClickAction = '';
+
+                    $('#searchServiceModelSelector').data('select').unlisten('MDCSelect:change')
+                    $('#searchServiceModelSelector').data('select').listen('MDCSelect:change', function (event) {
+                        self.serviceModelId = $.trim(event.detail.value);
+                        // self.doSearch();
+                    });
+
+                    $('#sizeSelector').data('select').unlisten('MDCSelect:change')
+                    $('#sizeSelector').data('select').listen('MDCSelect:change', function (event) {
+                        self.size = $.trim(event.detail.value);
+                        self.doSearch();
+                    });
+
+                    // 데이터셋 등록 요청 팝업
+                    $('#datasetAddDialogBtn').unbind('click').bind('click', function () {
+                        // 팝업 초기화
+                        self.showBeforeDatasetAddDialog($(self.datasetAddDialog.root));
+                        self.datasetAddDialog.open();
+                    });
+
+                    // 데이터셋 등록 팝업 show 후처리
+                    this.datasetAddDialog.listen('MDCDialog:opened', function() {
+                        self.showAfterDatasetAddDialog($(self.datasetAddDialog.root));
+                    });
+
+                    this.datasetDetailDialog.listen('MDCDialog:opened', function() {
+                        self.showAfterDatasetDetailDialog($(self.datasetDetailDialog.root));
+                    });
+
+                },
+                methods: {
+
+                    /**
+                     * 초기 url을 기준으로 화면 내용 설정
+                     */
+                    initPage: function (queryString) {
+                        var params = Qs.parse(queryString);
+                        
+                        this.serviceModelId =  params.serviceModeId || "";
+                        this.regDtFrom = params.regDtFrom || "";
+                        this.regDtTo = params.regDtTo || "";
+                        this.name = params.name || "";
+                        this.regId = params.regId || "";
+                        this.start = parseInt(params.start || DEFAULT_PAGE_START);
+                        this.size = parseInt(params.size || DEFAULT_PAGE_SIZE);
+
+                        this._searchCondition = {
+                            serviceModelId: this.serviceModelId,
+                            regDtFrom: this.regDtFrom,
+                            regDtTo: this.regDtTo,
+                            name: this.name,
+                            regId: this.regId,
+                            start: this.start,
+                            size: this.size,
+                        };
+
+                        // selector 초기값 설정
+                        $('#searchServiceModelSelector').attr('data-value', this.serviceModelId);
+                        $('#sizeSelector').attr('data-value', this.size);
+                    },
+
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            el.class
+                            mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0);
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+
+                        // select material ux 적용
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            var $select = mdc.select.MDCSelect.attachTo(el);
+                            var $el = $(el);
+                            var value = $el.attr('data-value');
+                            // 초기값 설정
+                            _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+                            $el.data('select', $select);
+                        }
+
+                        $("#chk-all").on('click', function() {
+                            $(".chk-row").prop('checked', $("#chk-all").is(":checked"));
+                        });
+                    },
+
+                    initDatasetAddDialogSelector: function() {
+                        var serviceModelListHtml = this.getDefaultListElement();
+                        for(var serviceModel of this.serviceModelList) {
+							
+                            serviceModelListHtml += this.getListElement(serviceModel.serviceModelName, serviceModel.serviceCode);
+                        }
+
+                        var directoryListHtml = this.getDefaultListElement();
+                        for(var directory of this.directoryList) {
+                            directoryListHtml += this.getListElement(directory.name, directory.id);
+                        }
+
+                        $("#newDatasetServiceModelSelector ul").html(serviceModelListHtml);
+                        $("#newDatasetDirectorySelector ul").html(directoryListHtml);
+                    },
+
+                    getListElement: function(text, value) {
+                        var element = '<li class="mdc-deprecated-list-item" data-value="{value}"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">{text}</span></li>'
+                        element = element.replace('{text}', text);
+                        element = element.replace('{value}', value);
+
+                        return element;
+                    },
+
+                    getDefaultListElement: function() {
+                        return '<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value=" " aria-selected="true"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">선택</span></li>'
+                    },
+
+                    /**
+                     * 검색 버튼클릭 시 처리
+                     */
+                    doSearch: function () {
+                        let self = this;
+						
+                        this._searchCondition = {
+                            serviceModelId: this.serviceModelId,
+                            regDtFrom: this.regDtFrom,
+                            regDtTo: this.regDtTo,
+                            name: this.name,
+                            regId: this.regId,
+                            start: 0,
+                            size: this.size,
+                        };
+
+                        this._pushHistory(this._searchCondition);
+                        this._search(this._searchCondition, $('#datasetListLoadingBar'), function (isError, data) {
+                            if (isError) {
+                                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                            } else {
+                                self.renderDatas(data.total, data.object, self._searchCondition);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 특정 페이지로 이동한다.
+                     */
+                    goPage: function (pageNum) {
+                        let self = this;
+
+                        this._searchCondition.start = this._searchCondition.size * (pageNum-1);
+                        this._pushHistory(this._searchCondition);
+                        this._search(this._searchCondition, $('#datasetListLoadingBar'), function (isError, data, total, list) {
+                            if (isError) {
+                                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                            } else {
+                                self.renderDatas(data.total, data.object, self._searchCondition);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 현재 검색 목록을 refresh한다.
+                     */
+                    doRefresh: function () {
+                        let self = this;
+                        this._search(this._searchCondition, $('#datasetListLoadingBar'), function (isError, data, total, list) {
+                            if (isError) {
+                                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                            } else {
+                                self.renderDatas(data.total, data.object, self._searchCondition);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 검색결과를 화면에 연결된 변수들에 저장
+                     */
+                    renderDatas: function (totalCount, list, condition) {
+
+                        $("input[type=checkbox]").prop('checked', false);
+
+                        var self = this;
+                        this.lastPageNum = Math.ceil((totalCount || 0) / condition.size);
+                        this.currentPageNum = Math.ceil(condition.start / condition.size) + 1;
+
+                        this.totalCount = totalCount;
+                        this.currentList = list || [];
+                        // 최신순으로 정렬하기 때문에 역순
+                        this.itemFromNum = totalCount - parseInt(condition.start);
+                        this.itemToNum = totalCount - Math.min(totalCount, parseInt(condition.start) + parseInt(condition.size));
+
+                        this.pagingNumbers = [this.currentPageNum];
+                        for (let diff = 1 ; this.pagingNumbers.length < PAGING_BTN_SIZE && diff <= PAGING_BTN_SIZE ; diff++) {
+                            if (1 <= this.currentPageNum - diff) {
+                                this.pagingNumbers.push(this.currentPageNum - diff);
+                            }
+                            if (this.pagingNumbers.length < PAGING_BTN_SIZE && this.currentPageNum + diff <= this.lastPageNum) {
+                                this.pagingNumbers.push(this.currentPageNum + diff);
+                            }
+                        }
+                        this.pagingNumbers = _.sortBy(this.pagingNumbers);
+
+                        this.initDatepicker();
+
+                        // 화면에 리스트가 구성된 이후 각 row에 대한 클릭 이벤트 적용
+                        this.$nextTick(function() {
+                            $(".chk-row").unbind('click').bind('click', function(ev) {
+                                ev.stopPropagation();
+                            });
+
+                            $('.dataset-info-row').unbind('click').bind('click', function (ev) {
+                                var datasetId = ev.currentTarget.dataset.id;
+                                self.getDataset(datasetId);
+                            });
+                        });
+                    },
+
+                    initDatepicker: function() {
+
+                        var self = this;
+                        var $searchRegDtFromInput = $('#searchRegDtFromInput');
+                        var $searchRegDtToInput = $('#searchRegDtToInput');
+
+                        // MaterialDatepicker 설정
+                        var datepickerOption = {
+                            lang: "en",		// ko 는 없음....
+                            orientation: "portrait",
+                            color: document.defaultView.getComputedStyle(document.documentElement).getPropertyValue("--mdc-theme-primary"),
+                            closeAfterClick: false,
+                            //date: null,
+                            outputFormat: 'YYYY-MM-DD',
+                            topHeaderFormat: 'YYYY MM',
+                            headerFormat: 'Do',
+                        };
+
+                        if ($searchRegDtFromInput.data('datepicker') != null) {
+                            $searchRegDtFromInput.data('datepicker').destroy();
+                        }
+
+                        $searchRegDtFromInput.data('datepicker', new MaterialDatepicker($searchRegDtFromInput.data('textField').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+								if (!$searchRegDtFromInput.data('textField')) {
+									return;
+								}
+                                if (_.isEmpty($searchRegDtFromInput.data('textField').value)) {
+                                    self.regDtFrom = null
+                                } else {
+                                    self.regDtFrom = moment(date).format("YYYY-MM-DD HH:mm:ss");
+                                }
+                            }
+                        })));
+
+                        if ($searchRegDtToInput.data('datepicker') != null) {
+                            $searchRegDtToInput.data('datepicker').destroy();
+                        }
+
+                        $searchRegDtToInput.data('datepicker', new MaterialDatepicker($searchRegDtToInput.data('textField').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+								if (!$searchRegDtToInput.data('textField')) {
+									return;
+								}
+                                if (_.isEmpty($searchRegDtToInput.data('textField').value)) {
+                                    self.regDtTo = null
+                                } else {
+                                    self.regDtTo = moment(date).format("YYYY-MM-DD HH:mm:ss");
+                                }
+                            }
+                        })));
+
+                        $searchRegDtFromInput.data('textField').value = this.regDtFrom ? moment(this.regDtFrom).format("YYYY-MM-DD") : '';
+                        $searchRegDtToInput.data('textField').value = this.regDtTo ? moment(this.regDtTo).format("YYYY-MM-DD") : '';
+
+                    },
+
+                    /**
+                     * 데이터셋 등록 팝업 초기화
+                     */
+                    showBeforeDatasetAddDialog: function($root) {
+
+                        var self = this;
+                        var $newDatasetNameInput = $root.find('#newDatasetNameInput');
+                        var $newDatasetNameCheckBtn = $root.find('#newDatasetNameCheckBtn');
+                        var $duplicateNewDatasetNameMessage = $root.find('#duplicateNewDatasetNameMessage');
+                        var $newDatasetServiceModelSelector = $root.find("#newDatasetServiceModelSelector");
+                        var $newDatasetDirectorySelector = $root.find("#newDatasetDirectorySelector");
+                        var $duplicateNewDatasetDirectoryMessage = $root.find("#duplicateNewDatasetDirectoryMessage");
+                        var $newDatasetDescriptionInput = $root.find("#newDatasetDescriptionInput");
+                        var $loadingBar = $root.find('#datasetAddDialogLoadingBar');
+                        var $datasetAddBtn = $root.find('#newDatasetAddBtn');
+
+                        // 팝업 출력 내용 초기화
+                        $newDatasetNameInput.data('textField').value = "";
+                        $newDatasetDescriptionInput.data('textField').value = "";
+                        $duplicateNewDatasetNameMessage.empty();
+                        $duplicateNewDatasetDirectoryMessage.empty();
+                        $newDatasetServiceModelSelector.data('select').value = " ";
+                        $newDatasetDirectorySelector.data('select').value = " ";
+                        $newDatasetNameCheckBtn.prop('disabled', false);
+                        $datasetAddBtn.prop('disabled', true);
+
+                        // input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+                        $root.find('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+                        // 팝업 내용 저장 변수 초기화
+                        this.newDatasetName = "";
+                        this.newDatasetServiceModelId = "";
+                        this.newDatasetDirectoryId = "";
+                        this.newDatasetDescription = "";
+
+                        $loadingBar.css('opacity', 0);
+                    },
+
+                    /**
+                     * 데이터셋 등록 팝업 이벤트 바인딩 & 값 설정
+                     */
+                    showAfterDatasetAddDialog: function($root) {
+
+                        var self = this;
+
+                        var $newDatasetNameInput = $root.find('#newDatasetNameInput');
+                        var $newDatasetNameCheckBtn = $root.find('#newDatasetNameCheckBtn');
+                        var $duplicateNewDatasetNameMessage = $root.find('#duplicateNewDatasetNameMessage');
+                        var $newDatasetServiceModelSelector = $root.find("#newDatasetServiceModelSelector");
+                        var $newDatasetDirectorySelector = $root.find("#newDatasetDirectorySelector");
+                        var $duplicateNewDatasetDirectoryMessage = $root.find("#duplicateNewDatasetDirectoryMessage");
+                        var $newDatasetDirectoryCheckBtn = $root.find("#newDatasetDirectoryCheckBtn");
+                        var $newDatasetDescriptionInput = $root.find("#newDatasetDescriptionInput");
+                        var $loadingBar = $root.find('#datasetAddDialogLoadingBar');
+                        var $datasetAddBtn = $root.find('#newDatasetAddBtn');
+
+                        // 등록 버튼 활성화 처리
+                        var registrationActiveFunc = function () {
+                            if(!_.isEmpty(self.newDatasetName) && _.isEqual(self.newDatasetName, $.trim($newDatasetNameInput.data('textField').value)) &&
+                                !_.isEqual(self.newDatasetServiceModelId, "") && _.isEqual(self.newDatasetServiceModelId, $.trim($newDatasetServiceModelSelector.data('select').value)) &&
+                                !_.isEqual(self.newDatasetDirectoryId, "") && _.isEqual(self.newDatasetDirectoryId, $.trim($newDatasetDirectorySelector.data('select').value))) {
+
+                                $datasetAddBtn.prop('disabled', false);
+                            } else {
+
+                                $datasetAddBtn.prop('disabled', true);
+                            }
+                        };
+
+                        // 데이터셋 이름 입력 변경에 따른 처리
+                        $newDatasetNameInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            if (self.newDatasetName !== "" && _.isEqual(self.newDatasetName, $.trim($newDatasetNameInput.data('textField').value))) {
+                                $newDatasetNameCheckBtn.prop('disabled', true);
+                            } else {
+                                $newDatasetNameCheckBtn.prop('disabled', false);
+                            }
+                            registrationActiveFunc();
+                        });
+
+                        $newDatasetServiceModelSelector.data('select').unlisten("MDCSelect:change");
+                        $newDatasetServiceModelSelector.data('select').listen('MDCSelect:change', (ev) => {
+
+                            self.newDatasetServiceModelId = $newDatasetServiceModelSelector.data('select').value;
+                            registrationActiveFunc();
+                        });
+
+                        $newDatasetDirectorySelector.data('select').unlisten("MDCSelect:change");
+                        $newDatasetDirectorySelector.data('select').listen('MDCSelect:change', (ev) => {
+                            console.log('select change event');
+                            if (self.newDatasetDirectoryId !== "" && _.isEqual(self.newDatasetDirectoryId, $.trim($newDatasetDirectorySelector.data('select').value))) {
+                                $newDatasetDirectoryCheckBtn.prop('disabled', true);
+                            } else {
+                                $newDatasetDirectoryCheckBtn.prop('disabled', false);
+                            }
+                            registrationActiveFunc();
+                        });
+
+                        $newDatasetDescriptionInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+                            self.newDatasetDescription = $newDatasetDescriptionInput.data('textField').value;
+                        });
+
+                        // 데이터셋 이름 중복 확인 버튼 처리
+                        $newDatasetNameCheckBtn.unbind('click').bind('click', function () {
+                            var newName = $newDatasetNameInput.data('textField').value;
+
+                            if ($.trim(newName) === '') {
+                                $duplicateNewDatasetNameMessage.removeClass('mdc-theme--success');
+                                $duplicateNewDatasetNameMessage.addClass('mdc-theme--error');
+                                $duplicateNewDatasetNameMessage.html(LABEL.message.INVALID_DATASET_NAME_ERROR);
+                            } else {
+                                self._duplicateCheckDatasetName(newName, $loadingBar, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateNewDatasetNameMessage.removeClass('mdc-theme--error');
+                                        $duplicateNewDatasetNameMessage.addClass('mdc-theme--success');
+                                        $duplicateNewDatasetNameMessage.html(LABEL.message.VALID_DATASET_NAME);
+                                        self.newDatasetName = $.trim(newName);
+                                    } else {
+                                        $duplicateNewDatasetNameMessage.removeClass('mdc-theme--success');
+                                        $duplicateNewDatasetNameMessage.addClass('mdc-theme--error');
+                                        $duplicateNewDatasetNameMessage.html(LABEL.message.CONFLICT_DATASET_NAME_ERROR);
+                                        self.newDatasetName = '';
+                                    }
+                                    $newDatasetNameInput.trigger('change');
+                                });
+                            }
+                        });
+
+                        $newDatasetDirectoryCheckBtn.unbind('click').bind('click', function () {
+                            var newDirectoryId = $newDatasetDirectorySelector.data('select').value
+
+                            if ($.trim(newDirectoryId) === '') {
+                                $duplicateNewDatasetDirectoryMessage.removeClass('mdc-theme--success');
+                                $duplicateNewDatasetDirectoryMessage.addClass('mdc-theme--error');
+                                $duplicateNewDatasetDirectoryMessage.html(LABEL.message.INVALID_DATASET_DIRECTORY_ERROR);
+                            } else {
+                                self._duplicateCheckDatasetDirectory(newDirectoryId, $loadingBar, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateNewDatasetDirectoryMessage.removeClass('mdc-theme--error');
+                                        $duplicateNewDatasetDirectoryMessage.addClass('mdc-theme--success');
+                                        $duplicateNewDatasetDirectoryMessage.html(LABEL.message.VALID_DATASET_DIRECTORY);
+                                        self.newDatasetDirectoryId = $.trim(newDirectoryId);
+                                    } else {
+                                        $duplicateNewDatasetDirectoryMessage.removeClass('mdc-theme--success');
+                                        $duplicateNewDatasetDirectoryMessage.addClass('mdc-theme--error');
+                                        $duplicateNewDatasetDirectoryMessage.html(LABEL.message.CONFLICT_DATASET_DIRECTORY_ERROR);
+                                        self.newDatasetDirectoryId = '';
+                                    }
+                                    $newDatasetDirectorySelector.data('select').emit('MDCSelect:change');
+                                });
+                            }
+                        });
+
+                        // 데이터셋 등록 버튼 처리
+                        $datasetAddBtn.unbind('click').bind('click', function () {
+                            if (!confirm(LABEL.message.DATASET_ADD_CONFIRM)) {
+                                return ;
+                            }
+
+                            self._registerDataset({
+                                name: self.newDatasetName,
+                                serviceModelId: self.newDatasetServiceModelId,
+                                directoryId: self.newDatasetDirectoryId,
+                                description: self.newDatasetDescription
+                            }, $loadingBar, function (isError, data) {
+                                if (isError) {
+                                    toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                                } else if(data+"" === 'true') {
+                                    toastr.success(LABEL.message.DATASET_ADD_MESSAGE, LABEL.message.DATASET_ADD_TITLE);
+                                    self.datasetAddDialog.close();
+                                    // 목록 갱신
+                                    self.doRefresh();
+                                }
+                            });
+                        });
+                    },
+
+                    /**
+                     * 데이터셋 상세 팝업 초기화
+                     */
+                    showBeforeDatasetDetailDialog: function($root, dataset) {
+
+                        var self = this;
+                        var $savedDatasetIdInput = $root.find("#savedDatasetIdInput");
+                        var $savedDatasetNameInput = $root.find('#savedDatasetNameInput');
+                        var $savedDatasetNameCheckBtn = $root.find('#savedDatasetNameCheckBtn');
+                        var $duplicateSavedDatasetNameMessage = $root.find('#duplicateSavedDatasetNameMessage');
+                        var $savedDatasetServiceModelInput = $root.find("#savedDatasetServiceModelInput");
+                        var $savedDatasetDirectoryInput = $root.find("#savedDatasetDirectoryInput");
+                        var $savedDatasetDescriptionInput = $root.find("#savedDatasetDescriptionInput");
+                        var $datasetUpdateBtn = $root.find('#savedDatasetUpdateBtn');
+                        var $loadingBar = $root.find('#datasetDetailDialogLoadingBar');
+
+                        // 팝업 출력 내용 초기화
+                        $savedDatasetIdInput.data('textField').value = dataset.id;
+                        $savedDatasetNameInput.data('textField').value = dataset.name;
+                        $savedDatasetServiceModelInput.data('textField').value = dataset.serviceModelName;
+                        $savedDatasetDirectoryInput.data('textField').value = dataset.directoryName;
+                        if(dataset.description != null){
+							$savedDatasetDescriptionInput.data('textField').value = dataset.description;
+						}
+                        $duplicateSavedDatasetNameMessage.empty();
+                        $savedDatasetNameCheckBtn.prop('disabled', true);
+                        $datasetUpdateBtn.prop('disabled', false); // name 이 초기값과 같아도 수정할 수 있도록 수정
+                        $loadingBar.css('opacity', 0);
+
+                        // input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+                        $root.find('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+                        // 팝업 내용 저장 변수 초기화
+                        this.modifiedDatasetName = "";
+                        this.modifiedDatasetDescription = "";
+                    },
+
+                    /**
+                     * 데이터셋 상세 팝업 이벤트 바인딩 & 값 설정
+                     */
+                    showAfterDatasetDetailDialog: function($root) {
+
+                        var self = this;
+
+                        var $savedDatasetIdInput = $root.find("#savedDatasetIdInput");
+                        var $savedDatasetNameInput = $root.find('#savedDatasetNameInput');
+                        var $savedDatasetNameCheckBtn = $root.find('#savedDatasetNameCheckBtn');
+                        var $duplicateSavedDatasetNameMessage = $root.find('#duplicateSavedDatasetNameMessage');
+                        var $savedDatasetDescriptionInput = $root.find("#savedDatasetDescriptionInput");
+                        var $loadingBar = $root.find('#datasetDetailDialogLoadingBar');
+                        var $datasetUpdateBtn = $root.find('#savedDatasetUpdateBtn');
+
+                        const initDatasetName = $savedDatasetNameInput.data('textField').value;
+
+                        // 기존값을 값 초기값으로 저장
+                        self.modifiedDatasetName = initDatasetName;
+                        self.modifiedDatasetDescription = $savedDatasetDescriptionInput.data('textField').value;
+
+                        // console.log("dataset init value : " + initDatasetName);
+                        // console.log("dataset description init value : " + self.modifiedDatasetDescription);
+
+                        var datasetId = $savedDatasetIdInput.data('textField').value;
+                        // 등록 버튼 활성화 처리
+                        var registrationActiveFunc = function () {
+                            if(_.isEqual(initDatasetName, $.trim($savedDatasetNameInput.data('textField').value))){
+                                $datasetUpdateBtn.prop('disabled', false); // name 이 초기값과 같아도 수정할 수 있도록 수정
+                            } else if(!_.isEmpty(self.modifiedDatasetName) && _.isEqual(self.modifiedDatasetName, $.trim($savedDatasetNameInput.data('textField').value))) {
+                                $datasetUpdateBtn.prop('disabled', false);
+                            } else {
+                                $datasetUpdateBtn.prop('disabled', true);
+                            }
+                        };
+
+                        // 데이터셋 이름 입력 변경에 따른 처리
+                        $savedDatasetNameInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            if(_.isEqual(initDatasetName, $.trim($savedDatasetNameInput.data('textField').value))){
+                                $savedDatasetNameCheckBtn.prop('disabled', true);
+                            }
+                            else if (self.modifiedDatasetName !== "" && _.isEqual(self.modifiedDatasetName, $.trim($savedDatasetNameInput.data('textField').value))) {
+                                $savedDatasetNameCheckBtn.prop('disabled', true);
+                            } else {
+                                $savedDatasetNameCheckBtn.prop('disabled', false);
+                            }
+                            registrationActiveFunc();
+                        });
+
+                        $savedDatasetDescriptionInput.unbind('change keydown keyup').bind('change keydown keyup', function() {
+                            self.modifiedDatasetDescription = $savedDatasetDescriptionInput.data('textField').value;
+                        });
+
+                        // 데이터셋 이름 중복 확인 버튼 처리
+                        $savedDatasetNameCheckBtn.unbind('click').bind('click', function () {
+                            var newName = $savedDatasetNameInput.data('textField').value;
+
+                            if ($.trim(newName) === '') {
+                                $duplicateSavedDatasetNameMessage.removeClass('mdc-theme--success');
+                                $duplicateSavedDatasetNameMessage.addClass('mdc-theme--error');
+                                $duplicateSavedDatasetNameMessage.html(LABEL.message.INVALID_DATASET_NAME_ERROR);
+                            } else {
+                                self._duplicateCheckDatasetName(newName, $loadingBar, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateSavedDatasetNameMessage.removeClass('mdc-theme--error');
+                                        $duplicateSavedDatasetNameMessage.addClass('mdc-theme--success');
+                                        $duplicateSavedDatasetNameMessage.html(LABEL.message.VALID_DATASET_NAME);
+                                        self.modifiedDatasetName = $.trim(newName);
+                                    } else {
+                                        $duplicateSavedDatasetNameMessage.removeClass('mdc-theme--success');
+                                        $duplicateSavedDatasetNameMessage.addClass('mdc-theme--error');
+                                        $duplicateSavedDatasetNameMessage.html(LABEL.message.CONFLICT_DATASET_NAME_ERROR);
+                                        self.modifiedDatasetName = '';
+                                    }
+                                    $savedDatasetNameInput.trigger('change');
+                                });
+                            }
+                        });
+
+                        // 데이터셋 등록 버튼 처리
+                        $datasetUpdateBtn.unbind('click').bind('click', function () {
+                            if (!confirm(LABEL.message.DATASET_UPDATE_CONFIRM)) {
+                                return ;
+                            }
+
+                            self._updateDataset(datasetId, {
+                                name: self.modifiedDatasetName,
+                                description: self.modifiedDatasetDescription
+                            }, $loadingBar, function (isError, data) {
+                                if (isError) {
+                                    toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                                } else if(data+"" === 'true') {
+                                    toastr.success(LABEL.message.DATASET_UPDATE_MESSAGE, LABEL.message.DATASET_UPDATE_TITLE);
+                                    self.datasetDetailDialog.close();
+                                    // 목록 갱신
+                                    self.doRefresh();
+                                }
+                            });
+                        });
+                    },
+
+                    /**
+                     * 현재 검색 조건에 대한 history를 push한다.
+                     */
+                    _pushHistory: function (condition) {
+                        if (!this.initSearched) {
+                            this.initSearched = true;
+                            // 맨 처음 page의 경우 history를 변경하여 back 시 이전 페이지로 돌아가도록 한다.
+                            history.replaceState(null, null, "?" + $.param(condition));
+                        } else {
+                            history.pushState(null, null, "?" + $.param(condition));
+                        }
+                    },
+
+                    /**
+                     * 검색 API 호출
+                     */
+                    _search: function(params, $loadingBar, cbFunc) {
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset",
+                            dataType: "json",
+                            data: params,
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status+"] "+jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                console.log('complete');
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 데이터셋 이름 중복 체크
+                     */
+                    _duplicateCheckDatasetName: function (name, $loadingBar, cbFunc) {
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset/name/duplicate",
+                            dataType: "json",
+                            data: {
+                                encodedName: encodeURIComponent(name)
+                            },
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    _duplicateCheckDatasetDirectory: function (directoryId, $loadingBar, cbFunc) {
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset/directory/duplicate",
+                            dataType: "json",
+                            data: {
+                                directoryId: directoryId
+                            },
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 신규 데이터셋을 등록한다.
+                     */
+                    _registerDataset: function(params, $loadingBar, cbFunc) {
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    _updateDataset: function(datasetId, params, $loadingBar, cbFunc) {
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset/" + datasetId + "/update",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 선택한 데이터셋을 삭제한다.
+                     */
+                    doDelete: function() {
+                        var self = this;
+                        var checkedList = $(".chk-row:checked");
+                        var targetIdList = $.map(checkedList, function(item) {
+                            return item.value;
+                        });
+
+                        if(targetIdList.length < 1) {
+                            alert("삭제할 데이터셋을 선택해주세요");
+                            return;
+                        }
+
+                        if (!confirm("데이터셋을 삭제하시겠습니까?")) {
+                            return ;
+                        }
+
+                        var params = {
+                            targetIdList : targetIdList
+                        };
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset/delete",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    self.doRefresh();
+                                    toastr.success("데이터셋 삭제가 완료됐습니다.");
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+                    getDataset: function(datasetId) {
+
+                        var self = this;
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset/" + datasetId,
+                            contentType: "application/json",
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    self.showBeforeDatasetDetailDialog($(self.datasetDetailDialog.root), response.object);
+                                    self.datasetDetailDialog.open();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+                    download: function(event, datasetId) {
+						$("#datasetListLoadingBar").css('opacity', 1);
+                        event.stopPropagation();
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/verify/dataset/" + datasetId + "/download",
+                            xhrFields: {
+                                responseType: 'blob'
+                            },
+                            success: function (data) {
+
+                                var a = document.createElement('a');
+                                var url = window.URL.createObjectURL(data);
+                                a.href = url;
+                                a.download = '검증데이터.zip';
+                                document.body.append(a);
+                                a.click();
+                                a.remove();
+                                window.URL.revokeObjectURL(url);
+                            }, error : function (){
+                                toastr.error(LABEL.message.DATASET_DOWNLOAD_FAIL);
+                            }, complete: function() {
+								$("#datasetListLoadingBar").css('opacity', 0);
+							}
+                        });
+                    }
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>

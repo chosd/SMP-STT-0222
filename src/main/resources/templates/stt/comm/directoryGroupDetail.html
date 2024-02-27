@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>디렉토리 그룹 상세</h2>
+            <div class="button-group">
+                <button
+                    class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--default"
+                    @click="goList">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon">keyboard_backspace</i>
+                    <span class="mdc-button__label">목록으로</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">
+                    <div class="form-row md-size">
+                        <h4 class="">그룹 정보</h4>
+                        <button id="groupDeleteBtn"
+                                class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-error mdc-theme--error-bg flex-right"
+                                @click="doDeleteGroup">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">delete</i>
+                            <span class="mdc-button__label">삭제</span>
+                        </button>
+                        <button id="groupRollbackBtn"
+                                class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg"
+                                @click="doRollbackGroup">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">undo</i>
+                            <span class="mdc-button__label">되돌리기</span>
+                        </button>
+                        <button id="groupUpdateBtn"
+                                class="mdc-button mdc-button--unelevated mdc-ripple-upgraded"
+                                @click="doUpdateGroup">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">save</i>
+                            <span class="mdc-button__label">저장</span>
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="card-body">
+                    <div class="form-row-stack">
+                        <div class="form-row multiline-align-top">
+                            <div class="item-column-stack half-gap flex-auto">
+                                <div class="item-column">
+                                    <div class="flex-auto">
+                                        <div id="groupNameInput"
+                                             class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                            <input type="text" class="mdc-text-field__input"
+                                                   aria-describedby="text-field-outlined-shape-one-helper-text"
+                                                   required/>
+                                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                                <div class="mdc-notched-outline__leading"></div>
+                                                <div class="mdc-notched-outline__notch">
+                                                    <label class="mdc-floating-label">그룹 이름</label>
+                                                </div>
+                                                <div class="mdc-notched-outline__trailing"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mdc-text-field-helper-line">
+                                            <p id="duplicateGroupNameMessage"
+                                               class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                                사용 가능한 그룹 이름입니다
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button id="groupNameCheckBtn"
+                                        class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+                                    <span class="mdc-button__ripple"></span>
+                                    <i class="material-icons mdc-button__icon">content_copy</i>
+                                    <span class="mdc-button__label">중복확인</span>
+                                </button>
+                            </div>
+                            <div class="flex-auto">
+                                <div id="groupDescriptionInput"
+                                     class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                    <input type="text" class="mdc-text-field__input"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">그룹 설명</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div id="groupIdInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly
+                                       required/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">그룹ID</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div id="groupRegDtInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly
+                                       required/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">등록일시</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-title">
+                        <h4>디렉토리 설정</h4>
+                        <div class="button-group">
+                            <button id="directoryDeleteBtn"
+                                    class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-error mdc-theme--error-bg ms-1"
+                                    @click="doDeleteDirectory">
+                                <span class="mdc-button__ripple"></span>
+                                <i class="material-icons mdc-button__icon me-1">delete</i>
+                                <span class="mdc-button__label">디렉토리 삭제</span>
+                            </button>
+                            <button id="directoryAddDialogBtn"
+                                    class="mdc-button mdc-button--unelevated mdc-ripple-upgraded ms-1">
+                                <span class="mdc-button__ripple"></span>
+                                <i class="material-icons mdc-button__icon me-1">add_link</i>
+                                <span class="mdc-button__label">디렉토리 추가</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mdc-data-table">
+                        <div class="mdc-data-table__table-container w-100">
+                            <table class="mdc-data-table__table">
+                                <thead>
+                                <tr class="mdc-data-table__header-row">
+                                    <th class="mdc-data-table__header-cell mdc-data-table__header-cell--checkbox text-center"
+                                        role="columnheader" scope="col">
+                                        <div
+                                            class="mdc-checkbox mdc-data-table__header-row-checkbox mdc-checkbox--upgraded mdc-checkbox--selected mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                                            <input id="chk-all" type="checkbox" class="mdc-checkbox__native-control"
+                                                   aria-checked="mixed"/>
+                                            <div class="mdc-checkbox__background">
+                                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                    <path class="mdc-checkbox__checkmark-path" fill="none"
+                                                          d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                                </svg>
+                                                <div class="mdc-checkbox__mixedmark"></div>
+                                            </div>
+                                            <div class="mdc-checkbox__ripple"></div>
+                                        </div>
+                                    </th>
+                                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        scope="col">
+                                        디렉토리ID
+                                    </th>
+                                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        scope="col">
+                                        디렉토리명
+                                    </th>
+                                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        scope="col">
+                                        경로
+                                    </th>
+                                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        scope="col"
+                                        colspan="3">노출순서
+                                    </th>
+                                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        scope="col">
+                                        사용여부
+                                    </th>
+                                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        scope="col">
+                                        등록일시
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody class="mdc-data-table__content border-bottom"
+                                       v-if="0 == directoryList.length">
+                                <tr class="mdc-data-table__row" aria-selected="false">
+                                    <td class="text-center" colspan="9">등록된 디렉토리가 없습니다.</td>
+                                </tr>
+                                </tbody>
+                                <tbody class="mdc-data-table__content border-bottom"
+                                       v-if="0 < directoryList.length">
+                                <tr v-for="(item, idx) in directoryList" :data-id="item.id"
+                                    class="mdc-data-table__row directory-row">
+                                    <td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
+                                        <div
+                                            class="mdc-checkbox mdc-data-table__row-checkbox mdc-checkbox--upgraded mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                                            <input type="checkbox"
+                                                   class="mdc-checkbox__native-control chk-directory-row"
+                                                   aria-labelledby="u60" :value="item.id"/>
+                                            <div class="mdc-checkbox__background">
+                                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                    <path class="mdc-checkbox__checkmark-path" fill="none"
+                                                          d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                                                </svg>
+                                                <div class="mdc-checkbox__mixedmark"></div>
+                                            </div>
+                                            <div class="mdc-checkbox__ripple"></div>
+                                        </div>
+                                    </td>
+                                    <td class="mdc-data-table__cell text-center" scope="row">{{item.id}}</td>
+                                    <td class="mdc-data-table__cell text-center" scope="row">{{item.name}}</td>
+                                    <td class="mdc-data-table__cell text-center" scope="row">{{item.path}}</td>
+                                    <td class="mdc-data-table__cell text-end" scope="row">
+                                        <button
+                                            class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-theme--primary"
+                                            :data-id="item.id">keyboard_arrow_up
+                                        </button>
+                                    </td>
+                                    <td class="mdc-data-table__cell text-center" scope="row">
+                                        <span>{{item.priority}}</span>
+                                    </td>
+                                    <td class="mdc-data-table__cell text-start" scope="row">
+                                        <button
+                                            class="down-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-theme--primary"
+                                            :data-id="item.id">keyboard_arrow_down
+                                        </button>
+                                    </td>
+                                    <td class="mdc-data-table__cell text-center">
+                                        <div class="mdc-switch">
+                                            <div class="mdc-switch__track"></div>
+                                            <div
+                                                class="mdc-switch__thumb-underlay mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                                                <div class="mdc-switch__thumb">
+                                                    <input type="checkbox" class="mdc-switch__native-control"
+                                                           role="switch"
+                                                           aria-checked="false" :data-id="item.id"
+                                                           :checked="item.inUse == 'Y'"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="mdc-data-table__cell text-center" scope="row">
+                                        {{moment(item.regDt).format("YYYY-MM-DD HH:mm:ss")}}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="directoryAddDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+        <div class="mdc-dialog__scrim"></div>
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <div class="mdc-dialog__header">
+                    <h2 class="mdc-dialog__title">디렉토리 등록</h2>
+                    <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+                        close
+                    </button>
+                </div>
+                <!-- loading bar -->
+                <div id="directoryAddDialogLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+                    <div class="mdc-linear-progress__buffering-dots"></div>
+                    <div class="mdc-linear-progress__buffer"></div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                </div>
+                <section class="mdc-dialog__content form-row-stack">
+                    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end">
+                            *모든 항목은 필수입력사항입니다.
+                        </p>
+                    <div class="form-row multiline-align-top">
+                        <div class="flex-auto">
+                            <div id="directoryNameInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">디렉토리 이름</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p id="duplicateDirectoryNameMessage"
+                                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    사용 가능한 디렉토리 이름입니다
+                                </p>
+                            </div>
+                        </div>
+                        <button id="directoryNameCheckBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">content_copy</i>
+                            <span class="mdc-button__label">중복확인</span>
+                        </button>
+                    </div>
+                    <div class="form-row multiline-align-top">
+                        <div class="flex-auto">
+                            <div id="directoryPathInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">디렉토리 경로</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p id="duplicateDirectoryPathMessage"
+                                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    사용 가능한 디렉토리 경로입니다
+                                </p>
+                            </div>
+                        </div>
+                        <button id="directoryPathCheckBtn"
+                                class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">content_copy</i>
+                            <span class="mdc-button__label">중복확인</span>
+                        </button>
+                    </div>
+                </section>
+                <footer class="mdc-dialog__actions">
+                    <button id="directoryAddBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">등록</span>
+                    </button>
+                    <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">취소</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+    </div>
+    <div id="directoryDetailDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+        <div class="mdc-dialog__scrim"></div>
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <div class="mdc-dialog__header">
+                    <h2 class="mdc-dialog__title">디렉토리 상세</h2>
+                    <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+                        close
+                    </button>
+                </div>
+                <!-- loading bar -->
+                <div id="savedDirectoryDialogLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+                    <div class="mdc-linear-progress__buffering-dots"></div>
+                    <div class="mdc-linear-progress__buffer"></div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                    <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                        <span class="mdc-linear-progress__bar-inner"></span>
+                    </div>
+                </div>
+                <section class="mdc-dialog__content form-row-stack">
+                    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end">
+                        *모든 항목은 필수입력사항입니다.
+                    </p>
+                    <div class="flex-row">
+                        <div id="savedDirectoryIdInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                            <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" >디렉토리 ID</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row multiline-align-top">
+                        <div class="flex-auto">
+                            <div id="savedDirectoryNameInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">디렉토리 이름</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p id="duplicateSavedDirectoryNameMessage"
+                                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    사용 가능한 디렉토리 이름입니다
+                                </p>
+                            </div>
+                        </div>
+                        <button id="savedDirectoryNameCheckBtn"
+                                class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">content_copy</i>
+                            <span class="mdc-button__label">중복확인</span>
+                        </button>
+                    </div>
+                    <div class="form-row multiline-align-top">
+                        <div class="flex-auto">
+                            <div id="savedDirectoryPathInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                                <input type="text" class="mdc-text-field__input"
+                                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">디렉토리 경로</label>
+                                    </div>
+                                    <div class="mdc-notched-outline__trailing"></div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p id="duplicateSavedDirectoryPathMessage"
+                                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    사용 가능한 디렉토리 경로입니다
+                                </p>
+                            </div>
+                        </div>
+                        <!--<button id="savedDirectoryPathCheckBtn" class="mdc-button mdc-button&#45;&#45;outlined mdc-ripple-upgraded lg-size">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">content_copy</i>
+                            <span class="mdc-button__label">중복확인</span>
+                        </button>-->
+                    </div>
+                </section>
+                <footer class="mdc-dialog__actions">
+                    <button id="directoryUpdateBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">수정</span>
+                    </button>
+                    <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg" data-mdc-dialog-action="close">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">취소</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        (function () {
+            const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+            const LIST_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/directory/group";
+            const LABEL = {
+                message: {
+                    // 공통
+                    API_ERROR_TITLE: "실패",
+                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+                    GROUP_ROLLBACK_CONFIRM: "변경된 그룹 정보를 되돌리시겠습니까?",
+                    NOT_EXIST_GROUP_ID: "존재하지 않는 그룹 입니다.",
+
+                    // 그룹 이름 변경
+                    INVALID_GROUP_NAME_ERROR: "올바른 그룹 이름을 입력해 주세요.",
+                    CONFLICT_GROUP_NAME_ERROR: "이미 등록되어 있거나 올바르지 않은 사이트 이름 입니다.",
+                    VALID_GROUP_NAME: "사용 가능한 그룹 이름 입니다.",
+
+                    // 그룹 정보 저장
+                    SAVE_GROUP_MODIFIED_CONFIRM: "수정된 그룹 정보를 저장하시겠습니까?",
+                    SAVE_GROUP_TITLE: "그룹 저장",
+                    SAVE_GROUP_MESSAGE: "수정된 그룹 정보가 저장되었습니다.",
+
+                    // 그룹 삭제
+                    DELETE_GROUP_CONFIRM: "그룹을 삭제하시겠습니까?",
+
+                    // 디렉토리 이름 변경
+                    INVALID_DIRECTORY_NAME_ERROR: "올바른 디렉토리 이름을 입력해 주세요.",
+                    CONFLICT_DIRECTORY_NAME_ERROR: "이미 등록되어 있거나 올바르지 않은 디렉토리 이름 입니다.",
+                    VALID_DIRECTORY_NAME: "사용 가능한 디렉토리 이름 입니다.",
+                    INVALID_DIRECTORY_PATH_ERROR: "올바른 디렉토리 경로를 입력해 주세요.",
+                    CONFLICT_DIRECTORY_PATH_ERROR: "이미 등록되어 있거나 올바르지 않은 디렉토리 경로 입니다.",
+                    VALID_DIRECTORY_PATH: "사용 가능한 디렉토리 경로 입니다.",
+
+                    // 디렉토리 등록
+                    DIRECTORY_REGISTRATION_CONFIRM: "신규 디렉토리를 등록하시겠습니까?",
+                    DIRECTORY_REGISTRATION_TITLE: "디렉토리 등록",
+                    DIRECTORY_REGISTRATION_MESSAGE: "신규 디렉토리가 등록되었습니다.",
+                    DIRECTORY_REGISTRATION_FAIL: "디렉토리 등록에 실패하였습니다. 입력된 정보를 확인 후 다시 등록해 주세요.",
+
+                    //디렉토리 수정
+                    DIRECTORY_MODIFY_TITLE: "디렉토리 수정",
+                    DIRECTORY_MODIFY_MESSAGE: "디렉토리 정보가 수정되었습니다",
+                    DIRECTORY_MODIFY_CONFIRM: "수정된 디렉토리 정보를 저장하시겠습니까?",
+                    DIRECTORY_MODIFY_FAIL: "디렉토리 정보 수정에 실패하였습니다. 입력된 정보를 확인 후 다시 등록해 주세요."
+
+                }
+            };
+            new Vue({
+                el: ".contentRoot",
+                data: {
+                    LABEL: LABEL,
+                    moment: moment,
+                    fn: fn,
+                    serviceUrlPrefix: serviceUrlPrefix,
+
+                    // 그룹 정보
+                    groupId: null,
+                    group: {},			// 조회된 정보
+                    groupJson: "",		// 변경 내용 비교를 체크를 위해서 JSON으로 데이터 저장
+                    modified: {},		// 수정된 내용
+
+                    //디렉토리 목록
+                    directoryList: [],
+
+                    // 디렉토리 추가 팝업 Dialog
+                    directoryAddDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#directoryAddDialog')),
+
+                    // 디렉토리 상세 팝업 Dialog
+                    directoryDetailDialog :mdc.dialog.MDCDialog.attachTo(document.querySelector('#directoryDetailDialog'))
+
+                },
+                created: function () {
+                    this.initPage(location.href);
+                    console.log("siteManage detail page created");
+                },
+                mounted: function () {
+
+                    var self = this;
+                    // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+                        console.log("page move out");
+                    });
+
+                    this.directoryAddDialog.scrimClickAction = '';
+
+                    if (_.isEmpty(this.groupId)) {
+                        toastr.error(LABEL.message.NOT_EXIST_GROUP_ID, LABEL.message.API_ERROR_TITLE);
+                    } else {
+                        this.getGroup();
+                    }
+
+                    // 경로 팝업 show 후처리
+                    this.directoryAddDialog.listen('MDCDialog:opened', function() {
+                        self.showAfterDirectoryAddDialog($(self.directoryAddDialog.root));
+                    });
+
+                    this.directoryDetailDialog.listen('MDCDialog:opened', function() {
+                        self.showAfterDirectoryDetailDialog($(self.directoryDetailDialog.root));
+                    });
+                },
+                methods: {
+
+                    /**
+                     * 초기 url을 기준으로 화면 내용 설정
+                     */
+                    initPage: function (href) {
+                        var self = this;
+                        // 현 URL에서 groupId를 추출함
+                        this.groupId = href.slice(href.lastIndexOf('/')+1);
+                    },
+
+                    /**
+                     * 구글 Material component 초기화
+                     */
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0));
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+                    },
+
+                    /**
+                     * 화면 상단에 있는 관리 버튼의 활성화를 체크 및 설정한다.
+                     */
+                    checkManageBtnActive: function (group) {
+                        var $updateBtn = $('#groupUpdateBtn');
+                        var $rollbackBtn = $('#groupRollbackBtn');
+                        var $groupNameCheckBtn = $('#groupNameCheckBtn');
+
+                        if (_.isEqual(JSON.stringify(group), this.groupJson) || !$groupNameCheckBtn.prop('disabled')) {
+                            $updateBtn.prop('disabled', true);
+                        } else {
+                            $updateBtn.prop('disabled', false);
+                        }
+
+                        if (_.isEqual(JSON.stringify(group), this.groupJson)) {
+                            $rollbackBtn.prop('disabled', true);
+                        } else {
+                            $rollbackBtn.prop('disabled', false);
+                        }
+                    },
+
+                    getGroup: function() {
+                        var self = this;
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId,
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if (response.code === 200) {
+                                    self.groupJson = JSON.stringify(response.object);
+                                    self.modified = JSON.parse(self.groupJson);
+
+                                    self.$nextTick(function() {
+                                        self.initMaterialUx();
+                                        self.renderDatas(self.modified);
+                                    });
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+
+                    /**
+					* 입력된 정보를 기준으로 화면에 데이터를 출력한다.
+					* NOTE :: Google Material Input을 자연스럽게 사용하기 위해서 직접 찾아서 데이터를 제공
+					*/
+                    renderDatas: function (group) {
+
+                        var self = this;
+                        var $rollbackBtn = $('#groupRollbackBtn');
+                        var $updateBtn = $('#groupUpdateBtn');
+                        var $groupNameInput = $('#groupNameInput');
+                        var $groupNameCheckBtn = $('#groupNameCheckBtn');
+                        var $duplicateGroupNameMessage = $('#duplicateGroupNameMessage');
+                        var $groupDescriptionInput = $("#groupDescriptionInput");
+                        var $checkAll = $("#chk-all");
+
+                        // 그룹 이름 중복 확인 처리
+                        var duplicateCheckGroupName = function () {
+                            var newName = $groupNameInput.data('textField').value;
+
+                            if ($.trim(newName) === '') {
+                                $duplicateGroupNameMessage.removeClass('mdc-theme--success');
+                                $duplicateGroupNameMessage.addClass('mdc-theme--error');
+                                $duplicateGroupNameMessage.html(LABEL.message.INVALID_GROUP_NAME_ERROR);
+                            } else if ($.trim(newName) === self.group.name) {	// 원례 이름과 이름과 같은경우
+                                $duplicateGroupNameMessage.removeClass('mdc-theme--error');
+                                $duplicateGroupNameMessage.addClass('mdc-theme--success');
+                                $duplicateGroupNameMessage.html(LABEL.message.VALID_GROUP_NAME);
+                                self.modified.name = $.trim(newName);
+                                $groupNameInput.trigger('change');
+                            } else {
+                                self._duplicateCheckGroupName(newName, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateGroupNameMessage.removeClass('mdc-theme--error');
+                                        $duplicateGroupNameMessage.addClass('mdc-theme--success');
+                                        $duplicateGroupNameMessage.html(LABEL.message.VALID_GROUP_NAME);
+                                        self.modified.name = $.trim(newName);
+                                    } else {
+                                        $duplicateGroupNameMessage.removeClass('mdc-theme--success');
+                                        $duplicateGroupNameMessage.addClass('mdc-theme--error');
+                                        $duplicateGroupNameMessage.html(LABEL.message.CONFLICT_GROUP_NAME_ERROR);
+                                    }
+                                    $groupNameInput.trigger('change');
+                                });
+                            }
+                        };
+
+                        // 디렉토리 추가 버튼 클릭 처리
+                        $('#directoryAddDialogBtn').unbind('click').bind('click', function () {
+                            self.showBeforeDirectoryAddDialog($(self.directoryAddDialog.root));
+                            self.directoryAddDialog.open();
+                        });
+
+                        //초기값 설정
+                        $updateBtn.prop('disabled', true);
+                        $rollbackBtn.prop('disabled', true);
+                        $groupNameInput.data('textField').value = group.name;
+                        $groupNameCheckBtn.prop('disabled', true);
+                        $duplicateGroupNameMessage.empty();
+                        if(group.description != null){
+							$groupDescriptionInput.data('textField').value = group.description;	
+						}
+                        $("#groupIdInput").data('textField').value = group.id;
+                        $('#groupRegDtInput').data('textField').value = moment(group.regDt).format("YYYY-MM-DD HH:mm:ss");
+
+                        // 그룹 이름 입력 변경에 따른 처리
+                        $groupNameInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            if (!_.isEmpty(group.name) && _.isEqual(group.name, $.trim($groupNameInput.data('textField').value))) {
+                                $groupNameCheckBtn.prop('disabled', true);
+                            } else {
+                                $groupNameCheckBtn.prop('disabled', false);
+                            }
+                            self.checkManageBtnActive(group);
+                        });
+
+                        //그룹 설명
+                        $groupDescriptionInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            self.modified.description = $groupDescriptionInput.data('textField').value;
+                        });
+
+                        // 그룹 이름 중복 확인 버튼 처리
+                        $groupNameCheckBtn.unbind('click').bind('click', function () {
+                            duplicateCheckGroupName();
+                        });
+
+                        $checkAll.unbind('click').bind('click', function() {
+                            $(".chk-directory-row").prop('checked', $("#chk-all").is(":checked"));
+                        });
+
+                        // 디렉토리 출력
+                        this.renderDirectoryList(group.directoryList);
+
+                        // 버튼들 설정된 초기값에 따라 초기화
+                        this.checkManageBtnActive(group);
+                    },
+
+                    /**
+                     * 디렉토리 내용을 출력한다.
+                     */
+                    renderDirectoryList: function (directoryList) {
+
+                        var self = this;
+                        self.directoryList = directoryList || [];
+
+                        $("input[type=checkbox].chk-directory-row").prop('checked', false);
+
+                        // google switch 버튼을 초기화
+                        this.$nextTick(function () {
+
+                            $(".chk-directory-row").unbind('click').bind('click', function(ev) {
+                                ev.stopPropagation();
+                            });
+
+                            $(".directory-row").unbind('click').bind('click', function(ev){
+                                var directoryId = ev.currentTarget.dataset.id;
+                                self.getDirectory(directoryId);
+                            });
+
+                            $(".up-priority-btn").unbind('click').bind('click', function(ev) {
+                                ev.stopPropagation();
+                                var directoryId = ev.target.dataset.id;
+                                self.upPriority(directoryId);
+                            });
+
+                            $(".down-priority-btn").unbind('click').bind('click', function(ev) {
+                                ev.stopPropagation();
+                                var directoryId = ev.target.dataset.id;
+                                self.downPriority(directoryId);
+                            });
+
+                            // switch material ux 적용
+                            const switchs = document.querySelectorAll('.mdc-switch');
+                            for (const el of switchs) {
+                                // 기존 내용이 있는 경우 destroy
+                                var pre = $(el).data('switchControl');
+                                if (pre !== void 0) { pre.destroy(); }
+
+                                var inst = mdc.switchControl.deprecated.MDCSwitch.attachTo(el);
+
+                                inst.listen('click', function(ev) {
+                                    ev.stopPropagation();
+                                });
+
+                                inst.listen('change', function (ev) {
+                                    self.changeInUse(ev.target.dataset.id, ev.target.checked);
+
+                                });
+                                $(el).data('switchControl', inst);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 리스트 화면으로 돌아간다.
+                     * NOTE :: history back이 아닌 리스트로 돌아감.
+                     */
+                    goList: function () {
+                        history.back();
+                    },
+
+                    /**
+                     * 디렉토리 추가 팝업 초기화
+                     */
+                    showBeforeDirectoryAddDialog: function ($root) {
+
+                        var $directoryNameInput = $root.find('#directoryNameInput');
+                        var $directoryNameCheckBtn = $root.find('#directoryNameCheckBtn');
+                        var $duplicateDirectoryNameMessage = $root.find('#duplicateDirectoryNameMessage');
+                        var $directoryPathInput = $root.find('#directoryPathInput');
+                        var $directoryPathCheckBtn = $root.find('#directoryPathCheckBtn');
+                        var $duplicateDirectoryPathMessage = $root.find('#duplicateDirectoryPathMessage');
+                        var $directoryAddBtn = $root.find('#directoryAddBtn');
+                        var $loadingBar = $root.find('#directoryAddDialogLoadingBar');
+
+                        $directoryNameInput.data('textField').value = '';
+                        $duplicateDirectoryNameMessage.empty();
+
+                        $directoryPathInput.data('textField').value = '';
+                        $duplicateDirectoryPathMessage.empty();
+
+                        $root.find('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+                        $directoryNameCheckBtn.prop('disabled', false);
+                        $directoryPathCheckBtn.prop('disabled', false);
+                        $directoryAddBtn.prop('disabled', true);
+                        $loadingBar.css('opacity', 0);
+
+                        this.newDirectoryName = "";
+                        this.newDirectoryPath = "";
+                    },
+
+                    /**
+                     * 디렉토리 추가 팝업 이벤트 바인딩 & 값 설정
+                     */
+                    showAfterDirectoryAddDialog: function ($root) {
+
+                        var self = this;
+                        var $directoryNameInput = $root.find('#directoryNameInput');
+                        var $directoryNameCheckBtn = $root.find('#directoryNameCheckBtn');
+                        var $duplicateDirectoryNameMessage = $root.find('#duplicateDirectoryNameMessage');
+                        var $directoryPathInput = $root.find('#directoryPathInput');
+                        var $directoryPathCheckBtn = $root.find('#directoryPathCheckBtn');
+                        var $duplicateDirectoryPathMessage = $root.find('#duplicateDirectoryPathMessage');
+                        var $directoryAddBtn = $root.find('#directoryAddBtn');
+                        var $loadingBar = $root.find('#directoryAddDialogLoadingBar');
+
+                        // 등록 버튼 활성화 처리
+                        var registrationActiveFunc = function () {
+                            if(!_.isEmpty(self.newDirectoryName) && _.isEqual(self.newDirectoryName, $.trim($directoryNameInput.data('textField').value)) &&
+                                !_.isEmpty(self.newDirectoryPath) && _.isEqual(self.newDirectoryPath, $.trim($directoryPathInput.data('textField').value))) {
+                                $directoryAddBtn.prop('disabled', false);
+                            } else {
+                                $directoryAddBtn.prop('disabled', true);
+                            }
+                        };
+
+                        // 디렉토리 이름 입력 변경에 따른 처리
+                        $directoryNameInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            if (self.newDirectoryName !== "" && _.isEqual(self.newDirectoryName, $.trim($directoryNameInput.data('textField').value))) {
+                                $directoryNameCheckBtn.prop('disabled', true);
+                            } else {
+                                $directoryNameCheckBtn.prop('disabled', false);
+                            }
+                            registrationActiveFunc();
+                        });
+
+                        // 디렉토리 이름 중복 확인 버튼 처리
+                        $directoryNameCheckBtn.unbind('click').bind('click', function () {
+                            var newName = $directoryNameInput.data('textField').value;
+
+                            if ($.trim(newName) === '') {
+                                $duplicateDirectoryNameMessage.removeClass('mdc-theme--success');
+                                $duplicateDirectoryNameMessage.addClass('mdc-theme--error');
+                                $duplicateDirectoryNameMessage.html(LABEL.message.INVALID_DIRECTORY_NAME_ERROR);
+                            } else {
+                                self._duplicateCheckDirectoryName(newName, $loadingBar, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateDirectoryNameMessage.removeClass('mdc-theme--error');
+                                        $duplicateDirectoryNameMessage.addClass('mdc-theme--success');
+                                        $duplicateDirectoryNameMessage.html(LABEL.message.VALID_DIRECTORY_NAME);
+                                        self.newDirectoryName = $.trim(newName);
+                                    } else {
+                                        $duplicateDirectoryNameMessage.removeClass('mdc-theme--success');
+                                        $duplicateDirectoryNameMessage.addClass('mdc-theme--error');
+                                        $duplicateDirectoryNameMessage.html(LABEL.message.CONFLICT_DIRECTORY_NAME_ERROR);
+                                        self.newDirectoryName = '';
+                                    }
+                                    $directoryNameInput.trigger('change');
+                                });
+                            }
+                        });
+
+                        // 디렉토리 경로 입력 변경에 따른 처리
+                        $directoryPathInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            if (self.newDirectoryPath !== "" && _.isEqual(self.newDirectoryPath, $.trim($directoryPathInput.data('textField').value))) {
+                                $directoryPathCheckBtn.prop('disabled', true);
+                            } else {
+                                $directoryPathCheckBtn.prop('disabled', false);
+                            }
+                            registrationActiveFunc();
+                        });
+
+                        // 디렉토리 경로 중복 확인 버튼 처리
+                        $directoryPathCheckBtn.unbind('click').bind('click', function () {
+                            var newPath = $directoryPathInput.data('textField').value;
+
+                            if ($.trim(newPath) === '') {
+                                $duplicateDirectoryPathMessage.removeClass('mdc-theme--success');
+                                $duplicateDirectoryPathMessage.addClass('mdc-theme--error');
+                                $duplicateDirectoryPathMessage.html(LABEL.message.INVALID_DIRECTORY_PATH_ERROR);
+                            } else {
+                                self._duplicateCheckDirectoryPath(newPath, $loadingBar, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateDirectoryPathMessage.removeClass('mdc-theme--error');
+                                        $duplicateDirectoryPathMessage.addClass('mdc-theme--success');
+                                        $duplicateDirectoryPathMessage.html(LABEL.message.VALID_DIRECTORY_PATH);
+                                        self.newDirectoryPath = $.trim(newPath);
+                                    } else {
+                                        $duplicateDirectoryPathMessage.removeClass('mdc-theme--success');
+                                        $duplicateDirectoryPathMessage.addClass('mdc-theme--error');
+                                        $duplicateDirectoryPathMessage.html(LABEL.message.CONFLICT_DIRECTORY_PATH_ERROR);
+                                        self.newDirectoryPath = '';
+                                    }
+                                    $directoryPathInput.trigger('change');
+                                });
+                            }
+                        });
+
+                        // 그룹 등록 버튼 처리
+                        $directoryAddBtn.unbind('click').bind('click', function () {
+                            if (!confirm(LABEL.message.DIRECTORY_REGISTRATION_CONFIRM)) {
+                                return ;
+                            }
+
+                            self._registerDirectory({
+                                name: self.newDirectoryName,
+                                path: self.newDirectoryPath
+                            }, $loadingBar, function (isError, data) {
+                                if (isError) {
+                                    toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                                } else if(data+"" === 'true') {
+                                    toastr.success(LABEL.message.DIRECTORY_REGISTRATION_MESSAGE, LABEL.message.GROUP_REGISTRATION_TITLE);
+                                    self.directoryAddDialog.close();
+                                    self.refreshDirectoryList();
+                                }
+                            });
+                        });
+                    },
+
+                    /**
+                     * 디렉토리 상세 팝업 초기화
+                     */
+                    showBeforeDirectoryDetailDialog: function (directory, $root) {
+
+                        var $directoryIdInput = $root.find("#savedDirectoryIdInput");
+                        var $directoryNameInput = $root.find('#savedDirectoryNameInput');
+                        var $directoryNameCheckBtn = $root.find('#savedDirectoryNameCheckBtn');
+                        var $duplicateDirectoryNameMessage = $root.find('#duplicateSavedDirectoryNameMessage');
+                        var $directoryPathInput = $root.find('#savedDirectoryPathInput');
+                        var $directoryPathCheckBtn = $root.find('#savedDirectoryPathCheckBtn');
+                        var $duplicateDirectoryPathMessage = $root.find('#duplicateSavedDirectoryPathMessage');
+                        var $directoryUpdateBtn = $root.find('#directoryUpdateBtn');
+                        var $loadingBar = $root.find('#savedDirectoryDialogLoadingBar');
+
+                        $directoryIdInput.data('textField').value = directory.id;
+
+                        $directoryNameInput.data('textField').value = directory.name;
+                        $duplicateDirectoryNameMessage.empty();
+
+                        $directoryPathInput.data('textField').value = directory.path;
+                        $duplicateDirectoryPathMessage.empty();
+
+                        $root.find('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+                        $directoryNameCheckBtn.prop('disabled', false);
+                        $directoryPathCheckBtn.prop('disabled', false);
+                        $directoryUpdateBtn.prop('disabled', true);
+                        $loadingBar.css('opacity', 0);
+
+                        this.modifiedDirectoryName = "";
+                        this.modifiedDirectoryPath = "";
+                    },
+
+                    /**
+                     * 디렉토리 상세 팝업 이벤트 바인딩 & 값 설정
+                     */
+                    showAfterDirectoryDetailDialog: function ($root) {
+
+                        var self = this;
+                        var $directoryIdInput = $root.find("#savedDirectoryIdInput");
+                        var $directoryNameInput = $root.find('#savedDirectoryNameInput');
+                        var $directoryNameCheckBtn = $root.find('#savedDirectoryNameCheckBtn');
+                        var $duplicateDirectoryNameMessage = $root.find('#duplicateSavedDirectoryNameMessage');
+                        var $directoryPathInput = $root.find('#savedDirectoryPathInput');
+                        var $directoryPathCheckBtn = $root.find('#savedDirectoryPathCheckBtn');
+                        var $duplicateDirectoryPathMessage = $root.find('#duplicateSavedDirectoryPathMessage');
+                        var $directoryUpdateBtn = $root.find('#directoryUpdateBtn');
+                        var $loadingBar = $root.find('#directoryDetailDialogLoadingBar');
+
+                        // 등록 버튼 활성화 처리
+                        var registrationActiveFunc = function () {
+                            // 경로와 관련한 검사 코드 제외
+                            if((!_.isEmpty(self.modifiedDirectoryName) && _.isEqual(self.modifiedDirectoryName, $.trim($directoryNameInput.data('textField').value))))
+                                // if((!_.isEmpty(self.modifiedDirectoryName) && _.isEqual(self.modifiedDirectoryName, $.trim($directoryNameInput.data('textField').value))) &&
+                                //   !_.isEmpty(self.modifiedDirectoryPath) && _.isEqual(self.modifiedDirectoryPath, $.trim($directoryPathInput.data('textField').value)))
+                            {
+                                $directoryUpdateBtn.prop('disabled', false);
+                            } else {
+                                $directoryUpdateBtn.prop('disabled', true);
+                            }
+                        };
+
+                        // 디렉토리 이름 입력 변경에 따른 처리
+                        $directoryNameInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            if (self.modifiedDirectoryName !== "" && _.isEqual(self.modifiedDirectoryName, $.trim($directoryNameInput.data('textField').value))) {
+                                $directoryNameCheckBtn.prop('disabled', true);
+                            } else {
+                                $directoryNameCheckBtn.prop('disabled', false);
+                            }
+                            registrationActiveFunc();
+                        });
+
+                        var directoryId = $directoryIdInput.data('textField').value;
+                        // 디렉토리 이름 중복 확인 버튼 처리
+                        $directoryNameCheckBtn.unbind('click').bind('click', function () {
+                            var newName = $directoryNameInput.data('textField').value;
+
+                            if ($.trim(newName) === '') {
+                                $duplicateDirectoryNameMessage.removeClass('mdc-theme--success');
+                                $duplicateDirectoryNameMessage.addClass('mdc-theme--error');
+                                $duplicateDirectoryNameMessage.html(LABEL.message.INVALID_DIRECTORY_NAME_ERROR);
+                            } else {
+                                self._duplicateCheckSavedDirectoryName(directoryId, newName, $loadingBar, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateDirectoryNameMessage.removeClass('mdc-theme--error');
+                                        $duplicateDirectoryNameMessage.addClass('mdc-theme--success');
+                                        $duplicateDirectoryNameMessage.html(LABEL.message.VALID_DIRECTORY_NAME);
+                                        self.modifiedDirectoryName = $.trim(newName);
+                                    } else {
+                                        $duplicateDirectoryNameMessage.removeClass('mdc-theme--success');
+                                        $duplicateDirectoryNameMessage.addClass('mdc-theme--error');
+                                        $duplicateDirectoryNameMessage.html(LABEL.message.CONFLICT_DIRECTORY_NAME_ERROR);
+                                        self.modifiedDirectoryName = '';
+                                    }
+                                    $directoryNameInput.trigger('change');
+                                });
+                            }
+                        });
+
+                        // 디렉토리 경로 입력 변경에 따른 처리
+                        $directoryPathInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+                            if (self.modifiedDirectoryPath !== "" && _.isEqual(self.modifiedDirectoryPath, $.trim($directoryPathInput.data('textField').value))) {
+                                $directoryPathCheckBtn.prop('disabled', true);
+                            } else {
+                                $directoryPathCheckBtn.prop('disabled', false);
+                            }
+                            registrationActiveFunc();
+                        });
+
+                        // 디렉토리 경로 중복 확인 버튼 처리
+                        $directoryPathCheckBtn.unbind('click').bind('click', function () {
+                            var newPath = $directoryPathInput.data('textField').value;
+
+                            if ($.trim(newPath) === '') {
+                                $duplicateDirectoryPathMessage.removeClass('mdc-theme--success');
+                                $duplicateDirectoryPathMessage.addClass('mdc-theme--error');
+                                $duplicateDirectoryPathMessage.html(LABEL.message.INVALID_DIRECTORY_PATH_ERROR);
+                            } else {
+                                self._duplicateCheckSavedDirectoryPath(directoryId, newPath, $loadingBar, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    } else if (data === 'ACCEPTED') {
+                                        $duplicateDirectoryPathMessage.removeClass('mdc-theme--error');
+                                        $duplicateDirectoryPathMessage.addClass('mdc-theme--success');
+                                        $duplicateDirectoryPathMessage.html(LABEL.message.VALID_DIRECTORY_PATH);
+                                        self.modifiedDirectoryPath = $.trim(newPath);
+                                    } else {
+                                        $duplicateDirectoryPathMessage.removeClass('mdc-theme--success');
+                                        $duplicateDirectoryPathMessage.addClass('mdc-theme--error');
+                                        $duplicateDirectoryPathMessage.html(LABEL.message.CONFLICT_DIRECTORY_PATH_ERROR);
+                                        self.modifiedDirectoryPath = '';
+                                    }
+                                    $directoryPathInput.trigger('change');
+                                });
+                            }
+                        });
+
+                        // 디렉토리 수정 버튼 처리
+                        $directoryUpdateBtn.unbind('click').bind('click', function () {
+                            if (!confirm(LABEL.message.DIRECTORY_MODIFY_CONFIRM)) {
+                                return ;
+                            }
+
+                            // var directoryId = $directoryIdInput.data('textField').value;
+
+                            const directoryId = $directoryIdInput.data('textField').value;
+                            const directoryPath = $directoryPathInput.data('textField').value;
+
+                            self._updateDirectory(directoryId, {
+                                name: self.modifiedDirectoryName,
+                                // path: self.modifiedDirectoryPath
+                                path : directoryPath // 기존 디렉토리 값이 넘어가도록 변경
+                            }, $loadingBar, function (isError, data) {
+                                if (isError) {
+                                    toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                                } else if(data+"" === 'true') {
+                                    toastr.success(LABEL.message.DIRECTORY_MODIFY_MESSAGE, LABEL.message.DIRECTORY_MODIFY_TITLE);
+                                    self.directoryDetailDialog.close();
+                                    self.refreshDirectoryList();
+                                }
+                            });
+                        });
+                    },
+                    doUpdateGroup: function() {
+
+                        if (!confirm(LABEL.message.SAVE_GROUP_MODIFIED_CONFIRM)) {
+                            return;
+                        }
+
+                        var self = this;
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/update",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(this.modified),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    toastr.success("그룹 수정이 완료되었습니다.");
+                                    self.getGroup();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 그룹을 삭제한다.
+                     */
+                    doDeleteGroup: function() {
+                        var self = this;
+
+                        if (!confirm("그룹을 삭제하시겠습니까?")) {
+                            return ;
+                        }
+
+                        var params = {
+                            targetIdList : [this.groupId]
+                        };
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/delete",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    toastr.success("그룹 삭제가 완료했습니다.");
+                                    self.goList();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+                    doRollbackGroup: function() {
+                        if (!confirm(LABEL.message.GROUP_ROLLBACK_CONFIRM)) {
+                            return;
+                        }
+
+                        this.getGroup();
+                    },
+
+                    /**
+                     * 그룹 이름 중복 체크
+                     */
+                    _duplicateCheckGroupName: function (name, cbFunc) {
+
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/name/duplicate",
+                            dataType: "json",
+                            data: {
+                                encodedName: encodeURIComponent(name)
+                            },
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            }
+                        });
+                    },
+
+                    /**
+                     * 디렉토리 이름 중복 체크
+                     */
+                    _duplicateCheckDirectoryName: function (name, $loadingBar, cbFunc) {
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/name/duplicate",
+                            dataType: "json",
+                            data: {
+                                encodedName: encodeURIComponent(name)
+                            },
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 디렉토리 이름 중복 체크
+                     */
+                    _duplicateCheckSavedDirectoryName: function (directoryId, name, $loadingBar, cbFunc) {
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/" + directoryId + "/name/duplicate",
+                            dataType: "json",
+                            data: {
+                                encodedName: encodeURIComponent(name)
+                            },
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 디렉토리 경로 중복 체크
+                     */
+                    _duplicateCheckDirectoryPath: function (path, $loadingBar, cbFunc) {
+
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/path/duplicate",
+                            dataType: "json",
+                            data: {
+                                path: path
+                            },
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+
+                    /**
+                     * 디렉토리 경로 중복 체크
+                     */
+                    _duplicateCheckSavedDirectoryPath: function (directoryId, path, $loadingBar, cbFunc) {
+
+                        $loadingBar.css('opacity', 1);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/" + directoryId + "/path/duplicate",
+                            dataType: "json",
+                            data: {
+                                path: path
+                            },
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response.message);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+                    _registerDirectory: function(params, $loadingBar, cbFunc) {
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+                    _updateDirectory: function(directoryId, params, $loadingBar, cbFunc) {
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/" + directoryId + "/update",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                if (typeof cbFunc === "function") {
+                                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                                }
+                            },
+                            complete: function () {
+                                $loadingBar.css('opacity', 0);
+                            }
+                        });
+                    },
+                    refreshDirectoryList: function() {
+
+                        var self = this;
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir",
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if(response.code === 200) {
+                                    self.renderDirectoryList(response.object);
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+
+                    },
+                    changeInUse: function(directoryId, inUse) {
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/" + directoryId + "/inUse",
+                            dataType: "json",
+                            data: {
+                                inUse: inUse ? "Y" : "N"
+                            }
+                        });
+                    },
+                    doDeleteDirectory: function() {
+                        var self = this;
+                        var checkedList = $(".chk-directory-row:checked");
+                        var targetIdList = $.map(checkedList, function(item) {
+                            return item.value;
+                        });
+
+                        if(targetIdList.length < 1) {
+                            alert("삭제할 디렉토리를 선택해주세요");
+                            return;
+                        }
+
+                        if (!confirm("디렉토리를 삭제하시겠습니까?")) {
+                            return ;
+                        }
+
+                        var params = {
+                            targetIdList : targetIdList
+                        };
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/dir/delete",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    self.refreshDirectoryList();
+                                    toastr.success("디렉토리 삭제가 완료됐습니다.");
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+                    getDirectory: function(directoryId) {
+
+                        var self = this;
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/directory/group/dir/" + directoryId,
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if(response.code === 200) {
+                                    self.showBeforeDirectoryDetailDialog(response.object, $(self.directoryDetailDialog.root))
+                                    self.directoryDetailDialog.open();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+                    upPriority: function(directoryId) {
+
+                        var self = this;
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/" + directoryId + "/priority/up",
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if(response.code === 200) {
+                                    self.refreshDirectoryList();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+
+                    },
+                    downPriority: function(directoryId) {
+
+                        var self = this;
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/directory/group/" + this.groupId + "/dir/" + directoryId + "/priority/down",
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if(response.code === 200) {
+                                    self.refreshDirectoryList();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    }
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:decorate="layouts/nolayout">
+	<th:block layout:fragment="html">
+		<div class="contentRoot mdc-layout-grid__inner pb-3">
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+				<h2>개인정보 조회 & 변경</h2>
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2 mdc-form-field">
+				<button id="password-change-dialog-btn" class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100">
+					<span class="mdc-button__ripple"></span>
+					<i class="material-icons mdc-button__icon me-1">key</i>
+					<span class="mdc-button__label">비밀번호 변경</span>
+				</button>
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2 mdc-form-field">
+				<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('변경된 내용을 저장하시겠습니까?');">
+					<span class="mdc-button__ripple"></span>
+					<i class="material-icons mdc-button__icon me-1">save</i>
+					<span class="mdc-button__label">저장</span>
+				</button>
+			</div>
+				
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12 mdc-layout-grid__inner border-bottom">
+				<h4 class="mdc-layout-grid__cell--span-4">관리자 정보</h4>
+				<div class="mdc-layout-grid__cell--span-8 mdc-form-field ms-auto">
+					<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end mb-1">
+						* 항목은 필수입력사항입니다.
+					</p>
+				</div>
+			</div>
+			
+    		<div class="mdc-layout-grid__cell--span-4 mdc-form-field">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required value="kd.hong@kt.com"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >아이디</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		<div class="mdc-layout-grid__cell--span-4 mdc-form-field">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value="홍길동"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >이름</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		<div class="mdc-layout-grid__cell--span-4 mdc-form-field">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value="KT"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >조직</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		<div class="mdc-layout-grid__cell--span-4 mdc-form-field">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value="010-1111-2222"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >연락처</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		
+    		<div class="mdc-layout-grid__cell--span-4 mdc-form-field">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required value="kd.hong@kt.com"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >이메일</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		
+	    	<div class="mdc-layout-grid__cell--span-12 border-bottom" style="height: 50px;">
+				<h4>사이트 & 프로젝트 정보</h4>
+			</div>
+			
+    		<div class="mdc-layout-grid__cell--span-4">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required readonly value="신한금융_운영"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >사이트</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		<div class="mdc-layout-grid__cell--span-4">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required readonly value="신한은행P"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >프로젝트</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		<div class="mdc-layout-grid__cell--span-4">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required readonly value="NLP 관리자"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >프로젝트 권한</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		
+    		<div class="mdc-layout-grid__cell--span-12 border-bottom" style="height: 50px;">
+				<h4>시스템 권한 정보</h4>
+			</div>
+    		<div class="mdc-layout-grid__cell--span-3">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required readonly value="프로젝트 관리자"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >시스템 권한</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		<div class="mdc-layout-grid__cell--span-3">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required readonly value="사용중"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >상태</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+			<div class="mdc-layout-grid__cell--span-3 mb-2" style="position: relative;">
+				<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly value="2022-10-26 00:00:00"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >유효 기간(from)</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+				<div class="mdc-text-field-helper-line" style="position: absolute; width: max-content;">
+					<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg">
+						유효기간이 없는 경우는 전체 기간을 뜻합니다.
+					</p>
+				</div>
+			</div>
+			<div class="mdc-layout-grid__cell--span-3">
+				<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly />
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >유효 기간(to)</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+			</div>
+    		<div class="mdc-layout-grid__cell--span-3 mdc-form-field">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="date" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required value="2022-09-28"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >등록일</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+    		<div class="mdc-layout-grid__cell--span-3 mdc-form-field">
+    			<div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+					<input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly required value="김세*"/>
+					<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+						<div class="mdc-notched-outline__leading"></div>
+						<div class="mdc-notched-outline__notch">
+							<label class="mdc-floating-label" >등록자</label>
+						</div>
+						<div class="mdc-notched-outline__trailing"></div>
+					</div>
+				</div>
+    		</div>
+		</div>
+		
+		<div class="mt-3">
+			<div>Toast</div>
+			<div class="mt-1">
+				<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.error('일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.', '실패');">API 처리 실패</button>
+				<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.success('비밀번호가 변경되었습니다.', '비밀번호 변경')">비밀번호 변경 완료</button>
+				<button class="mdc-button mdc-button--outlined m-1" onclick="toastr.success('변경된 개인정보가 저장되었습니다.', '개인정보 저장')">개인정보 저장 완료</button>
+			</div>
+		</div>
+		
+		<div id="password-change-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+			<div class="mdc-dialog__scrim"></div>
+			<div class="mdc-dialog__container">
+				<div class="mdc-dialog__surface">
+					<h2 class="mdc-dialog__title">비밀번호 변경</h2>
+					<!-- loading bar -->
+					<div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+					<section class="mdc-dialog__content mdc-layout-grid__inner">
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error text-end mb-2">
+								*모든 항목은 필수입력사항입니다.
+							</p>
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >기존 비밀번호</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >신규 비밀번호</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+						</div>
+						<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+							<div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+								<input type="password" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label" >신규 비밀번호 확인</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+							</div>
+							<div class="mdc-text-field-helper-line">
+								<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error">
+									비밀번호와 비밀번호 확인이 일치하지 않습니다. 확인 후 입력해 주세요.
+								</p>
+							</div>
+						</div>
+					</section>
+					<footer class="mdc-dialog__actions">
+						<button class="mdc-button mdc-button--raised mdc-ripple-upgraded w-100" onclick="confirm('비밀번호를 변경하시겠습니까?');">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">lock</i>
+							<span class="mdc-button__label">비밀번호 변경</span>
+						</button>
+					</footer>
+				</div>
+			</div>
+		</div>
+	</th:block>
+	<th:block layout:fragment="script">
+		<script type="text/javascript">
+		(function () {
+			new Vue({
+				el: ".contentRoot",
+				data: {
+					
+				},
+				created: function () {
+					
+				},
+				mounted: function () {
+					// 페이지 이동시 처리 
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						console.log("page move out");
+					});
+					
+					this.initMaterialUx();
+					
+					// 비밀번호 변경 팝업
+					var modal0 = mdc.dialog.MDCDialog.attachTo(document.querySelector('#password-change-dialog'));
+					$('#password-change-dialog-btn').unbind('click').bind('click', function (ev) {
+						modal0.open();
+					});
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0);
+						}
+						
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const textField of textFields) {
+							mdc.textField.MDCTextField.attachTo(textField);
+						}
+					}
+				}
+			});
+		})();
+		</script>
+	</th:block>
+</html>

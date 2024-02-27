@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.remover.mapper.FileRemoverMapper">
+	<select id="findRemoveAmDataDirectoryList" resultType="com.kt.smp.stt.remover.dto.RemoveAmDataDirectoryDto" parameterType="int">
+		SELECT
+			AM_DATA_PATH || ANS_FILE AS ansFilePath,
+			AM_DATA_PATH || VOICE_FILE AS voiceFilePath
+		FROM
+			IAAP_STT_TRAIN_AM_DATA
+		WHERE 
+			TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD')
+	</select>
+	
+	<select id="findRemoveCallInfoDirectoryList" resultType="string" parameterType="int">
+		SELECT
+			WAV_FILE_PATH
+		FROM
+			IAAP_STT_CALL_INFO isci 
+		WHERE 
+			TO_CHAR(CALL_START_TIME, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStandard}, 'YYYY-MM-DD')
+	</select>
+	
+	<select id="findRemoveDeployModelDirectoryList" resultType="string" parameterType="int">
+		SELECT
+			MODEL_PATH
+		FROM
+			IAAP_STT_DEPLOY_MODEL isdm  
+		WHERE 
+			TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStandard}, 'YYYY-MM-DD')
+	</select>
+	
+	<select id="findRemoveVerifyDataDirectoryList" resultType="string" parameterType="int">
+		SELECT
+			VERIFY_DATA_PATH 
+		FROM
+			IAAP_STT_VERIFY_DATA isvd  
+		WHERE 
+			TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStandard}, 'YYYY-MM-DD')
+	</select>
+	
+	<update id="removeFileRelatedData">
+		DECLARE
+  			dummy NUMBER;
+		BEGIN
+			SELECT 1 INTO dummy FROM DUAL;
+			<if test="datasToRemove.contains('REMOVER_DATA_AM_TRAIN_DATA')">
+				UPDATE IAAP_STT_TRAIN_AM_DATA SET USE_YN = 'N' WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_LM_TRAIN_DATA')">
+				UPDATE IAAP_STT_TRAIN_DATA SET USE_YN = 'N' WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_TRAIN_MNG')">
+				UPDATE IAAP_STT_TRAIN_MNG SET USE_YN = 'N' WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_VERIFY_DATA')">
+				UPDATE IAAP_STT_VERIFY_DATA SET USE_YN = 'N' WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_VERIFY_MNG')">
+				UPDATE IAAP_STT_VERIFY_HISTORY SET USE_YN = 'N' WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_DEPLOY_MODEL')">
+				UPDATE IAAP_STT_DEPLOY_MODEL SET USE_YN = 'N' WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_DEPLOY_MNG')">
+				UPDATE IAAP_STT_DEPLOY_MNG SET USE_YN = 'N' WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_CALLINFO')">
+				DELETE FROM IAAP_STT_TEST_DATA WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_CALLINFO')">
+				DELETE FROM IAAP_STT_CALL_INFO WHERE TO_CHAR(CALL_START_TIME, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+				DELETE FROM IAAP_STT_RESULT_INFO WHERE TO_CHAR(EPD_END_TIME, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_STT_RESULT')">
+				UPDATE IAAP_STT_LOG SET USE_YN = 'N' WHERE TO_CHAR(START_AT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_HW_RESOURCE')">
+				DELETE FROM IAAP_STT_SYSTEM_STATUS_STATH WHERE TO_CHAR(TO_DATE(DATE_HOUR, 'YYYYMMDDHH24'), 'YYYYMMDDHH24') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYYMMDDHH24');
+				DELETE FROM IAAP_STT_SYSTEM_STATUS WHERE TO_CHAR(LAST_CHECK_TIME, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_STATISTICS')">
+				DELETE FROM IAAP_STT_STATISTICS WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+				DELETE FROM IAAP_STT_STATISTICS_ERROR WHERE TO_CHAR(REG_DT, 'YYYY-MM-DD') <![CDATA[<=]]> TO_CHAR(CURRENT_DATE - #{removerStadard}, 'YYYY-MM-DD');
+			</if>
+	    END;
+	</update>
+	
+</mapper>

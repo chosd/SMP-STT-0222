@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.verify.dataset.mapper.VerifyDatasetMapper">
+
+    <select id="count" parameterType="verifyDatasetSearchCondition" resultType="int">
+		/* VerifyDatasetMapper.count */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_VERIFY_DATASET
+        WHERE USE_YN = 'Y'
+        <if test="serviceModelId != null">
+            AND SERVICE_MODEL_ID = #{serviceModelId}
+        </if>
+        <if test="name != null and name != ''">
+            AND NAME LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="regId != null and regId != ''">
+            AND REG_ID LIKE CONCAT('%', #{regId}, '%')
+        </if>
+        <choose>
+            <when test="regDtFrom != null">
+                AND REG_DT >= CONCAT(#{regDtFrom}, ' ', '00:00:00')
+            </when>
+            <otherwise>
+                AND REG_DT >= '2022-01-01 00:00:00'
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="regDtTo != null">
+                <![CDATA[
+                AND REG_DT <= CONCAT(#{regDtTo}, ' ', '23:59:59')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND REG_DT <= NOW()
+                ]]>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="search" parameterType="verifyDatasetSearchCondition" resultType="verifyDatasetListDto">
+		/* VerifyDatasetMapper.search */
+        SELECT
+        DATASET.ID,
+        SERVICE_MODEL.SERVICE_MODEL_NAME,
+        DATASET.NAME,
+        (
+        SELECT COUNT(DATA.ID)
+        FROM IAAP_STT_VERIFY_DATA DATA
+        WHERE DATA.USE_YN = 'Y'
+        AND DATA.DATASET_ID = DATASET.ID
+        ) NUM_OF_DATA,
+        DATASET.DESCRIPTION,
+        DATASET.REG_ID,
+        DATASET.REG_DT
+        FROM IAAP_STT_VERIFY_DATASET DATASET
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = DATASET.SERVICE_MODEL_ID
+        WHERE DATASET.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+            AND DATASET.SERVICE_MODEL_ID = #{serviceModelId}
+        </if>
+        <if test="name != null and name != ''">
+            AND DATASET.NAME LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="regId != null and regId != ''">
+            AND DATASET.REG_ID LIKE CONCAT('%', #{regId}, '%')
+        </if>
+        <choose>
+            <when test="regDtFrom != null">
+                AND DATASET.REG_DT >= CONCAT(#{regDtFrom}, ' ', '00:00:00')
+            </when>
+            <otherwise>
+                AND DATASET.REG_DT >= '2022-01-01 00:00:00'
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="regDtTo != null">
+                <![CDATA[
+                AND DATASET.REG_DT <= CONCAT(#{regDtTo}, ' ', '23:59:59')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND DATASET.REG_DT <= NOW()
+                ]]>
+            </otherwise>
+        </choose>
+        ORDER BY DATASET.REG_DT DESC
+        LIMIT #{size}
+        OFFSET #{start};
+    </select>
+
+    <select id="findAll" resultType="verifyDatasetListDto">
+		/* VerifyDatasetMapper.findAll */
+        SELECT
+            DATASET.ID,
+            DATASET.NAME,
+            SERVICE_MODEL.SERVICE_CODE SERVICE_MODEL_ID,
+            SERVICE_MODEL.SERVICE_MODEL_NAME
+        FROM IAAP_STT_VERIFY_DATASET DATASET
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = DATASET.SERVICE_MODEL_ID
+        WHERE DATASET.USE_YN = 'Y'
+    </select>
+
+    <select id="countByName" resultType="int">
+		/* VerifyDatasetMapper.countByName */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_VERIFY_DATASET
+        WHERE USE_YN = 'Y'
+        AND NAME = #{name}
+    </select>
+
+    <select id="countByDirectory" resultType="int">
+		/* VerifyDatasetMapper.countByDirectory */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_VERIFY_DATASET
+        WHERE USE_YN = 'Y'
+        AND DIRECTORY_ID = #{directoryId}
+    </select>
+
+    <select id="findById" resultType="verifyDatasetDto">
+		/* VerifyDatasetMapper.findById */
+        SELECT
+            DATASET.ID,
+            DATASET.NAME,
+            DATASET.SERVICE_MODEL_ID,
+            SERVICE_MODEL.SERVICE_MODEL_NAME,
+            DIRECTORY.ID DIRECTORY_ID,
+            DIRECTORY.NAME DIRECTORY_NAME,
+            DIRECTORY.HOME_PATH DIRECTORY_HOME_PATH,
+            DIRECTORY.PATH DIRECTORY_PATH,
+            DATASET.DESCRIPTION
+        FROM IAAP_STT_VERIFY_DATASET DATASET
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = DATASET.SERVICE_MODEL_ID
+        JOIN IAAP_CM_DIRECTORY DIRECTORY ON DIRECTORY.ID = DATASET.DIRECTORY_ID
+        WHERE DATASET.USE_YN = 'Y'
+        AND DATASET.ID = #{id}
+    </select>
+
+    <insert id="save" parameterType="verifyDatasetSaveDto">
+		/* VerifyDatasetMapper.save */
+        INSERT INTO IAAP_STT_VERIFY_DATASET
+        (
+            ID,
+            NAME,
+            SERVICE_MODEL_ID,
+            DIRECTORY_ID,
+            DESCRIPTION,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP
+        ) VALUES
+        (
+            NEXTVAL(SEQ_IAAP_STT_VERIFY_DATASET),
+            #{name},
+            #{serviceModelId},
+            #{directoryId},
+            #{description},
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp}
+        )
+    </insert>
+
+    <update id="update" parameterType="verifyDatasetUpdateDto">
+		/* VerifyDatasetMapper.update */
+        UPDATE IAAP_STT_VERIFY_DATASET
+        SET
+            NAME = #{name},
+            DESCRIPTION = #{description},
+            UPD_ID = #{updId},
+            UPD_IP = #{updIp}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="delete">
+		/* VerifyDatasetMapper.delete */
+        UPDATE IAAP_STT_VERIFY_DATASET
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+</mapper>

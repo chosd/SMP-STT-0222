@@ -1,0 +1,2765 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+  <div class="contentRoot">
+    <div class="content-header">
+      <h2>전사데이터</h2>
+    </div>
+    <div class="content-body">
+      <div class="card">
+        <div class="card-header pb-4">
+          <div class="form-row md-size multiline-align-top">
+            <div id="searchServiceModelSelector"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">서비스모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected"
+                      data-value=" "
+                      aria-selected="true">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">전체</span>
+                  </li>
+                  <li v-for="(item, index) in serviceModelList" class="mdc-deprecated-list-item"
+                      :data-value="item.serviceCode">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span
+                      class="mdc-deprecated-list-item__text">{{item.serviceModelName}}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div id="searchUsageSelector"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">데이터구분</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                        <span class="mdc-select__selected-text"></span>
+                    </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected"
+                      data-value=" "
+                      aria-selected="true">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">전체</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="VERIFY_DATA">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">검증데이터</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="AM_TRAIN_DATA">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">AM 학습데이터</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto search-bar">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"
+                     v-model="wavFileName"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">파일명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto search-bar">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"
+                     v-model="dictatedText"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">전사데이터</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto search-bar">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" v-model="updId"
+                     @keyup.enter="doSearch"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">수정자</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="flex-auto flex-ratio-two">
+              <div class="form-row h-100">
+                <div id="searchRegDtFromInput"
+                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                  <i class="material-icons mdc-text-field__icon">event</i>
+                  <input type="text" class="mdc-text-field__input"
+                         aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                  <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                    <div class="mdc-notched-outline__leading"></div>
+                    <div class="mdc-notched-outline__notch">
+                      <label class="mdc-floating-label">등록일(from)</label>
+                    </div>
+                    <div class="mdc-notched-outline__trailing"></div>
+                  </div>
+                </div>
+                <div id="searchRegDtToInput"
+                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                  <i class="material-icons mdc-text-field__icon">event</i>
+                  <input type="text" class="mdc-text-field__input"
+                         aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                  <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                    <div class="mdc-notched-outline__leading"></div>
+                    <div class="mdc-notched-outline__notch">
+                      <label class="mdc-floating-label">등록일(to)</label>
+                    </div>
+                    <div class="mdc-notched-outline__trailing"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" style="position: absolute;">
+                <p
+                  class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg">
+                  등록일이 없는 경우는 전체 기간을 뜻합니다.
+                </p>
+              </div>
+            </div>
+            <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="doSearch">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">search</i>
+              <span class="mdc-button__label">검색</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-controls form-row md-size">
+            <div class="table-result-info flex-auto">
+              <h4>검색결과 : <span>{{fn.addComma(totalCount)}}</span>건</h4>
+            </div>
+            <!--<button id="insertDialogBtn" class="mdc-button mdc-button&#45;&#45;unelevated mdc-ripple-upgraded">
+                <span class="mdc-button__ripple"></span>
+                <i class="material-icons mdc-button__icon me-1">add</i>
+                <span class="mdc-button__label">신뢰도 설정</span>
+            </button>-->
+            <button id="addUsageDialogBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">add</i>
+              <span class="mdc-button__label">AM 학습데이터 등록</span>
+            </button>
+            <button id="addVerifyDataDialogBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">add</i>
+              <span class="mdc-button__label">검증데이터 등록</span>
+            </button>
+            <button
+              class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-error mdc-theme--error-bg"
+              @click="deleteDictation">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">delete</i>
+              <span class="mdc-button__label">삭제</span>
+            </button>
+            <div id="sizeSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">레코드 수</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected"
+                      data-value="10" aria-selected="true" @click="size=10;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">10개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item" data-value="20" @click="size=20;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">20개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item " data-value="30" @click="size=30;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">30개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item " data-value="40" @click="size=40;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">40개</span>
+                  </li>
+                  <li class="mdc-deprecated-list-item " data-value="50" @click="size=50;">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">50개</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <div id="dictationLoadingBar" role="progressbar"
+                 class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+              <div class="mdc-linear-progress__buffering-dots"></div>
+              <div class="mdc-linear-progress__buffer"></div>
+              <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+              </div>
+              <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+              </div>
+            </div>
+            <div class="mdc-data-table">
+              <div class="mdc-data-table__table-container">
+                <!-- loading bar -->
+                <table class="mdc-data-table__table">
+                  <thead>
+                  <tr class="mdc-data-table__header-row">
+                    <th class="mdc-data-table__header-cell mdc-data-table__header-cell--checkbox text-center"
+                        role="columnheader" scope="col">
+                      <div
+                        class="mdc-checkbox mdc-data-table__header-row-checkbox mdc-checkbox--upgraded mdc-checkbox--selected mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                        <input id="chk-all" type="checkbox" class="mdc-checkbox__native-control"
+                               aria-checked="mixed"/>
+                        <div class="mdc-checkbox__background">
+                          <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                            <path class="mdc-checkbox__checkmark-path" fill="none"
+                                  d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                          </svg>
+                          <div class="mdc-checkbox__mixedmark"></div>
+                        </div>
+                        <div class="mdc-checkbox__ripple"></div>
+                      </div>
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      No.
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      음원파일명
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      채널구분
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      STT 결과
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      전사데이터
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      데이터구분
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      등록자
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      등록일
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      수정자
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                        scope="col">
+                      수정여부
+                    </th>
+                  </tr>
+                  </thead>
+                  <tbody class="mdc-data-table__content" v-if="totalCount === 0">
+                  <tr class="mdc-data-table__row" aria-selected="false">
+                    <td class="text-center" colspan="11">검색 결과가 없습니다.</td>
+                  </tr>
+                  </tbody>
+                  <tbody class="mdc-data-table__content" v-if="0 < currentList.length">
+                  <tr v-for="(item, idx) in currentList" :data-id="item.id"
+                      class="dictation-info-row mdc-data-table__row" aria-selected="false"
+                      style="cursor: pointer;">
+                    <td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
+                      <div
+                        class="mdc-checkbox mdc-data-table__row-checkbox mdc-checkbox--upgraded mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                        <input type="checkbox" class="mdc-checkbox__native-control chk-row"
+                               aria-labelledby="u60" :value="item.id"/>
+                        <div class="mdc-checkbox__background">
+                          <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                            <path class="mdc-checkbox__checkmark-path" fill="none"
+                                  d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                          </svg>
+                          <div class="mdc-checkbox__mixedmark"></div>
+                        </div>
+                        <div class="mdc-checkbox__ripple"></div>
+                      </div>
+                    </td>
+                    <td class="mdc-data-table__cell text-center">{{itemFromNum - idx}}</td>
+                    <td class="mdc-data-table__cell text-center">{{item.wavFileName}}</td>
+                    <td class="mdc-data-table__cell text-center">{{item.serviceModelName}}</td>
+                    <td class="mdc-data-table__cell">{{item.transcript}}</td>
+                    <td class="mdc-data-table__cell">{{item.dictatedText}}</td>
+                    <td class="mdc-data-table__cell text-center">{{item.usageType}}</td>
+                    <td class="mdc-data-table__cell text-center">{{item.regId}}</td>
+                    <td class="mdc-data-table__cell text-center">
+                      {{moment(item.regDt).format("YYYY-MM-DD HH:mm:ss")}}
+                    </td>
+                    <td class="mdc-data-table__cell text-center">{{item.updId}}</td>
+                    <td class="mdc-data-table__cell text-center">{{item.isPreempted}}</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="table-pagination mdc-data-table__pagination" v-if="totalCount > 0">
+            <div class="mdc-data-table__pagination-trailing mdc-chip-set mdc-chip-set--choice">
+              <div class="mdc-data-table__pagination-navigation">
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-first-page="true" v-bind:disabled="!(1 < currentPageNum)"
+                        @click="goPage(1)">
+                  <div class="mdc-button__icon">first_page</div>
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-prev-page="true" v-bind:disabled="!(1 < currentPageNum)"
+                        @click="goPage(Math.max(1, currentPageNum-1))">
+                  <div class="mdc-button__icon">chevron_left</div>
+                </button>
+                <button v-for="page in pagingNumbers"
+                        class="mdc-chip mdc-data-table__pagination-button fs-6 bg-transparent"
+                        :class="{'mdc-chip--selected': currentPageNum==page}" @click="goPage(page)">
+                  {{page}}
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-next-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)"
+                        @click="goPage(Math.min(currentPageNum+1, lastPageNum))">
+                  <div class="mdc-button__icon">chevron_right</div>
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-last-page="true" v-bind:disabled="!(currentPageNum < lastPageNum)"
+                        @click="goPage(lastPageNum)">
+                  <div class="mdc-button__icon">last_page</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- >>> 등록 팝업 -->
+  <div id="insertDialog" class="mdc-dialog" role="alertdialog" aria-modal="true"
+       aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">신뢰도 값 설정</h2>
+          <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+            close
+          </button>
+        </div>
+        <!-- loading bar -->
+        <div id="set-confidence-dialog-loadingbar" role="progressbar"
+             class="mdc-linear-progress mdc-linear-progress--indeterminate" hidden>
+          <div class="mdc-linear-progress__buffering-dots"></div>
+          <div class="mdc-linear-progress__buffer"></div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+            * 표시 항목은 필수입력사항입니다.
+          </p>
+          <!-- 서비스 모델 -->
+          <div class="form-row">
+            <div id="insertDialogServiceModelSelector"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">서비스 모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                  <span class="mdc-select__selected-text"></span>
+                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-menu-surface--fixed" style="z-index: 9999">
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list">
+                    <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected"
+                        data-value="0" aria-selected="true">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span class="mdc-deprecated-list-item__text">선택</span>
+                    </li>
+                    <li v-for="(item, index) in serviceModelList" class="mdc-deprecated-list-item"
+                        :data-value="item.serviceCode">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span
+                        class="mdc-deprecated-list-item__text">{{item.serviceModelName}}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--신뢰도값-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"
+                       id="insert-confidence-input"
+                />
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">신뢰도 값</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-confidence-helper-line">
+              </div>
+            </div>
+          </div>
+          <!--파일 암호화 유무-->
+          <div class="form-row">
+            <span>암호화 유무</span>
+            <div class="mdc-form-field">
+              <div class="mdc-radio mdc-ripple-upgraded mdc-ripple-upgraded--unbounded"
+                   style="--mdc-ripple-fg-size: 0px; --mdc-ripple-fg-scale: NaN; --mdc-ripple-left: 0px; --mdc-ripple-top: 0px;">
+                <input class="mdc-radio__native-control" type="radio" id="insert-encrypt-y" name="encrypt_yn" value="Y"
+                       checked>
+                <div class="mdc-radio__background">
+                  <div class="mdc-radio__outer-circle"></div>
+                  <div class="mdc-radio__inner-circle"></div>
+                </div>
+                <div class="mdc-radio__ripple"></div>
+                <div class="mdc-radio__focus-ring"></div>
+              </div>
+              <label for="insert-encrypt-y">예</label>
+              <div class="mdc-radio mdc-ripple-upgraded mdc-ripple-upgraded--unbounded"
+                   style="--mdc-ripple-fg-size: 0px; --mdc-ripple-fg-scale: NaN; --mdc-ripple-left: 0px; --mdc-ripple-top: 0px;">
+                <input class="mdc-radio__native-control" type="radio" id="insert-encrypt-n" name="encrypt_yn" value="N">
+                <div class="mdc-radio__background">
+                  <div class="mdc-radio__outer-circle"></div>
+                  <div class="mdc-radio__inner-circle"></div>
+                </div>
+                <div class="mdc-radio__ripple"></div>
+                <div class="mdc-radio__focus-ring"></div>
+              </div>
+              <label for="insert-encrypt-n">아니오</label>
+            </div>
+          </div>
+          <!--현재 파일 저장 개수-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"
+                       id="insert-fileSaveCount-input"
+                       readonly
+                />
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">파일 현재 저장 개수</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-fileSaveCount-helper-line">
+              </div>
+            </div>
+          </div>
+          <!-- 파일 최대 저장 개수 -->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"
+                       id="insert-fileStartCount-input"
+                />
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">파일 최대 저장 개수</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-fileStartCount-helper-line">
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button id="start-btn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">시작</span>
+          </button>
+          <button id="stop-btn"
+                  class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">중지</span>
+          </button>
+          <button id="insert-btn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">변경</span>
+          </button>
+          <button data-mdc-dialog-action="close" id="close-btn"
+                  class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">닫기</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <!-- <<< 등록 팝업 -->
+
+  <!-- 학습데이터 일괄등록 -->
+  <div id="addUsageDialog" class="mdc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="simple-dialog-label"
+       aria-describedby="simple-dialog-description" tabindex="-1">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">AM 학습데이터 등록</h2>
+          <button class="mdc-icon-button material-icons close-button" tabindex="-1">
+            close
+          </button>
+        </div>
+        <!-- loading bar -->
+        <div id="addUsageDialogLoadingBar" role="progressbar"
+             class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+          <div class="mdc-linear-progress__buffering-dots"></div>
+          <div class="mdc-linear-progress__buffer"></div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <h4>AM 학습데이터</h4>
+          <!-- 일괄등록 학습데이터 저장경로 / 현재 사용 안함 -->
+          <div class="form-row" style="display: none">
+            <div id="amTrainDataDirectorySelector" class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">학습데이터 저장위치</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                    <span class="mdc-select__selected-text"></span>
+                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-menu-surface--fixed" style="z-index: 9999;">
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list">
+                    <li class="mdc-deprecated-list-item" data-value=" ">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span class="mdc-deprecated-list-item__text">선택</span>
+                    </li>
+                    <li v-for="(item, idx) in amDirectoryList" class="mdc-deprecated-list-item"
+                        :data-value="item.id">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span class="mdc-deprecated-list-item__text">{{item.name}}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 일괄등록 서비스모델 -->
+          <div class="form-row">
+            <div id="serviceModelIdSelector" class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">서비스모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                    <span class="mdc-select__selected-text"></span>
+                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-menu-surface--fixed" style="z-index: 9999;">
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list">
+                    <li class="mdc-deprecated-list-item" data-value=" ">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span class="mdc-deprecated-list-item__text">선택</span>
+                    </li>
+                    <li v-for="(item, idx) in serviceModelList" class="mdc-deprecated-list-item"
+                        :data-value="item.serviceCode">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span
+                        class="mdc-deprecated-list-item__text">{{item.serviceModelName}}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 일괄등록 모델타입 -->
+          <div class="form-row">
+            <div id="modelTypeSelector" class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">모델타입</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                  <span class="mdc-select__selected-text"></span>
+                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-menu-surface--fixed" style="z-index: 9999;">
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list">
+                    <li class="mdc-deprecated-list-item" data-value=" ">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span class="mdc-deprecated-list-item__text">선택</span>
+                    </li>
+                    <li v-for="(item, idx) in modelTypeList" class="mdc-deprecated-list-item"
+                        :data-value="item.key">
+                      <span class="mdc-deprecated-list-item__ripple"></span>
+                      <span
+                        class="mdc-deprecated-list-item__text">{{item.value}}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 일괄등록 데이터셋 이름-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input id="insert-dataset-input" required type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">학습 데이터셋 이름</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-dataset-helper-line"></div>
+            </div>
+            <button id="insert-dataset-dupcheck-btn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size"
+                    disabled>
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">group</i>
+              <span class="mdc-button__label">중복확인</span>
+            </button>
+          </div>
+
+          <!-- 일괄등록 기본 경로 -->
+          <div class="form-row multiline-align-top">
+
+            <div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+              <input readonly id="insert-basepath-input" type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">기본 디렉토리</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 일괄등록 상세 경로-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input id="insert-detailpath-input" required type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">상세 디렉토리명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-detailpath-helper-line"></div>
+            </div>
+            <button id="insert-detailpath-dupcheck-btn"
+                    class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size" disabled>
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">group</i>
+              <span class="mdc-button__label">중복확인</span>
+            </button>
+          </div>
+
+          <!--일괄등록 설명-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" id="insert-description-input"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">설명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-description-helper-line">
+              </div>
+            </div>
+          </div>
+
+          <!-- 기존소스 -->
+          <div class="mdc-layout-grid__cell--span-12" style="display:none">
+            <h4>AM데이터셋</h4>
+          </div>
+          <div class="form-row" style="display: none;">
+            <ul class="mdc-list flex-auto" role="group" aria-label="List with checkbox items">
+              <template v-for="(item, idx) in trainDatasetList">
+                <li class="mdc-list-item p-0" role="checkbox" aria-checked="false">
+                  <span class="mdc-list-item__ripple"></span>
+                  <span class="mdc-list-item__graphic">
+                                      <div class="mdc-checkbox">
+                                        <input type="checkbox"
+                                               class="mdc-checkbox__native-control chk-am-dataset"
+                                               @change="toggleAddBtn"
+                                               :value="item.id"/>
+                                        <div class="mdc-checkbox__background">
+                                          <svg class="mdc-checkbox__checkmark"
+                                               viewBox="0 0 24 24">
+                                            <path class="mdc-checkbox__checkmark-path"
+                                                  fill="none"
+                                                  d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                                          </svg>
+                                          <div class="mdc-checkbox__mixedmark"></div>
+                                        </div>
+                                      </div>
+                                    </span>
+                  <label class="mdc-list-item__text" :for="item.id">{{item.name}}</label>
+                </li>
+                <li role="separator" class="mdc-list-divider"></li>
+              </template>
+            </ul>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button id="addUsageBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="addUsage">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">등록</span>
+          </button>
+          <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg close-button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">취소</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- 검증데이터 일괄등록 -->
+  <div id="addVerifyDataDialog" class="mdc-dialog" role="alertdialog" aria-modal="true"
+       aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description" tabindex="-1">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">검증데이터 등록</h2>
+          <button class="mdc-icon-button material-icons close-button" tabindex="-1">
+            close
+          </button>
+        </div>
+        <!-- loading bar -->
+        <div id="addVerifyDataDialogLoadingBar" role="progressbar"
+             class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+          <div class="mdc-linear-progress__buffering-dots"></div>
+          <div class="mdc-linear-progress__buffer"></div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <div class="form-row">
+            <div id="newDataServiceModelSelector"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label flex-auto">
+              <div class="mdc-select__anchor" required>
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">서비스모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                <span class="mdc-select__selected-text"></span>
+                            </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list"></ul>
+              </div>
+            </div>
+          </div>
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div id="newDatasetNameInput"
+                   class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">데이터셋 이름</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line">
+                <p id="duplicateNewDatasetNameMessage"
+                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                  사용 가능한 데이터셋 이름입니다
+                </p>
+              </div>
+            </div>
+            <button id="newDatasetNameCheckBtn"
+                    class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">content_copy</i>
+              <span class="mdc-button__label">중복확인</span>
+            </button>
+          </div>
+          <div class="form-row">
+            <div id="newDataBasePathInput" class="mdc-text-field text-field mdc-text-field--outlined w-100">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">기본 디렉토리</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div id="newDetailPathNameInput"
+                   class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">상세 디렉토리명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line">
+                <p id="duplicateNewDetailPathNameMessage"
+                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                  사용 가능한 디렉토리 입니다.
+                </p>
+              </div>
+            </div>
+            <button id="newDetailPathNameCheckBtn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">content_copy</i>
+              <span class="mdc-button__label">중복확인</span>
+            </button>
+          </div>
+          <div class="form-row">
+            <div class="flex-auto">
+              <div id="newDescriptionInput"
+                   class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">설명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line">
+                <p id="checkNewDescriptionNameMessage"
+                   class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                  사용 가능한 설명 입니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button id="addVerifyDataBtn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded"
+                  @click="addVerifyData">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">등록</span>
+          </button>
+          <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg close-button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">취소</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+  <input type="hidden" readonly id="defaultPageSize" th:value="${defaultPageSize}">
+</th:block>
+<th:block layout:fragment="script">
+  <script type="text/javascript">
+    (function () {
+
+      const DEFAULT_PAGE_START = 0;
+      const DEFAULT_PAGE_SIZE = $("#defaultPageSize").val();
+      const PAGING_BTN_SIZE = 5;
+      const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+      const directoryHome = "[[${directoryHome}]]";
+      const amBasePath = "/trainData";
+      const DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/dictation/{dictationId}";
+      const LABEL = {
+        message: {
+          // 공통
+          API_ERROR_TITLE: "실패",
+          API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+          SUCCESS_SET: "성공적으로 변경하였습니다.",
+          SUCCESS_START: "성공적으로 시작하였습니다.",
+          SUCCESS_STOP: "성공적으로 중지하였습니다.",
+          REQUIRED_CHECK: "하나 이상의 전사데이터를 체크해주세요.",
+          INVALID_DATASET_NAME_ERROR: "올바른 데이터셋 이름을 입력해 주세요.",
+          INVALID_DETAILPATH_NAME_ERROR: "올바른 상세 디렉토리명을 입력해 주세요.",
+          INVALID_SERVICEMODEL_ERROR: "서비스모델값을 선택 해주세요.",
+          VALID_DATASET_NAME: "사용 가능한 데이터셋 이름 입니다.",
+          VALID_DESCRIPTION: "사용 가능한 설명 입니다.",
+          VALID_DETAILPATH_NAME: "사용 가능한 상세 디렉토리명 입니다.",
+          CONFLICT_DATASET_NAME_ERROR: "이미 등록되어 있거나 올바르지 않은 데이터셋 이름 입니다.",
+          CONFLICT_DETAILPATH_NAME_ERROR: "이미 등록되어 있거나 올바르지 않은 상세 디렉토리명 입니다.",
+        }
+      };
+      const dialogInstance = new Vue({
+        el: "#addUsageDialog",
+        data: {
+          serviceUrlPrefix: serviceUrlPrefix,
+          directoryHome: directoryHome,
+          //verifyDatasetList: JSON.parse("[[${verifyDatasetList}]]".replaceAll('&quot;', "\"")),
+          trainDatasetList: JSON.parse("[[${trainDatasetList}]]".replaceAll('&quot;', "\"")),
+          amDirectoryList: JSON.parse("[[${amDirectoryList}]]".replaceAll("\\", "/").replaceAll('&quot;', "\"")),
+          serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+          modelTypeList: [
+            // {key: 0, value: "전체"},
+            {key: "E2ESL", value: "E2ESL(지도)"}
+          ],
+          newObj: JSON.parse(JSON.stringify(
+            {
+              // "amDirectoryId": "",
+              "serviceModelId": "",
+              "modelType": "",
+              "datasetName": "",
+              "description": "",
+              "basePath": "",
+              "detailPath": "",
+              "datasetDupCheck": true
+            }
+          )),
+          DATASET_MAX_LENGTH: 30,
+          DESCRIPTION_MAX_LENGTH: 255
+        },
+        mounted: function () {
+          this.initMaterialUx();
+        },
+        methods: {
+          initMaterialUx: function () {
+
+            // ripple material ux 적용
+            const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+            for (const el of elements) {
+              el.class
+              mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                isUnbounded: true
+              } : void 0);
+            }
+
+            // input text material ux 적용
+            const textFields = document.querySelectorAll('.mdc-text-field');
+            for (const el of textFields) {
+              $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+            }
+
+            // select material ux 적용
+            const selects = document.querySelectorAll('.mdc-select');
+            for (const el of selects) {
+              var $select = mdc.select.MDCSelect.attachTo(el);
+              console.log(">>> select : ", $select);
+              var $el = $(el);
+              console.log(">>> el : ", $el);
+              var value = $el.attr('data-value');
+              console.log(">>value : ", value);
+              // console.log(">>serviceModelList : ", this.serviceModelList);
+              // 초기값 설정
+              _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+              $el.data('select', $select);
+            }
+
+            var self = this;
+
+            // var $amTrainDataDirectorySelector = $("#amTrainDataDirectorySelector");
+            // $amTrainDataDirectorySelector.data('select').unlisten("MDCSelect:change");
+            // $amTrainDataDirectorySelector.data('select').listen('MDCSelect:change', function () {
+            //   self.toggleAddBtn();
+            // });
+
+            $("#serviceModelIdSelector").data('select').value = ' ';
+            var $serviceModelIdSelector = $("#serviceModelIdSelector");
+            $serviceModelIdSelector.data('select').unlisten("MDCSelect:change");
+            $serviceModelIdSelector.data('select').listen('MDCSelect:change', function () {
+              self.checkServiceModelId();
+              self.toggleAddBtn();
+            });
+
+            $("#modelTypeSelector").data('select').value = ' ';
+            var $modelTypeSelector = $("#modelTypeSelector");
+            $modelTypeSelector.data('select').unlisten("MDCSelect:change");
+            $modelTypeSelector.data('select').listen('MDCSelect:change', function () {
+              self.checkModelType();
+            });
+
+            // 기본 디렉토리
+            $('#insert-basepath-input')[0].value = directoryHome + amBasePath;
+            this.newObj.basePath = amBasePath;
+
+            $("#insert-dataset-input").off('keyup').on('keyup', self.onChangeInsertDataset)
+            $("#insert-dataset-dupcheck-btn").off('click').on('click', self.onClickInsertDatasetDupCheck);
+
+            // 상세 디렉토리
+            $("#insert-detailpath-input").off('keyup').on('keyup', self.onChangeInsertDetailPath);
+            $("#insert-detailpath-dupcheck-btn").off('click').on('click', self.onClickInsertDetailPathDupCheck);
+
+            // 설명
+            $("#insert-description-input").off('keyup').on('keyup', self.onChangeInsertDescription);
+
+            $("#addUsageDialogLoadingBar").css('opacity', 0);
+            $("#addUsageBtn").prop('disabled', true);
+
+            this._showValidationHelperLine('', $("#insert-description-helper-line"), '설명');
+          },
+          showBeforeAddAmDataDialog : function () {
+
+            var $loadingBar = $('#addUsageDialogLoadingBar');
+
+            /*helperline 초기화*/
+            this._showValidationHelperLine('', $("#insert-dataset-helper-line"), '학습 데이터셋 이름');
+            this._showValidationHelperLine('', $("#insert-detailpath-helper-line"), '상세 디렉토리명');
+            this._showValidationHelperLine('', $("#insert-description-helper-line"), '설명');
+
+
+            // input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+            $('.mdc-text-field').removeClass('mdc-text-field--invalid');
+            $('.mdc-text-field').removeClass('mdc-text-field--focused mdc-text-field--label-floating');
+
+            this.newObj.datasetName = "";
+            this.newObj.detailPath = "";
+            this.newObj.description = "";
+
+            $loadingBar.css('opacity', 0);
+          },
+          showAfterAddAmDataDialog : function () {
+
+          },
+          // 데이터셋 중복 체크
+          checkDuplicateDataset: function (obj, callback) {
+
+            var newObj = {
+              "datasetName": String(obj.datasetName),
+              "serviceModelId": String(obj.serviceModelId)
+            }
+
+            $.ajax({
+              url: this.serviceUrlPrefix + "/trainData/api/existAmData",
+              method: "post",
+              data: newObj,
+              dataType: "json"
+            }).done(data => {
+
+              if (data.resultCode == "0000") {
+                obj.datasetDupCheck = true;
+              } else {
+
+                toastr.error("이미 등록된 학습 데이터셋명 입니다.");
+              }
+              callback();
+            })
+          },
+
+          // amData 등록 상세 디렉토리 중복 체크
+          checkDuplicateDetailPath: function (obj, callback) {
+
+            var newObj = {
+              "detailPath": String(obj.detailPath),
+              "serviceModelId": String(obj.serviceModelId)
+            }
+
+            $.ajax({
+              url: this.serviceUrlPrefix + "/trainData/api/existDirPath",
+              method: "post",
+              data: newObj,
+              dataType: "json"
+            }).done(data => {
+
+              if (data.resultCode == "0000") {
+                obj.detailPathDupCheck = true;
+              } else {
+
+                toastr.error("이미 등록된 디렉토리 입니다.");
+              }
+              callback();
+            })
+
+          },
+          onChangeInsertDataset: function (e) {
+
+            e.stopPropagation();
+            var newDataset = e.target.value;
+            e.target.value = newDataset;
+
+            var $helperLine = $("#insert-dataset-helper-line");
+
+            if (this.validateDataset(e.target.value)) {
+              this._showValidationHelperLine("VALID", $helperLine, "학습 데이터셋 이름");
+              this.newObj.datasetName = newDataset;
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "학습 데이터셋 이름");
+              e.target.focus();
+            }
+
+            this.newObj.datasetDupCheck = false;
+
+            if (this.validateDataset(e.target.value)) {
+              this._disableDatasetDuplCheckBtn(false)
+              this._showValidationHelperLine("DUPCHECK", $helperLine, "학습 데이터셋 이름");
+            } else {
+              this._disableDatasetDuplCheckBtn(true)
+              this._showValidationHelperLine("INVALID", $helperLine, "학습 데이터셋 이름");
+              e.target.focus();
+            }
+            this.newObj.datasetName = newDataset;
+
+          },
+          onClickInsertDatasetDupCheck: function () {
+
+            var self = this;
+
+            if (!this.validateDatasetDuplicate()) {
+              return;
+            }
+
+            this.checkDuplicateDataset(this.newObj, function () {
+              if (self.newObj.datasetDupCheck) {
+                self._showValidationHelperLine('VALID', $("#insert-dataset-helper-line"), '학습 데이터셋');
+              } else {
+                self._showValidationHelperLine('DUPCHECK', $("#insert-dataset-helper-line"), '학습 데이터셋');
+              }
+            });
+          },
+
+          onChangeInsertDetailPath: function (e) {
+
+            e.stopPropagation();
+            var newDetailPath = e.target.value;
+            e.target.value = newDetailPath;
+
+            var $helperLine = $("#insert-detailpath-helper-line")
+            var regExp = /[^0-9a-zA-Z]/g;
+            if (regExp.test(e.target.value)) {
+              e.target.value = e.target.value.replace(regExp, '');
+              newDetailPath = e.target.value
+            }
+
+            if (this.validateDetailPath(e.target.value)) {
+              this._showValidationHelperLine("VALID", $helperLine, "상세 디렉토리명");
+              this.newObj.detailPath = newDetailPath;
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "상세 디렉토리명");
+              e.target.focus();
+
+
+            }
+
+            this.newObj.detailPathDupCheck = false;
+
+            if (this.validateDetailPath(e.target.value)) {
+              this._disableDetailPathDuplCheckBtn(false)
+              this._showValidationHelperLine("DUPCHECK", $helperLine, "상세 디렉토리명");
+            } else {
+              this._disableDetailPathDuplCheckBtn(true)
+              this._showValidationHelperLine("INVALID", $helperLine, "상세 디렉토리명");
+              e.target.focus();
+            }
+            this.newObj.detailPath = newDetailPath;
+
+          },
+
+          onChangeInsertDescription: function (e) {
+
+            e.stopPropagation();
+            var newDescription = e.target.value;
+            //e.target.value = newDescription;
+
+            var $helperLine = $("#insert-description-helper-line")
+
+            if (this.validateDescription(e.target.value)) {
+              this._showValidationHelperLine("VALID", $helperLine, "설명");
+              this.newObj.description = newDescription;
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "설명");
+              e.target.focus();
+            }
+
+          },
+
+          onClickInsertDetailPathDupCheck: function () {
+            var self = this;
+
+            if (!this.validateDetailPathDuplicate()) {
+              return;
+            }
+
+            this.checkDuplicateDetailPath(this.newObj, function () {
+              if (self.newObj.detailPathDupCheck) {
+                self._showValidationHelperLine('VALID', $("#insert-detailpath-helper-line"), '상세 디렉토리명');
+              } else {
+                self._showValidationHelperLine('DUPCHECK', $("#insert-detailpath-helper-line"), '상세 디렉토리명');
+              }
+            });
+          },
+
+          _disableDatasetDuplCheckBtn: function (disabled) {
+            $("#insert-dataset-dupcheck-btn").prop("disabled", disabled);
+          },
+          _disableDetailPathDuplCheckBtn: function (disabled) {
+            $("#insert-detailpath-dupcheck-btn").prop("disabled", disabled);
+          },
+
+          validateDataset: function (value) {
+            // 최대 글자
+            var newValue = value.trim();
+            return newValue.length <= this.DATASET_MAX_LENGTH;
+          },
+          validateDetailPath: function (value) {
+            // 최대 글자
+            var newValue = value.trim();
+            return true;
+          },
+          validateDescription: function (value) {
+            // 최대 글자
+            var newValue = value.trim();
+            return newValue.length <= this.DESCRIPTION_MAX_LENGTH;
+          },
+          // 상세디렉토리 중복 검사시 서비스모델값 체크
+          validateDetailPathDuplicate: function () {
+
+            // 서비스 모델
+            if (this.newObj.serviceModelId == null || this.newObj.serviceModelId == undefined || this.newObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            return true;
+          },
+          // 데이터셋명 중복 검사시 서비스모델값 체크
+          validateDatasetDuplicate: function () {
+
+            // 서비스 모델
+            if (this.newObj.serviceModelId == null || this.newObj.serviceModelId == undefined || this.newObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            return true;
+          },
+          _disableDatasetDuplCheckBtn: function (disabled) {
+            $("#insert-dataset-dupcheck-btn").prop("disabled", disabled);
+          },
+          _showValidationHelperLine: function (mode, $helperline, key) {
+            if (mode == "VALID") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                    사용 가능한 ${key}입니다.
+                  </p>`
+              )
+            } else if (mode == "DUPCHECK") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--warning ">
+                    ${key} 중복 체크를 해주세요.
+                  </p>`
+              )
+            } else if (mode == "INVALID") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error ">
+                    유효하지 않은 ${key}입니다.
+                  </p>`
+              )
+            } else {
+              $helperline.html('<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg "></p>');
+            }
+          },
+          toggleAddBtn: function () {
+
+            var amDatasetIdList = $.map($(".chk-am-dataset:checked"), function (item) {
+              return $(item).val();
+            });
+
+            // var amTrainDataDirectoryId = $("#amTrainDataDirectorySelector").data('select').value;
+            this.newObj.serviceModelId = $("#serviceModelIdSelector").data('select').value;
+            this.newObj.modelType = $("#modelTypeSelector").data('select').value;
+            // this.newObj.amDirectoryId = amTrainDataDirectoryId;
+            //if ($.trim(amTrainDataDirectoryId) === "" || amDatasetIdList.length < 1) {
+
+            if (this.newObj.modelType == null || $.trim(this.newObj.modelType == null) == "" || this.newObj.serviceModelId == null || $.trim(this.newObj.serviceModelId) == "") {
+
+              $("#addUsageBtn").prop('disabled', true);
+              return;
+            }
+
+            $("#addUsageBtn").prop('disabled', false);
+          },
+          checkServiceModelId: function () {
+
+            this.newObj.serviceModelId = $("#serviceModelIdSelector").data('select').value;
+
+            $('#insert-dataset-input').parent().data('textField').value = "";
+            // $('#insert-dataset-helper-line > p.mdc-text-field-helper-text').empty();
+            $('#insert-dataset-helper-line > p.mdc-text-field-helper-text').remove();
+            $('#insert-detailpath-input').parent().data('textField').value = "";
+            // $('#insert-detailpath-helper-line > p.mdc-text-field-helper-text').empty();
+            $('#insert-detailpath-helper-line > p.mdc-text-field-helper-text').remove();
+            $('#insert-description-input').parent().data('textField').value = "";
+            $('#insert-description-helper-line > p.mdc-text-field-helper-text').remove();
+
+          },
+          checkModelType: function () {
+
+            this.newObj.modelType = $("#modelTypeSelector").data('select').value;
+
+          },
+          addUsage: function () {
+            if (!this.validateAddUsage()) {
+              return;
+            }
+
+            var $loadingBar = $("#addUsageDialogLoadingBar");
+            $loadingBar.css('opacity', 1);
+            rootInstance.checkXhrAbort = true;
+            rootInstance.dispatchProcessing('process');
+            var amDatasetIdList = $.map($(".chk-am-dataset:checked"), function (item) {
+              return $(item).val();
+            });
+
+            var amTrainDataDirectoryId = $("#amTrainDataDirectorySelector").data('select').value;
+            var serviceModelId = $("#serviceModelIdSelector").data('select').value;
+
+            var params = {
+              dictationIdList: rootInstance.checkedList,
+              amDatasetIdList: amDatasetIdList,
+              // amTrainDataDirectoryId: this.newObj.amDirectoryId,
+              serviceModelId: this.newObj.serviceModelId,
+              modelType : this.newObj.modelType,
+              datasetName: this.newObj.datasetName,
+              description: this.newObj.description,
+              basePath: amBasePath,
+              detailPath: this.newObj.detailPath
+            };
+            //console.log(">> params : " , params);
+
+            let apiUrl = this.serviceUrlPrefix + "/api/dictation/usage/save";
+            let xhr = $.ajax({
+              method: "POST",
+              url: apiUrl,
+              contentType: "application/json",
+              dataType: "json",
+              data: JSON.stringify(params),
+              success: function (response, textStatus, jqXHR) {
+
+                if (response.code === 200) {
+                  toastr.success("전사데이터 등록이 완료되었습니다");
+                  rootInstance.doSearch();
+                  return;
+                }
+
+                toastr.error(response.message);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                toastr.error("전사데이터 등록에 실패했습니다");
+              },
+              complete: function () {
+                $loadingBar.css('opacity', 0);
+                rootInstance.addUsageDialog.close();
+                // 배열에서 해당 xhr 제거 및 checkXhrAbort 초기화
+                let result = rootInstance.currentXhr.find(obj => obj.id === apiUrl);
+                if (result) {
+                  let index = rootInstance.currentXhr.indexOf(result);
+                  rootInstance.currentXhr.splice(index, 1);
+                }
+                rootInstance.checkXhrAbort = false;
+                rootInstance.dispatchProcessing('done');
+              }
+            });
+            // abort 적용을 위해 xhr 객체에 id를 추가해 배열에 push
+            let result = {id: apiUrl, xhr};
+            rootInstance.currentXhr.push(result);
+          },
+          validateAddUsage: function () {
+            var amTrainDataDirectoryId = $("#amTrainDataDirectorySelector").data('select').value;
+
+            // 학습데이터 저장위치
+            // if (this.newObj.amDirectoryId == null || this.newObj.amDirectoryId == undefined || this.newObj.amDirectoryId == 0) {
+            //   toastr.error("학습데이터 저장위치를 선택해주세요.")
+            //   return;
+            // }
+
+
+            // 서비스 모델
+            if (this.newObj.serviceModelId == null || this.newObj.serviceModelId == undefined || this.newObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            if (this.newObj.modelType == null || this.newObj.modelType == undefined || this.newObj.modelType == 0) {
+              toastr.error("모델 타입을 선택해주세요.")
+              return;
+            }
+
+            // 정답지 데이터셋 길이체크
+            if (!this.validateDataset(this.newObj.datasetName)) {
+              toastr.error("데이터셋 이름은 최대" + this.DATASET_MAX_LENGTH + "자 까지 입력 가능합니다.")
+              return;
+            }
+            if (!this.newObj.datasetDupCheck) {
+              toastr.error("학습 데이터셋 중복 체크를 진행해주세요.")
+              return;
+            }
+            // 정답지 데이터셋 빈값
+            if (this.newObj.datasetName == null || this.newObj.datasetName == undefined || this.newObj.datasetName == "") {
+              toastr.error("학습 데이터셋 이름을 입력해주세요.");
+              return;
+            }
+
+            return true;
+
+          }
+        }
+      });
+
+      const verifyDataDialogInstance = new Vue({
+        el: "#addVerifyDataDialog",
+        data: {
+          serviceUrlPrefix: serviceUrlPrefix,
+          verifyDatasetList: JSON.parse("[[${verifyDatasetList}]]".replaceAll('&quot;', "\"")),
+          selectedDatasetId: "",
+          processing: false,
+          // 그룹 등록 Dialog 변수들
+          newDatasetName: "",
+          newDataBasePath: "",
+          newDetailPathName: "",
+          newDataServiceModelId: "",
+          newDescription : "",
+          directoryHome: "[[${directoryHome}]]",
+          dataList: JSON.parse("[[${dataList}]]".replaceAll('&quot;', "\"")),
+          serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+        },
+        created: function () {
+          this.initVerifyDataAddDialogSelector();
+        },
+        mounted: function () {
+          this.initMaterialUx();
+
+        },
+        methods: {
+          initMaterialUx: function () {
+
+            // ripple material ux 적용
+            const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+            for (const el of elements) {
+              el.class
+              mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                isUnbounded: true
+              } : void 0);
+            }
+
+            // input text material ux 적용
+            const textFields = document.querySelectorAll('.mdc-text-field');
+            for (const el of textFields) {
+              $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+            }
+
+            // select material ux 적용
+            const selects = document.querySelectorAll('.mdc-select');
+            for (const el of selects) {
+              var $select = mdc.select.MDCSelect.attachTo(el);
+              var $el = $(el);
+              var value = $el.attr('data-value');
+              // 초기값 설정
+              _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+              $el.data('select', $select);
+            }
+          },
+          initVerifyDataAddDialogSelector: function () {
+            var dataListHtml = this.getDefaultListElement();
+            for (var data of this.dataList) {
+              dataListHtml += this.getListElement(data.datasetName, data.datasetId);
+            }
+            console.log(">>  ", this.dataList);
+            var serviceModelListHtml = this.getDefaultListElement();
+            for (var serviceModel of this.serviceModelList) {
+
+              serviceModelListHtml += this.getListElement(serviceModel.serviceModelName, serviceModel.serviceCode);
+            }
+
+            $("#newDataServiceModelSelector ul").html(serviceModelListHtml);
+
+          },
+          getListElement: function (text, value) {
+            var element = '<li class="mdc-deprecated-list-item" data-value="{value}"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">{text}</span></li>'
+            element = element.replace('{text}', text);
+            element = element.replace('{value}', value);
+
+            return element;
+          },
+          getDefaultListElement: function () {
+            return '<li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" data-value=" " aria-selected="true"><span class="mdc-deprecated-list-item__ripple"></span><span class="mdc-deprecated-list-item__text">선택</span></li>'
+          },
+          showBeforeAddVerifyDataDialog: function () {
+
+            var $newDataServiceModelSelector = $("#newDataServiceModelSelector");
+            var $newDatasetNameInput = $('#newDatasetNameInput');
+            var $newDatasetNameCheckBtn = $('#newDatasetNameCheckBtn');
+            var $newDataBasePathInput = $('#newDataBasePathInput');
+            var $newDetailPathNameInput = $('#newDetailPathNameInput');
+            var $newDetailPathNameCheckBtn = $('#newDetailPathNameCheckBtn');
+            var $duplicateNewDetailPathNameMessage = $('#duplicateNewDetailPathNameMessage');
+            var $duplicateNewDatasetNameMessage = $('#duplicateNewDatasetNameMessage');
+            var $newDescriptionInput = $('#newDescriptionInput');
+            var $checkNewDescriptionNameMessage = $('#checkNewDescriptionNameMessage');
+            var $loadingBar = $('#addVerifyDataDialogLoadingBar');
+            var $dataAddBtn = $('#addVerifyDataBtn');
+
+            $newDataServiceModelSelector.data('select').value = " ";
+            $newDatasetNameInput.data('textField').value = "";
+            $newDatasetNameCheckBtn.prop('disabled', false);
+            $duplicateNewDatasetNameMessage.empty();
+            $newDataBasePathInput.data('textField').value = this.directoryHome + "/verifyData";
+            $newDetailPathNameInput.data('textField').value = "";
+            $newDetailPathNameCheckBtn.prop('disabled', false);
+            $duplicateNewDetailPathNameMessage.empty();
+            $newDescriptionInput.data('textField').value = "";
+            $checkNewDescriptionNameMessage.empty();
+
+            // input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+            $('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+            // 팝업 내용 저장 변수 초기화
+            this.newDatasetName = "";
+            this.newDataBasePath = self.directoryHome + "/verifyData";
+            this.newDetailPathName = "";
+            this.newDataAnswerSheet = "";
+            this.newDataWavFile = "";
+            this.newDescription = "";
+
+            $loadingBar.css('opacity', 0);
+          },
+          showAfterAddVerifyDataDialog: function ($root) {
+
+            var self = this;
+            var $newDataServiceModelSelector = $("#newDataServiceModelSelector");
+            var $newDatasetNameInput = $('#newDatasetNameInput');
+            var $newDatasetNameCheckBtn = $('#newDatasetNameCheckBtn');
+            var $duplicateNewDatasetNameMessage = $('#duplicateNewDatasetNameMessage');
+            var $newDataBasePathInput = $('#newDataBasePathInput');
+            var $newDetailPathNameInput = $('#newDetailPathNameInput');
+            var $newDetailPathNameCheckBtn = $('#newDetailPathNameCheckBtn');
+            var $duplicateNewDetailPathNameMessage = $('#duplicateNewDetailPathNameMessage');
+            var $newDescriptionInput = $('#newDescriptionInput');
+            var $checkNewDescriptionNameMessage = $('#checkNewDescriptionNameMessage');
+            var $loadingBar = $('#addVerifyDataDialogLoadingBar');
+            var $dataAddBtn = $('#newDataAddBtn');
+
+            // 등록 버튼 활성화 처리
+            var registrationActiveFunc = function () {
+              self.newDataBasePath = '/verifyData';
+              if (!_.isEmpty(self.newDatasetName) && _.isEqual(self.newDatasetName, $.trim($newDatasetNameInput.data('textField').value)) &&
+                !_.isEmpty(self.newDetailPathName) && _.isEqual(self.newDetailPathName, $.trim($newDetailPathNameInput.data('textField').value)) &&
+                !_.isEqual(self.newDataServiceModelId, "") && _.isEqual(self.newDataServiceModelId, $.trim($newDataServiceModelSelector.data('select').value))) {
+
+                $dataAddBtn.prop('disabled', false);
+              } else {
+
+                $dataAddBtn.prop('disabled', true);
+              }
+            };
+
+            $newDataServiceModelSelector.data('select').unlisten("MDCSelect:change");
+            $newDataServiceModelSelector.data('select').listen('MDCSelect:change', (ev) => {
+              
+              self.newDataServiceModelId = $newDataServiceModelSelector.data('select').value;
+              $newDatasetNameInput.data('textField').value = "";
+              self.newDatasetName = "";
+              
+              $newDetailPathNameInput.data('textField').value = "";
+              self.newDetailPathName = "";
+              
+              $duplicateNewDatasetNameMessage.removeClass('mdc-theme--success');
+              $duplicateNewDatasetNameMessage.removeClass('mdc-theme--error');
+              $duplicateNewDatasetNameMessage.html("");
+              
+              $duplicateNewDetailPathNameMessage.removeClass('mdc-theme--success');
+              $duplicateNewDetailPathNameMessage.removeClass('mdc-theme--error');
+              $duplicateNewDetailPathNameMessage.html("");
+              registrationActiveFunc();
+            });
+
+            // 데이터셋 이름 입력 변경에 따른 처리
+            $newDatasetNameInput.unbind('change keydown keyup').bind('change keydown keyup', function () {
+              if (self.newDatasetName !== "" && _.isEqual(self.newDatasetName, $.trim($newDatasetNameInput.data('textField').value))) {
+                $newDatasetNameCheckBtn.prop('disabled', true);
+              } else {
+                $newDatasetNameCheckBtn.prop('disabled', false);
+              }
+              registrationActiveFunc();
+            });
+
+            // 상세 디렉토리명 입력 변경에 따른 처리
+            $newDetailPathNameInput.unbind('change keydown keyup').bind('change keydown keyup', function (e) {
+              var regExp = /[^0-9a-zA-Z]/g;
+              if (regExp.test(e.target.value)) {
+                e.target.value = e.target.value.replace(regExp, '');
+                self.newDetailPathName = e.target.value
+              }
+
+              if (self.newDetailPathName !== "" && _.isEqual(self.newDetailPathName, $.trim($newDetailPathNameInput.data('textField').value))) {
+                $newDetailPathNameCheckBtn.prop('disabled', true);
+              } else {
+                $newDetailPathNameCheckBtn.prop('disabled', false);
+              }
+              registrationActiveFunc();
+            });
+
+            // 설명 입력 변경에 따른 처리
+            $newDescriptionInput.unbind('change keydown keyup').bind('change keydown keyup', function (e) {
+
+              self.newDescription = e.target.value;
+
+              if (self.newDescription !== "" && _.isEqual(self.newDescription, $.trim($newDescriptionInput.data('textField').value))) {
+                $checkNewDescriptionNameMessage.addClass('mdc-theme--success');
+                $checkNewDescriptionNameMessage.html(LABEL.message.VALID_DESCRIPTION);
+
+                self.newDescription = $.trim(self.newDescription);
+                // console.log(self.newDescription);
+              } else {
+                $checkNewDescriptionNameMessage.empty();
+              }
+            });
+
+            // 데이터셋 이름 중복 확인 버튼 처리
+            $newDatasetNameCheckBtn.unbind('click').bind('click', function () {
+              var newName = $newDatasetNameInput.data('textField').value;
+
+              if ($.trim(newName) === '') {
+                $duplicateNewDatasetNameMessage.removeClass('mdc-theme--success');
+                $duplicateNewDatasetNameMessage.addClass('mdc-theme--error');
+                $duplicateNewDatasetNameMessage.html(LABEL.message.INVALID_DATASET_NAME_ERROR);
+              } else {
+                _duplicateCheckDatasetName(newName, $loadingBar, function (isError, data) {
+                  if (isError) {
+                    toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                  } else if (data === 'ACCEPTED') {
+                    $duplicateNewDatasetNameMessage.removeClass('mdc-theme--error');
+                    $duplicateNewDatasetNameMessage.addClass('mdc-theme--success');
+                    $duplicateNewDatasetNameMessage.html(LABEL.message.VALID_DATASET_NAME);
+                    self.newDatasetName = $.trim(newName);
+                  } else {
+                    $duplicateNewDatasetNameMessage.removeClass('mdc-theme--success');
+                    $duplicateNewDatasetNameMessage.addClass('mdc-theme--error');
+                    $duplicateNewDatasetNameMessage.html(LABEL.message.CONFLICT_DATASET_NAME_ERROR);
+                    self.newDatasetName = '';
+                  }
+                  $newDatasetNameInput.trigger('change');
+                });
+              }
+            });
+
+            // 상세 디렉토리명 중복 확인 버튼 처리
+            $newDetailPathNameCheckBtn.unbind('click').bind('click', function () {
+              var newPath = $newDetailPathNameInput.data('textField').value;
+              var selectedServiceCode = self.newDataServiceModelId;
+
+              if ($.trim(newPath) === '') {
+                $duplicateNewDetailPathNameMessage.removeClass('mdc-theme--success');
+                $duplicateNewDetailPathNameMessage.addClass('mdc-theme--error');
+                $duplicateNewDetailPathNameMessage.html(LABEL.message.INVALID_DETAILPATH_NAME_ERROR);
+              } else {
+                _duplicateCheckDetailPathName(selectedServiceCode, newPath, $loadingBar, function (isError, data) {
+                  if (isError) {
+                    toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                  } else if (data === 'ACCEPTED') {
+                    $duplicateNewDetailPathNameMessage.removeClass('mdc-theme--error');
+                    $duplicateNewDetailPathNameMessage.addClass('mdc-theme--success');
+                    $duplicateNewDetailPathNameMessage.html(LABEL.message.VALID_DETAILPATH_NAME);
+                    self.newDetailPathName = $.trim(newPath);
+                  } else {
+                    $duplicateNewDetailPathNameMessage.removeClass('mdc-theme--success');
+                    $duplicateNewDetailPathNameMessage.addClass('mdc-theme--error');
+                    $duplicateNewDetailPathNameMessage.html(LABEL.message.CONFLICT_DETAILPATH_NAME_ERROR);
+                    self.newDetailPathName = '';
+                  }
+                  $newDetailPathNameInput.trigger('change');
+                });
+              }
+            });
+
+            var _duplicateCheckDatasetName = function (name, $loadingBar, cbFunc) {
+              self.validateDatasetDuplicate();
+              $loadingBar.css('opacity', 1);
+              let apiUrl = serviceUrlPrefix + "/api/verify/data/name/duplicate";
+              let xhr = $.ajax({
+                method: "GET",
+                url: apiUrl,
+                dataType: "json",
+                data: {
+				  serviceModelId: self.newDataServiceModelId,
+                  encodedName: encodeURIComponent(name)
+                },
+                success: function (response, textStatus, jqXHR) {
+                  if (typeof cbFunc === "function") {
+                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  if (typeof cbFunc === "function") {
+                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                  }
+                },
+                complete: function () {
+                  $loadingBar.css('opacity', 0);
+                  // 배열에서 해당 xhr 제거 및 checkXhrAbort 초기화
+                  let result = rootInstance.currentXhr.find(obj => obj.id === apiUrl);
+                  if (result) {
+                    let index = rootInstance.currentXhr.indexOf(result);
+                    rootInstance.currentXhr.splice(index, 1);
+                  }
+                }
+              });
+              // abort 적용을 위해 xhr 객체에 id를 추가해 배열에 push
+              let result = {id: apiUrl, xhr};
+              rootInstance.currentXhr.push(result);
+            };
+
+            var _duplicateCheckDetailPathName = function (id, path, $loadingBar, cbFunc) {
+              $loadingBar.css('opacity', 1);
+              let apiUrl = serviceUrlPrefix + "/api/verify/data/path/duplicate";
+              let xhr = $.ajax({
+                method: "GET",
+                url: apiUrl,
+                dataType: "json",
+                data: {
+                  path: path,
+                  serviceModelId: id
+                },
+                success: function (response, textStatus, jqXHR) {
+                  if (typeof cbFunc === "function") {
+                    cbFunc(response.code !== 200, response.code === 200 ? response.object : response);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  if (typeof cbFunc === "function") {
+                    cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                  }
+                },
+                complete: function () {
+                  $loadingBar.css('opacity', 0);
+                  // 배열에서 해당 xhr 제거 및 checkXhrAbort 초기화
+                  let result = rootInstance.currentXhr.find(obj => obj.id === apiUrl);
+                  if (result) {
+                    let index = rootInstance.currentXhr.indexOf(result);
+                    rootInstance.currentXhr.splice(index, 1);
+                  }
+                }
+              });
+              // abort 적용을 위해 xhr 객체에 id를 추가해 배열에 push
+              let result = {id: apiUrl, xhr};
+              rootInstance.currentXhr.push(result);
+            };
+
+            // 데이터 등록 버튼 처리
+            $dataAddBtn.unbind('click').bind('click', function () {
+              if (!confirm(LABEL.message.DATA_ADD_CONFIRM)) {
+                return;
+              }
+
+              self._registerData({
+                datasetName: self.newDatasetName,
+                basePath: self.newDataBasePath,
+                detailPath: self.newDetailPathName,
+                description : self.newDescription,
+              }, $loadingBar, function (isError, data) {
+                if (isError) {
+                  toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+                } else if (data + "" === 'true') {
+                  toastr.success(LABEL.message.DATA_ADD_MESSAGE, LABEL.message.DATA_ADD_TITLE);
+                  self.dataAddDialog.close();
+                  self.doRefresh();
+                }
+              });
+            });
+          },
+          validateDatasetDuplicate: function () {
+
+            // 서비스 모델
+            if (this.newDataServiceModelId == null || this.newDataServiceModelId == undefined || this.newDataServiceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            return true;
+          },
+          onChangeVerifyDataset: function (datasetId) {
+            this.selectedDatasetId = datasetId;
+          },
+          addVerifyData: function () {
+
+            const jsonBody = {
+              dictationIdList: rootInstance.checkedList,
+              basePath: this.newDataBasePath,
+              detailPath: this.newDetailPathName,
+              datasetName: this.newDatasetName,
+              serviceModelId: this.newDataServiceModelId,
+              description : this.newDescription,
+            }
+			
+			if (!this.validate(jsonBody)) return;
+            var $loadingBar = $("#addVerifyDataDialogLoadingBar");
+            $loadingBar.css('opacity', 1);
+            rootInstance.checkXhrAbort = true;
+            rootInstance.dispatchProcessing('process');
+
+            let apiUrl = this.serviceUrlPrefix + "/api/dictation/verify/save";
+            let xhr = $.ajax({
+              method: "POST",
+              url: apiUrl,
+              contentType: "application/json",
+              data: JSON.stringify(jsonBody)
+            })
+              .done(responseJson => {
+                const response = JSON.parse(responseJson);
+                if (response.code === 200) {
+                  toastr.success("검증데이터 등록이 완료되었습니다");
+                  rootInstance.doSearch();
+                  return;
+                }
+                toastr.error(response.message);
+              })
+              .fail(error => {
+                toastr.error("검증데이터 등록에 실패했습니다");
+              })
+              .always(() => {
+                $loadingBar.css('opacity', 0);
+                rootInstance.addVerifyDataDialog.close();
+                // 배열에서 해당 xhr 제거 및 checkXhrAbort 초기화
+                let result = rootInstance.currentXhr.find(obj => obj.id === apiUrl);
+                if (result) {
+                  let index = rootInstance.currentXhr.indexOf(result);
+                  rootInstance.currentXhr.splice(index, 1);
+                }
+                rootInstance.checkXhrAbort = false;
+                rootInstance.dispatchProcessing('done');
+              });
+
+            // abort 적용을 위해 xhr 객체에 id를 추가해 배열에 push
+            let result = {id: apiUrl, xhr};
+            rootInstance.currentXhr.push(result);
+          },
+          validate: function(jsonBody) {
+			  if (!jsonBody.datasetName) {
+				  toastr.error("데이터셋 명을 입력해주세요.");
+				  return false;
+			  }
+			  if (!jsonBody.detailPath) {
+				  toastr.error("상세 디렉토리명을 입력해주세요.");
+				  return false;
+			  }
+			  if (!jsonBody.serviceModelId) {
+				  toastr.error("서비스 모델을 선택해주세요.");
+				  return false;
+			  }
+			  return true;
+		  }
+        }
+      });
+
+      const insertDialog = new Vue({
+        el: "#insertDialog",
+        data: {
+          serviceUrlPrefix: serviceUrlPrefix,
+          serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+          setConfidentDialogLoadingBar: $("#set-confidence-dialog-loadingbar"),
+          serviceCode: "",
+          serviceModelId: "",
+        },
+        mounted: function () {
+          var self = this;
+
+          this.initMaterialUx();
+
+          $('#insert-btn').unbind('click').bind('click', function () {
+            var encrypt = "0";
+            if (document.getElementById('insert-encrypt-y').checked) {
+              encrypt = "1";
+            }
+            var newObj = {
+              "serviceModelId": self.serviceModelId,
+              "serviceCode": self.serviceCode,
+              "confidence": $($('#insert-confidence-input')[0].parentElement).data('textField').value,
+              "fileCount": $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value,
+              "encFlag": encrypt
+            };
+            self.onConfidenceControl('set', newObj);
+          });
+          $('#start-btn').unbind('click').bind('click', function () {
+            const fileCount = $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value;
+
+            if (fileCount < 1) {
+              toastr.error("파일 저장 최대 개수를 1 이상 입력해주세요.");
+              return;
+            }
+            var encrypt = "0";
+            if (document.getElementById('insert-encrypt-y').checked) {
+              encrypt = "1";
+            }
+
+            var newObj = {
+              "serviceModelId": self.serviceModelId,
+              "serviceCode": self.serviceCode,
+              "confidence": $($('#insert-confidence-input')[0].parentElement).data('textField').value,
+              "fileCount": fileCount,
+              "encFlag": encrypt
+            };
+            self.onConfidenceControl('start', newObj);
+          });
+          $('#stop-btn').unbind('click').bind('click', function () {
+            var newObj = {
+              "serviceModelId": self.serviceModelId,
+              "serviceCode": self.serviceCode
+            };
+            self.onConfidenceControl('stop', newObj);
+          });
+        },
+        methods: {
+          initMaterialUx: function () {
+            var self = this;
+
+            // ripple material ux 적용
+            const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+            for (const el of elements) {
+              el.class
+              mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                isUnbounded: true
+              } : void 0);
+            }
+
+            // input text material ux 적용
+            const textFields = document.querySelectorAll('.mdc-text-field');
+            for (const el of textFields) {
+              $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+            }
+
+            // select material ux 적용
+            const selects = document.querySelectorAll('.mdc-select');
+            for (const el of selects) {
+              var $select = mdc.select.MDCSelect.attachTo(el);
+              var $el = $(el);
+              var value = $el.attr('data-value');
+              // 초기값 설정
+              _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+              $el.data('select', $select);
+            }
+
+            var $searchServiceModelSelector = $("#insertDialogServiceModelSelector");
+            $searchServiceModelSelector.data('select').unlisten("MDCSelect:change");
+            $searchServiceModelSelector.data('select').listen('MDCSelect:change', function (e) {
+              var serviceCode = e.detail.value;
+              if (serviceCode == 0) {
+                $($('#insert-confidence-input')[0].parentElement).data('textField').value = "";
+                $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = "";
+                document.getElementById('insert-encrypt-n').checked = false;
+                document.getElementById('insert-encrypt-y').checked = true;
+                $('#insert-fileStartCount-input').removeAttr("readonly");
+                $('#insert-btn').attr("disabled", true);
+                $('#start-btn').attr("disabled", true);
+                $('#stop-btn').attr("disabled", true);
+              } else {
+                self.serviceCode = serviceCode;
+                self.onChangeInsertDialogServiceModel(serviceCode);
+              }
+            });
+          },
+          onChangeInsertDialogServiceModel: function (serviceCode) {
+
+            var self = this;
+
+            var newObj = {
+              "serviceCode": serviceCode
+            };
+
+            $.ajax({
+              url: this.serviceUrlPrefix + "/api/dictation/confidence",
+              method: "post",
+              contentType: 'application/json; charset=UTF-8',
+              dataType: "json",
+              data: JSON.stringify(newObj)
+            }).done(data => {
+              if (data.resultCode === "0000") {
+
+                if (data.result.exeYn == 'Y') {
+                  $('#insert-fileStartCount-input').attr("readonly", true);
+                  $('#insert-btn').removeAttr("disabled");
+                  $('#start-btn').attr("disabled", true);
+                  $('#stop-btn').removeAttr("disabled");
+                  $($('#insert-fileSaveCount-input')[0].parentElement).data('textField').value = data.result.fileSaveCount;
+                  $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = data.result.fileStartCount;
+                } else {
+                  $('#insert-fileStartCount-input').removeAttr("readonly");
+                  $('#insert-btn').attr("disabled", true);
+                  $('#start-btn').removeAttr("disabled");
+                  $('#stop-btn').attr("disabled", true);
+                  $($('#insert-fileSaveCount-input')[0].parentElement).data('textField').value = 0;
+                  $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = 0;
+                }
+
+                // 등록된 신뢰도 값 셋팅
+                $($('#insert-confidence-input')[0].parentElement).data('textField').value = data.result.confidence;
+
+
+                // 암호화 유무 세팅
+                if (data.result.encryptYn == 'Y') {
+                  document.getElementById('insert-encrypt-n').checked = false;
+                  document.getElementById('insert-encrypt-y').checked = true;
+                } else {
+                  document.getElementById('insert-encrypt-y').checked = false;
+                  document.getElementById('insert-encrypt-n').checked = true;
+                }
+
+                /*
+                if(data.result.useYn == 'Y'){
+                  $('#insert-fileStartCount-input').attr("readonly",true);
+                  //$('#insert-btn').removeAttr("disabled");
+                } else {
+                  $('#insert-fileStartCount-input').removeAttr("readonly");
+                  //$('#insert-btn').attr("disabled",true);
+                }
+                */
+
+              } else {
+                $($('#insert-confidence-input')[0].parentElement).data('textField').value = '';
+                $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = '';
+                document.getElementById('insert-encrypt-n').checked = false;
+                document.getElementById('insert-encrypt-y').checked = true;
+                $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = 0;
+                $($('#insert-fileSaveCount-input')[0].parentElement).data('textField').value = 0;
+
+                $('#insert-btn').attr("disabled", true);
+                $('#start-btn').removeAttr("disabled");
+                $('#stop-btn').attr("disabled", true);
+                toastr.error(data.resultMsg);
+              }
+            })
+          },
+
+          onConfidenceControl: function (requestType, newObj) {
+            var self = this;
+            this.setDialogLoading(this.setConfidentDialogLoadingBar, true);
+            $.ajax({
+              url: this.serviceUrlPrefix + "/api/dictation/confidence/" + requestType,
+              method: "post",
+              contentType: 'application/json; charset=UTF-8',
+              dataType: "json",
+              data: JSON.stringify(newObj),
+              success: function (data, textStatus, jqXHR) {
+                if (data.resultCode == '0000') {
+                  let successMessage;
+                  if (data.result == 'stop') {
+                    $('#insert-fileStartCount-input').removeAttr("readonly");
+                    $('#insert-btn').attr("disabled", true);
+                    $('#start-btn').removeAttr("disabled");
+                    $('#stop-btn').attr("disabled", true);
+                    successMessage = LABEL.message.SUCCESS_STOP;
+                  } else if (data.result == 'start') {
+                    $('#insert-fileStartCount-input').attr("readonly", true);
+                    $('#insert-btn').removeAttr("disabled");
+                    $('#start-btn').attr("disabled", true);
+                    $('#stop-btn').removeAttr("disabled");
+                    successMessage = LABEL.message.SUCCESS_START;
+                  } else if (data.result == 'set') {
+                    successMessage = LABEL.message.SUCCESS_SET;
+                  }
+                  toastr.success(successMessage);
+                } else {
+                  toastr.error("통신오류가 발생했습니다.");
+                  rootInstance.insertDialog.close();
+                }
+              },
+              complete: function () {
+                self.setDialogLoading(self.setConfidentDialogLoadingBar, false);
+
+              }
+            })
+          },
+          setDialogLoading: function (loadingBarJqueryEl, option) {
+            if (option == true) {
+              loadingBarJqueryEl.show();
+              return;
+            }
+            loadingBarJqueryEl.hide();
+          }
+        }
+
+      })
+
+      const rootInstance = new Vue({
+        el: ".contentRoot",
+        data: {
+          LABEL: LABEL,
+          moment: moment,
+          fn: fn,
+          serviceUrlPrefix: serviceUrlPrefix,
+
+          //검색조건
+          serviceModelId: "",
+          serviceCode: "",
+          usageType: "",
+          wavFileName: "",
+          dictatedText: "",
+          updId: "",
+          regDtFrom: "",
+          regDtTo: "",
+          start: DEFAULT_PAGE_START,
+          size: DEFAULT_PAGE_SIZE,
+
+          // 현재 적용되어 있는 검색 조건
+          _searchCondition: {
+            serviceModelId: "",
+            serviceCode: "",
+            usageType: "",
+            wavFileName: "",
+            dictatedText: "",
+            updId: "",
+            regDtFrom: "",
+            regDtTo: "",
+            start: 0,
+            size: 0,
+          },
+
+          // 검색 결과
+          totalCount: 0,
+          currentPageNum: 0,
+          lastPageNum: 0,
+          itemFromNum: 0,
+          itemToNum: 0,
+          currentList: [],
+          pagingNumbers: [],
+
+          checkedList: [],
+          addUsageDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#addUsageDialog')),
+          addVerifyDataDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#addVerifyDataDialog')),
+          insertDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#insertDialog')),
+          // etc
+          initSearched: false,		// 초기 검색이 제공되었는지 여부
+          serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+
+          // etc
+          currentXhr: [],		// 모달 내 XHR 중단할 때 사용
+          checkXhrAbort: false,	// 모달 내에서 등록/저장 등 업로드 시엔 컨펌 추가
+          currentDialog: null   // vue data에서 정의한 모달의 key. ( :string)
+        },
+        created: function () {
+          var self = this;
+          this.initPage(location.search.slice(1));
+          this.$nextTick(function () {
+            self.doRefresh();
+          });
+        },
+        mounted: function () {
+          var self = this;
+
+          // 페이지 이동시 처리
+          $('#drawer-main-content-viewer').one('page.move', function () {
+
+            var $searchRegDtFromInput = $('#searchRegDtFromInput');
+            var $searchRegDtToInput = $('#searchRegDtToInput');
+            $searchRegDtFromInput.data('datepicker').destroy();
+            $searchRegDtToInput.data('datepicker').destroy();
+
+          });
+
+          this.initMaterialUx();
+
+          $('#searchServiceModelSelector').data('select').unlisten('MDCSelect:change')
+          $('#searchServiceModelSelector').data('select').listen('MDCSelect:change', function (event) {
+            self.serviceCode = $.trim(event.detail.value);
+            // self.doSearch();
+          });
+
+
+          $('#searchUsageSelector').data('select').unlisten('MDCSelect:change')
+          $('#searchUsageSelector').data('select').listen('MDCSelect:change', function (event) {
+            self.usageType = $.trim(event.detail.value);
+            // self.doSearch();
+          });
+
+          $('#sizeSelector').data('select').unlisten('MDCSelect:change')
+          $('#sizeSelector').data('select').listen('MDCSelect:change', function (event) {
+            self.size = $.trim(event.detail.value);
+            self.doSearch();
+          });
+
+          $('#addUsageDialogBtn').unbind('click').bind('click', function () {
+
+            self.checkedList = $.map($(".chk-row:checked"), function (item) {
+              return $(item).val();
+            });
+
+            if (self.checkedList.length < 1) {
+              alert("최소 1개 이상 선택해야 합니다");
+              return;
+            }
+
+            /* AM 학습 데이터 등록 입력창 초기화 */
+            $("#serviceModelIdSelector").data('select').value = ' ';
+            $("#modelTypeSelector").data('select').value = ' ';
+            $('#insert-dataset-input').parent().data('textField').value = "";
+            // $('#insert-dataset-helper-line > p.mdc-text-field-helper-text').empty();
+            $('#insert-dataset-helper-line > p.mdc-text-field-helper-text').remove();
+            $('#insert-basepath-input')[0].value = directoryHome + amBasePath;
+            $('#insert-detailpath-input').parent().data('textField').value = "";
+            // $('#insert-detailpath-helper-line > p.mdc-text-field-helper-text').empty();
+            $('#insert-detailpath-helper-line > p.mdc-text-field-helper-text').remove();
+            $('#insert-description-input').parent().data('textField').value = "";
+            $('#insert-description-helper-line > p.mdc-text-field-helper-text').remove();
+
+            // input 이 필수값이 없을때 오류 표기되는 것을 초기화 함
+            $('.mdc-text-field').removeClass('mdc-text-field--invalid');
+
+            self.showBeforeAddUsageDialog();
+            self.addUsageDialog.open();
+            self.currentDialog = 'addUsageDialog';
+          });
+
+          $('#addVerifyDataDialogBtn').unbind('click').bind('click', function () {
+
+            self.checkedList = $.map($(".chk-row:checked"), function (item) {
+              return $(item).val();
+            });
+
+            if (self.checkedList.length < 1) {
+              alert("최소 1개 이상 선택해야 합니다");
+              return;
+            }
+
+            verifyDataDialogInstance.showBeforeAddVerifyDataDialog();
+            self.currentDialog = 'addVerifyDataDialog';
+            self.addVerifyDataDialog.open();
+          });
+
+          // 검증데이터 등록 팝업 show 후처리
+          this.addVerifyDataDialog.listen('MDCDialog:opened', function () {
+            verifyDataDialogInstance.showAfterAddVerifyDataDialog($(self.addVerifyDataDialog.root));
+          });
+
+          $('#insertDialogBtn').unbind('click').bind('click', function () {
+            self.showBeforeInsertDialog();
+            self.insertDialog.open();
+          })
+
+          // 모달 닫을 때 데이터 요청/전송 취소
+          $('.close-button').off('click').on('click', function () {
+            self.onCloseDialog();
+          })
+          $('.mdc-dialog').on('keydown', function (e) {
+            if (e.key === 'Escape') self.onCloseDialog();
+          })
+        },
+        methods: {
+
+          /**
+           * 초기 url을 기준으로 화면 내용 설정
+           */
+          initPage: function (queryString) {
+
+            var params = Qs.parse(queryString);
+            this.serviceModelId = params.serviceCode || "";
+            this.serviceCode = params.serviceCode || "";
+            this.usageType = params.usageType || "";
+            this.wavFileName = params.wavFileName || "";
+            this.dictatedText = params.dictatedText || "";
+            this.updId = params.updId || "";
+            this.regDtFrom = params.regDtFrom || "";
+            this.regDtTo = params.regDtTo || "";
+            this.start = parseInt(params.start || DEFAULT_PAGE_START);
+            this.size = parseInt(params.size || DEFAULT_PAGE_SIZE);
+
+
+            this._searchCondition = {
+              serviceModelId: this.serviceCode,
+              serviceCode: this.serviceCode,
+              usageType: this.usageType,
+              wavFileName: this.wavFileName,
+              dictatedText: this.dictatedText,
+              updId: this.updId,
+              regDtFrom: this.regDtFrom,
+              regDtTo: this.regDtTo,
+              start: this.start,
+              size: this.size,
+            };
+
+            // selector 초기값 설정
+            $('#searchServiceModelSelector').attr('data-value', this.serviceCode);
+            $('#insertDialogServiceModelSelector').attr('data-value', this.serviceCode);
+            $('#searchUsageTypeSelector').attr('data-value', this.usageType);
+            $('#sizeSelector').attr('data-value', this.size);
+          },
+
+          initMaterialUx: function () {
+            var self = this;
+
+            // ripple material ux 적용
+            const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+            for (const el of elements) {
+              el.class
+              mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                isUnbounded: true
+              } : void 0);
+            }
+
+            // input text material ux 적용
+            const textFields = document.querySelectorAll('.mdc-text-field');
+            for (const el of textFields) {
+              $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+            }
+
+            // select material ux 적용
+            const selects = document.querySelectorAll('.mdc-select');
+            for (const el of selects) {
+              var $select = mdc.select.MDCSelect.attachTo(el);
+              var $el = $(el);
+              var value = $el.attr('data-value');
+              // 초기값 설정
+              _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+              $el.data('select', $select);
+            }
+
+            $("#chk-all").on('click', function () {
+              $(".chk-row").prop('checked', $("#chk-all").is(":checked"));
+            });
+
+          },
+
+          /**
+           * 검색 버튼클릭 시 처리
+           */
+          doSearch: function () {
+            let self = this;
+
+            this._searchCondition = {
+              serviceModelId: this.serviceCode,
+              serviceCode: this.serviceCode,
+              usageType: this.usageType,
+              wavFileName: this.wavFileName,
+              dictatedText: this.dictatedText,
+              updId: this.updId,
+              regDtFrom: this.regDtFrom,
+              regDtTo: this.regDtTo,
+              start: 0,
+              size: this.size,
+            };
+
+            this._pushHistory(this._searchCondition);
+            this._search(this._searchCondition, $('#dictationLoadingBar'), function (isError, data) {
+              if (isError) {
+                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+              } else {
+                self.renderDatas(data.total, data.object, self._searchCondition);
+              }
+            });
+          },
+
+          /**
+           * 특정 페이지로 이동한다.
+           */
+          goPage: function (pageNum) {
+            let self = this;
+
+            this._searchCondition.start = this._searchCondition.size * (pageNum - 1);
+            this._pushHistory(this._searchCondition);
+            this._search(this._searchCondition, $('#dictationLoadingBar'), function (isError, data, total, list) {
+              if (isError) {
+                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+              } else {
+                self.renderDatas(data.total, data.object, self._searchCondition);
+              }
+            });
+          },
+
+          /**
+           * 현재 검색 목록을 refresh한다.
+           */
+          doRefresh: function () {
+            let self = this;
+            this._search(this._searchCondition, $('#dictationLoadingBar'), function (isError, data, total, list) {
+              if (isError) {
+                toastr.error(data.message, LABEL.message.API_ERROR_TITLE);
+              } else {
+                self.renderDatas(data.total, data.object, self._searchCondition);
+              }
+            });
+          },
+
+          /**
+           * 검색결과를 화면에 연결된 변수들에 저장
+           */
+          renderDatas: function (totalCount, list, condition) {
+
+            $("input[type=checkbox]").prop('checked', false);
+
+            var self = this;
+            this.lastPageNum = Math.ceil((totalCount || 0) / condition.size);
+            this.currentPageNum = Math.ceil(condition.start / condition.size) + 1;
+
+            this.totalCount = totalCount;
+            this.currentList = list || [];
+            // 최신순으로 정렬하기 때문에 역순
+            this.itemFromNum = totalCount - parseInt(condition.start);
+            this.itemToNum = totalCount - Math.min(totalCount, parseInt(condition.start) + parseInt(condition.size));
+
+            this.pagingNumbers = [this.currentPageNum];
+            for (let diff = 1; this.pagingNumbers.length < PAGING_BTN_SIZE && diff <= PAGING_BTN_SIZE; diff++) {
+              if (1 <= this.currentPageNum - diff) {
+                this.pagingNumbers.push(this.currentPageNum - diff);
+              }
+              if (this.pagingNumbers.length < PAGING_BTN_SIZE && this.currentPageNum + diff <= this.lastPageNum) {
+                this.pagingNumbers.push(this.currentPageNum + diff);
+              }
+            }
+            this.pagingNumbers = _.sortBy(this.pagingNumbers);
+
+            this.initDatepicker();
+
+            // 화면에 리스트가 구성된 이후 각 row에 대한 클릭 이벤트 적용
+            this.$nextTick(function () {
+              $(".chk-row").unbind('click').bind('click', function (ev) {
+                ev.stopPropagation();
+              });
+
+              $('.dictation-info-row').unbind('click').bind('click', function (ev) {
+                var dictationId = ev.currentTarget.dataset.id;
+                window.index.movePage(DETAIL_PAGE_SERVICE_URI.replace("{dictationId}", dictationId));
+              });
+            });
+          },
+
+          initDatepicker: function () {
+
+            var self = this;
+            var $searchRegDtFromInput = $('#searchRegDtFromInput');
+            var $searchRegDtToInput = $('#searchRegDtToInput');
+
+            // MaterialDatepicker 설정
+            var datepickerOption = {
+              lang: "en",		// ko 는 없음....
+              orientation: "portrait",
+              color: document.defaultView.getComputedStyle(document.documentElement).getPropertyValue("--mdc-theme-primary"),
+              closeAfterClick: false,
+              //date: null,
+              outputFormat: 'YYYY-MM-DD',
+              topHeaderFormat: 'YYYY MM',
+              headerFormat: 'Do',
+            };
+
+            if ($searchRegDtFromInput.data('datepicker') != null) {
+              $searchRegDtFromInput.data('datepicker').destroy();
+            }
+
+            $searchRegDtFromInput.data('datepicker', new MaterialDatepicker($searchRegDtFromInput.data('textField').input, $.extend({}, datepickerOption, {
+              onChange: function (date) {
+                if (!$searchRegDtFromInput.data('textField')) {
+                  return;
+                }
+                if (_.isEmpty($searchRegDtFromInput.data('textField').value)) {
+                  self.regDtFrom = null
+                } else {
+                  self.regDtFrom = moment(date).format("YYYY-MM-DD HH:mm:ss");
+                }
+              }
+            })));
+
+            if ($searchRegDtToInput.data('datepicker') != null) {
+              $searchRegDtToInput.data('datepicker').destroy();
+            }
+
+            $searchRegDtToInput.data('datepicker', new MaterialDatepicker($searchRegDtToInput.data('textField').input, $.extend({}, datepickerOption, {
+              onChange: function (date) {
+                if (!$searchRegDtToInput.data('textField')) {
+                  return;
+                }
+                if (_.isEmpty($searchRegDtToInput.data('textField').value)) {
+                  self.regDtTo = null
+                } else {
+                  self.regDtTo = moment(date).format("YYYY-MM-DD HH:mm:ss");
+                }
+              }
+            })));
+
+            $searchRegDtFromInput.data('textField').value = this.regDtFrom ? moment(this.regDtFrom).format("YYYY-MM-DD") : '';
+            $searchRegDtToInput.data('textField').value = this.regDtTo ? moment(this.regDtTo).format("YYYY-MM-DD") : '';
+
+          },
+
+          showBeforeAddUsageDialog: function () {
+
+            $("#amTrainDataDirectorySelector").data('select').value = " ";
+            // $('#insert-basepath-input')[0].value = directoryHome + amBasePath;
+
+            $(".chk-am-dataset").prop('checked', false);
+          },
+          showBeforeInsertDialog: function () {
+            $($('#insert-confidence-input')[0].parentElement).data('textField').value = '';
+            $($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = '';
+            $($('#insert-fileSaveCount-input')[0].parentElement).data('textField').value = '';
+            document.getElementById('insert-encrypt-n').checked = false;
+            document.getElementById('insert-encrypt-y').checked = true;
+
+            $("#insertDialogServiceModelSelector").data('select').value = "0";
+
+            $('#insert-btn').attr("disabled", true);
+            $('#start-btn').attr("disabled", true);
+            $('#stop-btn').attr("disabled", true);
+          },
+
+          /**
+           * 현재 검색 조건에 대한 history를 push한다.
+           */
+          _pushHistory: function (condition) {
+            if (!this.initSearched) {
+              this.initSearched = true;
+              // 맨 처음 page의 경우 history를 변경하여 back 시 이전 페이지로 돌아가도록 한다.
+              history.replaceState(null, null, "?" + $.param(condition));
+            } else {
+              history.pushState(null, null, "?" + $.param(condition));
+            }
+          },
+
+            /* helperline 초기화용 */
+            _showValidationHelperLine: function (mode, $helperline, key) {
+                if (mode == "VALID") {
+                    $helperline.html(
+                      `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                    사용 가능한 ${key}입니다.
+                  </p>`
+                    )
+                } else if (mode == "DUPCHECK") {
+                    $helperline.html(
+                      `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--warning ">
+                    ${key} 중복 체크를 해주세요.
+                  </p>`
+                    )
+                } else if (mode == "INVALID") {
+                    $helperline.html(
+                      `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error ">
+                    유효하지 않은 ${key}입니다.
+                  </p>`
+                    )
+                } else {
+                    $helperline.html('<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg "></p>');
+                }
+            },
+
+          /**
+           * 검색 API 호출
+           */
+          _search: function (params, $loadingBar, cbFunc) {
+            $loadingBar.css('opacity', 1);
+            $.ajax({
+              method: "GET",
+              url: this.serviceUrlPrefix + "/api/dictation",
+              dataType: "json",
+              data: params,
+              success: function (response, textStatus, jqXHR) {
+                if (typeof cbFunc === "function") {
+                  cbFunc(response.code !== 200, response.code === 200 ? response : response);
+                }
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                if (typeof cbFunc === "function") {
+                  cbFunc(true, jqXHR.status + "] " + jqXHR.responseText);
+                }
+              },
+              complete: function () {
+                $loadingBar.css('opacity', 0);
+              }
+            });
+          },
+          /**
+           * 전사데이터를 삭제한다.
+           */
+          deleteDictation: function () {
+            const self = this;
+            const checkedList = $.map($(".chk-row:checked"), function (item) {
+              return $(item).val();
+            });
+
+            if (checkedList.length === 0) {
+              toastr.error(LABEL.message.REQUIRED_CHECK);
+              return;
+            }
+
+            if (!confirm("전사데이터를 삭제하시겠습니까?")) {
+              return;
+            }
+
+            const params = {
+              targetIdList: checkedList
+            };
+
+            $.ajax({
+              method: "POST",
+              url: this.serviceUrlPrefix + "/api/dictation/delete",
+              contentType: "application/json",
+              dataType: "json",
+              data: JSON.stringify(params),
+              success: function (response, textStatus, jqXHR) {
+
+                if (response.code === 200) {
+                  toastr.success("전사데이터를 삭제하였습니다.");
+                  self.doSearch();
+                  return;
+                }
+
+                toastr.error(response.message);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+              }
+            });
+          },
+
+          /**
+           * 모달 닫을 때 데이터 요청/전송 취소
+           */
+          onCloseDialog: function () {
+            const self = this;
+            if (self.currentXhr.length !== 0) {
+              if (self.checkXhrAbort && !confirm('취소 시 저장 및 업로드가 중단됩니다.')) return;
+              [...self.currentXhr].forEach(xhrItem => xhrItem.xhr.abort())
+              self.dispatchProcessing('done');
+            }
+            if (self.currentDialog) {
+              self[self.currentDialog].close();
+              self.currentDialog = null;
+            }
+          },
+
+          /**
+           *
+           * @param state: 'process' || 'done'
+           * 디스패치 시 모달 본문에 유저 동작 방지 적용 및 닫기/취소를 제외한 버튼 비활성화
+           */
+          dispatchProcessing: function (state) {
+            let $modalSurface;
+            let $modalBtn;
+            if (state === 'process') {
+              // 닫기/취소를 제외한 버튼 선택
+              $modalBtn = $('.mdc-dialog--open .mdc-dialog__surface .mdc-button').not('.close-button');
+              // 현재 열려있는 모달 선택
+              $modalSurface = $('.mdc-dialog--open .mdc-dialog__surface');
+              $modalBtn.prop('disabled', true);
+              $modalSurface.addClass('is-processing');
+            } else if (state === 'done') {
+              // 진행 중인 모달 선택.
+              // 모달 닫는게 먼저 실행되면 .mdc-dialog--open으로 선택 불가
+              $modalBtn = $('.mdc-dialog__surface.is-processing .mdc-button').not('.close-button');
+              $modalSurface = $('.mdc-dialog__surface.is-processing');
+              $modalBtn.prop('disabled', false);
+              $modalSurface.removeClass('is-processing');
+            }
+          },
+        }
+      });
+    })();
+  </script>
+</th:block>
+</html>

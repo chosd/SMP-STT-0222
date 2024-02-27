@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+
+<th:block layout:fragment="html">
+    <link th:href='${smpServiceUriPrefix + "/css/audio.css"}' rel="stylesheet" />
+
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>검증데이터 상세</h2>
+            <div class="button-group">
+                <button
+                    class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--default"
+                    @click="goList">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon">keyboard_backspace</i>
+                    <span class="mdc-button__label">목록으로</span>
+                </button>
+            </div>
+        </div>
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">
+                    <div class="form-row md-size">
+                        <div class="flex-auto">
+                            <h4>검증데이터 정보</h4>
+                        </div>
+                        <button
+                            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-error mdc-theme--error-bg"
+                            @click="deleteData">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">delete</i>
+                            <span class="mdc-button__label">삭제</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body custom-scrollbar">
+                    <div class="form-row multiline-align-top">
+                        <div id="serviceModelNameInput"
+                             class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                            <input type="text" class="mdc-text-field__input"
+                                   aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label">서비스모델</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                        <div id="datasetNameInput"
+                             class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                            <input type="text" class="mdc-text-field__input"
+                                   aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label">검증데이터셋</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                        <div id="wavFileNameInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                            <input type="text" class="mdc-text-field__input"
+                                   aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                            <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label">음원파일명</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                  <div class="form-row multiline-align-top mt-3">
+                    <div id="descriptionInput"
+                         class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                      <input type="text" class="mdc-text-field__input"
+                             aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                      <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                        <div class="mdc-notched-outline__leading"></div>
+                        <div class="mdc-notched-outline__notch">
+                          <label class="mdc-floating-label">설명</label>
+                        </div>
+                        <div class="mdc-notched-outline__trailing"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                    <div class="content-item">
+                        <div class="content-title">
+                            <h4 class="mdc-layout-grid__cell--span-4">전사데이터</h4>
+                        </div>
+                        <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12" style="height: 200px;" id="dictatedTextInputWrap">
+                            <div id="dictatedTextInput"
+                                 class="mdc-text-field text-field mdc-text-field--outlined w-100 h-100">
+                                <textarea class="mdc-text-field__input" readonly style="resize: none;"></textarea>
+                                <div class="mdc-notched-outline mdc-notched-outline--upgraded h-100">
+                                    <div class="mdc-notched-outline__leading"></div>
+                                    <div class="mdc-notched-outline__trailing">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12" id="mediaAreaWrap">
+		<div class="media-area">
+			<div id="waveForm" style="margin-bottom: 10px;"></div>
+			<div class="sound-info">
+				<div class="ftl">
+					<span class="time">
+						<i id="time-current" class="txt-green">00:00</i>
+						/
+						<i id="time-total">00:00</i>
+					</span>
+					<span>
+						<img th:src='${smpServiceUriPrefix + "/img/icon-volume.png"}' atl="볼륨" />
+					</span>
+					<input id="audioVolume" type="range" min="0" max="1" value="0.5" step="0.1" />
+				</div>
+				<div class="ftr">
+					<div>
+						<div>
+							<a href="javascript:void(0);" class="playBackRate" data-value="0.5">x0.5</a>
+							<a href="javascript:void(0);" class="playBackRate playBackRateOn" data-value="1">x1.0</a>
+							<a href="javascript:void(0);" class="playBackRate" data-value="1.5">x1.5</a>
+							<a href="javascript:void(0);" class="playBackRate" data-value="2">x2.0</a>
+							<a href="javascript:void(0);" id="audioStop">
+								<img width="53" th:src='${smpServiceUriPrefix + "/img/icon-pause.png"}' alt="일시정지" />
+							</a>
+							<a href="javascript:void(0);" id="audioPlay">
+								<img width="53" th:src='${smpServiceUriPrefix + "/img/icon-play.png"}' alt="재생" />
+							</a>
+							<a href="javascript:void(0);" id="audioPlayLoop" class="playLoop">반복재생</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+    <input type="hidden" readonly id="projectCode" th:value="${projectCode}">
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript" th:src='${smpServiceUriPrefix + "/js/wavesurferV2.js"}'></script>
+    <script type="text/javascript">
+        (function () {
+            const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+            const projectCode = $("#projectCode").val();
+
+            const LABEL = {
+                message: {
+                    // 공통
+                    API_ERROR_TITLE: "실패",
+                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+                    NOT_EXIST_DATA_ID: "존재하지 않는 검증데이터 입니다.",
+                    DELETE_DATA_CONFIRM: "검증데이터를 삭제하시겠습니까?",
+                    NOT_EXIST_AUDIO_FILE: "음원 파일이 존재하지 않습니다."
+                }
+            };
+
+            const wavesurfer = WaveSurfer.create({
+                container: "#waveForm",
+                backgroundColor: 'white',
+                height: 60,
+                waveColor: '#14BBB3',
+                normalize: true,
+                xhr: {
+                    requestHeaders: [
+                        {
+                            key: 'x-smp-project-code',
+                            value: projectCode
+                        }
+                    ]
+                }
+            });
+
+            new Vue({
+                el: ".contentRoot",
+                data: {	
+                    LABEL: LABEL,
+                    moment: moment,
+                    fn: fn,
+                    wavesurfer: wavesurfer,
+                    playLoop: false,
+                    serviceUrlPrefix: serviceUrlPrefix,
+                    dataId: null,
+                    datasetId: "",
+                    datasetName: "",
+                    description: "",
+                    seekEventNum: 0
+
+                },
+                created: function () {
+                    this.initPage(location.href);
+                },
+                mounted: function () {
+					console.log('mounted ~');
+                    // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+                        console.log("page move out");
+						$("#audioStop").click();	// 화면 바뀔 때 오디오를 꺼줍니다.
+                    });
+
+                    if (_.isEmpty(this.dataId)) {
+                        toastr.error(LABEL.message.NOT_EXIST_DATA_ID, LABEL.message.API_ERROR_TITLE);
+                    } else {
+                        this.getData();
+                    }
+
+					$("#dictatedTextInputWrap").before($("#mediaAreaWrap"));
+					
+                    this.initWavesurfer();
+                },
+                methods: {
+
+                    /**
+                     * 초기 url을 기준으로 화면 내용 설정
+                     */
+                    initPage: function (href) {
+                        // 현 URL에서 groupId를 추출함
+                        this.dataId = href.slice(href.lastIndexOf('/')+1);
+                    },
+
+                    /**
+                     * 구글 Material component 초기화
+                     */
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0));
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            var $select = mdc.select.MDCSelect.attachTo(el);
+                            var $el = $(el);
+                            var value = $el.attr('data-value');
+                            // 초기값 설정
+                            _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+                            $el.data('select', $select);
+                        }
+                    },
+                    initWavesurfer: function() {
+
+                        var self = this;
+                        this.wavesurfer.on('ready', function() {
+                            $("#time-current").text(self.toHHMMSS(self.wavesurfer.getCurrentTime()));
+                            $("#time-total").text(self.toHHMMSS(self.wavesurfer.getDuration()));
+                        });
+
+                        this.wavesurfer.on('audioprocess', function() {
+                            $("#time-current").text(self.toHHMMSS(self.wavesurfer.getCurrentTime()));
+                        });
+
+						this.wavesurfer.on('finish', function() {
+                            self.wavesurfer.seekTo(0);
+                            if(self.playLoop) {
+                                self.wavesurfer.play();
+                            }
+                        });
+                        
+                        this.wavesurfer.on('error', function(error) {
+                            toastr.error(LABEL.message.NOT_EXIST_AUDIO_FILE, LABEL.message.API_ERROR_TITLE);
+                        });
+
+                        $("#audioPlay").click(function() {
+                            self.wavesurfer.play();
+                        });
+
+                        $("#audioStop").click(function() {
+                            self.wavesurfer.pause();
+                        });
+
+                        $("#audioVolume").on('input', function() {
+                            self.wavesurfer.setVolume($("#audioVolume").val());
+                        });
+
+                        $("#audioPlayLoop").click(function() {
+                            self.playLoop = !self.playLoop;
+
+                            if(self.playLoop) {
+                                $("#audioPlayLoop").addClass("playLoopOn");
+                            }
+                            else {
+                                $("#audioPlayLoop").removeClass("playLoopOn");
+                            }
+                        });
+
+                        $(".playBackRate").click(function(event) {
+                            var rate = event.target.getAttribute("data-value");
+                            $(".playBackRate").removeClass('playBackRateOn');
+                            event.target.classList.add('playBackRateOn');
+                            self.wavesurfer.setPlaybackRate(rate);
+                        });
+
+                        this.loadWavFile();
+
+                    },
+                    loadWavFile: async function() {
+                        var url = this.serviceUrlPrefix + "/api/verify/data/" + this.dataId + "/wav";
+						
+						try {
+							await this.wavesurfer.load(url);	
+						} catch(e) {
+							console.error(e);
+							this.wavesurfer.empty();
+							toastr.error(LABEL.message.NOT_EXIST_AUDIO_FILE, LABEL.message.API_ERROR_TITLE);
+						}
+                        
+                    },
+                    toHHMMSS: function(param) {
+                        var sec_num = parseInt(param, 10);
+                        var hours   = Math.floor(sec_num / 3600);
+                        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+                        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+                        if (hours   < 10) {hours   = "0"+hours;}
+                        if (minutes < 10) {minutes = "0"+minutes;}
+                        if (seconds < 10) {seconds = "0"+seconds;}
+                        return hours+':'+minutes+':'+seconds;
+                    },
+                    getData: function() {
+						
+                        var self = this;
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/verify/data/" + this.dataId,
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if (response.code === 200) {
+									console.log(">>> detail data response : ",response);
+                                    self.$nextTick(function() {
+                                        self.initMaterialUx();
+                                        self.renderDatas(response.object);
+                                    });
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+
+                    /**
+					* 입력된 정보를 기준으로 화면에 데이터를 출력한다.
+					* NOTE :: Google Material Input을 자연스럽게 사용하기 위해서 직접 찾아서 데이터를 제공
+					*/
+                    renderDatas: function (data) {
+                        var self = this;
+                        var $serviceModelNameInput = $("#serviceModelNameInput");
+                        var $datasetNameInput = $("#datasetNameInput");
+                        var $wavFileNameInput = $("#wavFileNameInput");
+                        var $dictatedTextInput = $("#dictatedTextInput");
+                        var $descriptionInput = $("#descriptionInput");
+					
+                        //초기값 설정
+                        $serviceModelNameInput.data('textField').value = data.serviceModelName;
+                        $datasetNameInput.data('textField').value = data.datasetName;
+                        $wavFileNameInput.data('textField').value = data.wavFileName;
+                        $descriptionInput.data('textField').value = data.description;
+                        $dictatedTextInput.data('textField').value = data.dictatedText;
+						self.datasetId = data.datasetId;
+						self.datasetName = data.datasetName;
+                    },
+
+                    /**
+                     * 리스트 화면으로 돌아간다.
+                     * NOTE :: history back이 아닌 리스트로 돌아감.
+                     */
+                    goList: function () {
+                        history.back();
+                    },
+
+                    /**
+                     * 전사데이터를 삭제한다.
+                     */
+                    deleteData: function() {
+                        var self = this;
+
+                        if (!confirm("검증데이터를 삭제하시겠습니까?")) {
+                            return ;
+                        }
+                        var params = {
+                            targetIdList : [this.dataId],
+                            datasetId : this.datasetId,
+                            datasetName : this.datasetName
+                        };
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/verify/data/delete",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    toastr.success("검증데이터 삭제가 완료되었습니다.");
+                                    self.goList();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    }
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>

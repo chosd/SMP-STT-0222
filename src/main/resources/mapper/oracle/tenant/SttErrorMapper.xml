@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.error.mapper.SttErrorMapper">
+    <!--  INSERT  -->
+    <insert id="insert" parameterType="java.util.List">
+		/* SttErrorMapper.insert */
+        INSERT INTO 
+        	IAAP_STT_ERROR_LOG 
+        	(
+        		ID,
+				TYPE,
+				ERROR_CODE,
+				ERROR_MSG,
+				API_URL,
+				SERVER_ID,
+				ERROR_POINT,
+				THRESHOLD,
+				STATUS_VALUE,
+				ERROR_TIME
+			)
+        VALUES
+        <foreach collection="list" item="item" index="index" open="" close="" separator=",">
+        (
+        	SEQ_IAAP_STT_ERROR_LOG.NEXTVAL
+        	, #{item.type}
+        	<choose>
+				<when test="item.errorCode != null">, #{item.errorCode}</when>
+				<otherwise>	,''</otherwise>
+			</choose>
+			<choose>
+				<when test="item.errorMsg != null">, #{item.errorMsg}</when>
+				<otherwise>	,''</otherwise>
+			</choose>
+			<choose>
+				<when test="item.apiUrl != null">, #{item.apiUrl}</when>
+				<otherwise>	,''</otherwise>
+			</choose>
+			<choose>
+				<when test="item.serverId != null">, #{item.serverId}</when>
+				<otherwise>	,''</otherwise>
+			</choose>
+			<choose>
+				<when test="item.errorPoint != null">, #{item.errorPoint}</when>
+				<otherwise>	,''</otherwise>
+			</choose>
+			<choose>
+				<when test="item.threshold != null">, #{item.threshold}</when>
+				<otherwise>	,0</otherwise>
+			</choose>
+			<choose>
+				<when test="item.statusValue != null">, #{item.statusValue}</when>
+				<otherwise>	,0</otherwise>
+			</choose>
+            , current_date
+        )
+		</foreach>
+    </insert>
+    
+    <select id="selectType" resultType="com.kt.smp.stt.error.dto.SttErrorTypeDto">
+		/* SttErrorMapper.selectType */
+		SELECT 
+			TYPE as type
+		FROM
+			IAAP_STT_ERROR_LOG
+		GROUP BY 
+			TYPE
+	</select>
+	
+	<select id="list" parameterType="com.kt.smp.stt.error.dto.SttErrorSearchDto" resultType="com.kt.smp.stt.error.dto.SttErrorListDto">
+		/* SttErrorMapper.list */
+		SELECT
+			ID,
+			TO_CHAR(ERROR_TIME,'YYYY-MM-DD HH:MM:SS') AS errorTime,
+			TYPE,
+			CASE WHEN TYPE = 'IF' 
+				THEN ERROR_CODE
+				ELSE 
+					CASE WHEN ERROR_POINT = 'C' THEN 'CPU'
+						WHEN ERROR_POINT = 'M' THEN 'MEMORY'
+						WHEN ERROR_POINT = 'S' THEN 'STORAGE'
+					END
+			END AS code,
+			CASE  WHEN TYPE = 'IF' 
+				THEN ERROR_MSG
+				ELSE TO_CHAR(STATUS_VALUE) || '% (' || TO_CHAR(THRESHOLD) || '%)'
+			END AS contents,
+			CASE  WHEN TYPE = 'IF' 
+				THEN API_URL
+				ELSE ''
+			END AS etc
+		FROM
+			IAAP_STT_ERROR_LOG
+		WHERE 1=1
+		<if test="type != null and type != ''">
+			AND TYPE = #{type}
+		</if>
+		<if test="from != null">
+			AND <![CDATA[
+	        ERROR_TIME >= TO_DATE(#{from} || ' 00:00:00','YY-MM-DD HH24:MI:SS')
+	        ]]>
+        </if>
+        <if test="to != null">
+	    	AND <![CDATA[
+	        ERROR_TIME <= TO_DATE(#{to} || ' 23:59:59','YY-MM-DD HH24:MI:SS')
+	        ]]>
+        </if>
+        ORDER BY ERROR_TIME DESC
+	</select>
+</mapper>

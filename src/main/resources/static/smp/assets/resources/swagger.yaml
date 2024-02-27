@@ -1,0 +1,90 @@
+# swagger-editor GIT :: https://github.com/swagger-api/swagger-editor
+# swagger-ui GIT :: https://github.com/swagger-api/swagger-ui
+# editor :: https://editor.swagger.io/
+# swagger.json Sample :: https://petstore.swagger.io/v2/swagger.json
+
+# 몇 버전의 신텍스를 사용할지 설정
+swagger: '2.0'
+
+# 프로젝트 정보
+info:
+  title: Master SMP Base Project
+  version: 1.0.0
+  description: Master SMP의 서비스 프로젝트를 구현하기 위한 Base
+  # termsOfService: 서비스 약관 URL
+  # contact: 개발자 연력처 정보
+  #   email: email 정보
+  # license: 라이선스 정보
+  #   name: 라이선스 이름
+  #   url: 라이선스 URL
+
+# swagger가 실행되고 있는  host 설정
+host: localhost:8081
+# url에서 사용할 basePath를 설정해 줍니다.
+basePath: /
+
+# 프로토콜을 설정해 주는 곳인데, Production으로 사용시 http를 제거하는 것을 권장
+schemes:
+  - http
+  #- https
+
+  # API 인증 관련 정의
+  # securityDefinitions:
+  #api_key:
+  #  type: apiKey
+  #  name: api_key
+  #  in: header
+  #petstore_auth:
+  #  type: oauth2
+  #  authorizationUrl: https://petstore.swagger.io/oauth/authorize
+  #  flow: implicit
+  #  scopes:
+  #    read:pets: read your pets
+  #    write:pets: modify pets in your account
+
+# API 그룹 정보 이후 name을 기준으로 개별 API 에 정보를 입력할 수 있음.
+tags:
+  - name: 서비스 연동
+    description: Master SMP와 서비스 서버 간에 연동을 위한 API
+
+definitions:
+  HttpResponse:
+    type: object
+    description: API 수행 결과 Dto
+    properties:
+      code:
+        type: integer
+        format: int32
+        description: API 수행 결과 코드
+      message:
+        type: string
+        description: API 수행 결과 메시지
+      total:
+        type: integer
+        format: int32
+        description: API 수행 결과 데이터가 List 형태인 경우 전체 개수를 제공
+      object:
+        type: json  # json은 미리 정의된 항목은 아님. 설명을 위해서 제공
+        description: API 수행 결과 데이터
+      debugInfo:
+        type: json  # json은 미리 정의된 항목은 아님. 설명을 위해서 제공
+        description: 디버그 시 별도 내용을 제공하기 위한 영역
+# 개별 API에 대한 정보 입력
+paths:
+  #서비스 연동 
+  /:
+    post:
+      tags:
+        - 서비스 연동
+      summary: 서비스 연동을 위한 서비스 정보 제공
+      description: ''
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 성공
+          schema:
+            $ref: '#/definitions/HttpResponse'
+ 

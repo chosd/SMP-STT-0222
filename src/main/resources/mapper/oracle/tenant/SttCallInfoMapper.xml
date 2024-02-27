@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.callinfo.mapper.SttCallInfoMapper">
+
+    <resultMap id="callInfoResultMap" type="SttCallInfoDto">
+        <result column="STT_CALL_IDX" property="sttCallIdx"/>
+        <result column="APPLICATION_ID" property="applicationId"/>
+        <result column="REC_ID" property="recId"/>
+        <result column="CALL_ID" property="callId"/>
+        <result column="STT_ID" property="sttId"/>
+        <result column="DEVICE_ID" property="deviceId"/>
+        <result column="SERVICE_CODE" property="serviceCode"/>
+        <result column="CALL_STATUS" property="callStatus"
+        	javaType="com.kt.smp.stt.callinfo.enums.CallStatus" jdbcType="VARCHAR"
+        	typeHandler="com.kt.smp.stt.callinfo.handler.CallStatusHandler"
+        />
+        <result column="STATUS" property="reprocessStatus"
+        	javaType="com.kt.smp.stt.reprocess.enums.ReprocessStatus" jdbcType="VARCHAR"
+        	typeHandler="com.kt.smp.stt.reprocess.handler.ReprocessStatusHandler"
+        />
+        <result column="reprocessApplicationId" property="reprocessApplicationId"/>
+        <result column="CALL_START_TIME" property="callStartTime"/>
+        <result column="CALL_END_TIME" property="callEndTime"/>
+        <result column="WAV_FILE_PATH" property="wavFilePath"/>
+    </resultMap>
+    
+    <resultMap id="callInfoLogMap" type="CallInfoLogVO">
+        <result column="STT_RESULT_IDX" property="sttResultIdx"/>
+        <result column="STT_ID" property="sttId"/>
+        <result column="SPEAKER_TYPE" property="speakerType"/>
+		<result column="APPLICATION_ID" property="applicationId"/>
+        <result column="STT_SEQ" property="sttSeq"/>
+        <result column="START_TIME_STAMP" property="startTimeStamp"/>
+        <result column="END_TIME_STAMP" property="endTimeStamp"/>
+        <result column="STT_JSON" property="sttJson" javaType="java.lang.String" jdbcType="CLOB"/>
+        <result column="STT_TEXT" property="sttText" javaType="java.lang.String" jdbcType="CLOB"/>
+        <result column="CONFIDENCE" property="confidence"/>
+        <result column="EPD_START_TIME" property="startTime"/>
+        <result column="EPD_END_TIME" property="endTime"/>
+    </resultMap>
+    
+	<!-- SELECT -->
+	<select id="search" parameterType="callInfoSearchConditionDto" resultMap="callInfoResultMap">
+		/* SttCallInfoMapper.search */
+		SELECT
+			ISCI.STT_CALL_IDX,
+			ISCI.APPLICATION_ID,
+			ISCI.REC_ID,
+			ISCI.CALL_ID,
+			ISCI.STT_ID,
+			ISCI.DEVICE_ID,
+			ISCI.SERVICE_CODE,
+			ISSM.SERVICE_MODEL_NAME,
+			ISCI.CALL_STATUS,
+			ISCI.CALL_START_TIME,
+			ISCI.CALL_END_TIME,
+			ISCI.WAV_FILE_PATH,
+			nvl(max(RR.APPLICATION_ID), ' ')  as reprocessApplicationId
+		FROM
+			IAAP_STT_CALL_INFO ISCI
+		LEFT OUTER JOIN RECORDS_REC RR
+			ON ISCI.APPLICATION_ID = RR.APPLICATION_ID
+		JOIN IAAP_STT_SERVICE_MODEL ISSM
+			ON ISSM.SERVICE_CODE = ISCI.SERVICE_CODE
+		<where>
+			<if test="startDate != null">
+				AND ISCI.CALL_START_TIME >= TO_DATE(#{startDate} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+			</if>
+			<if test="endDate != null">
+				AND ISCI.CALL_START_TIME
+				 <![CDATA[ <= ]]> 
+				 TO_DATE(#{endDate} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+			</if>
+            <if test="searchKeyword != null and searchKeyword != '' and searchKeywordType != null and searchKeywordType != ''">
+				<choose>
+					<when test="searchKeywordType.equals('callId')">
+						AND ISCI.CALL_ID = #{searchKeyword}
+					</when>
+					<when test="searchKeywordType.equals('applicationId')">
+						AND ISCI.APPLICATION_ID = #{searchKeyword}
+					</when>
+					<when test="searchKeywordType.equals('recId')">
+						AND ISCI.REC_ID = #{searchKeyword}
+					</when>
+				</choose>
+            </if>
+            <if test="serviceCode != null and !serviceCode.equals('')">
+                AND ISCI.SERVICE_CODE = #{serviceCode}
+            </if>
+            <if test="callStatus != null and !callStatus.equals('')" >
+				<choose>
+					<when test="callStatus == '2000'">
+						AND ISCI.CALL_STATUS IN ('1000', '2000')
+					</when>
+					<otherwise>
+						AND ISCI.CALL_STATUS = #{callStatus}	
+					</otherwise>
+				</choose>
+            </if>
+		</where>
+		GROUP BY 
+			ISCI.STT_CALL_IDX,
+			ISCI.APPLICATION_ID,
+			ISCI.REC_ID,
+			ISCI.CALL_ID,
+			ISCI.STT_ID,
+			ISCI.DEVICE_ID,
+			ISCI.SERVICE_CODE,
+			ISSM.SERVICE_MODEL_NAME,
+			ISCI.CALL_STATUS,
+			ISCI.CALL_START_TIME,
+			ISCI.CALL_END_TIME,
+			ISCI.WAV_FILE_PATH
+		ORDER BY ISCI.CALL_START_TIME DESC
+	</select>
+	
+	<select id="getCallInfoByCallId" parameterType="String" resultMap="callInfoResultMap">
+		/* SttCallInfoMapper.getCallInfoByCallId */
+		SELECT
+			STT_CALL_IDX,
+			APPLICATION_ID,
+			REC_ID,
+			CALL_ID,
+			STT_ID,
+			DEVICE_ID,
+			SERVICE_CODE,
+			CALL_STATUS,
+			TO_CHAR(CALL_START_TIME, 'YYYY-MM-DD HH24:MI:SS') AS CALL_START_TIME,
+			TO_CHAR(CALL_END_TIME, 'YYYY-MM-DD HH24:MI:SS') AS CALL_END_TIME,
+			WAV_FILE_PATH
+		FROM
+			IAAP_STT_CALL_INFO
+		WHERE
+			CALL_ID = #{callId}
+	</select>
+	
+	<select id="getCallInfoByApplicationId" parameterType="String" resultMap="callInfoResultMap">
+		/* SttCallInfoMapper.getCallInfoByApplicationId */
+		SELECT
+			STT_CALL_IDX,
+			APPLICATION_ID,
+			REC_ID,
+			CALL_ID,
+			STT_ID,
+			DEVICE_ID,
+			SERVICE_CODE,
+			CALL_STATUS,
+			TO_CHAR(CALL_START_TIME, 'YYYY-MM-DD HH24:MI:SS') AS CALL_START_TIME,
+			TO_CHAR(CALL_END_TIME, 'YYYY-MM-DD HH24:MI:SS') AS CALL_END_TIME,
+			WAV_FILE_PATH
+		FROM
+			IAAP_STT_CALL_INFO
+		WHERE
+			APPLICATION_ID = #{applicationId}
+	</select>	
+	
+	<select id="getCallInfoLogListBySttResultIdx" parameterType="Integer" resultMap="callInfoLogMap">
+		/* SttCallInfoMapper.getCallInfoLogListBySttResultIdx */
+		SELECT
+			STT_RESULT_IDX,
+			APPLICATION_ID,
+			STT_ID,
+			SPEAKER_TYPE,
+			STT_SEQ,
+			START_TIME_STAMP,
+			END_TIME_STAMP,
+			STT_JSON,
+			STT_TEXT,
+			CONFIDENCE,
+			TO_CHAR(EPD_START_TIME, 'YYYY-MM-DD HH24:MI:SS'),
+			TO_CHAR(EPD_END_TIME, 'YYYY-MM-DD HH24:MI:SS')
+		FROM
+			IAAP_STT_RESULT_INFO
+		WHERE
+			STT_RESULT_IDX = #{sttResultIdx}
+		ORDER BY EPD_START_TIME
+	</select>
+	
+	<select id="getCallInfoLogListByApplicationId" parameterType="String" resultMap="callInfoLogMap">
+		/* SttCallInfoMapper.getCallInfoLogListByApplicationId */
+		SELECT
+			STT_RESULT_IDX,
+			STT_ID,
+			APPLICATION_ID,
+			SPEAKER_TYPE,
+			STT_SEQ,
+			START_TIME_STAMP,
+			END_TIME_STAMP,
+			STT_JSON,
+			STT_TEXT,
+			CONFIDENCE,
+			TO_CHAR(EPD_START_TIME, 'YYYY-MM-DD HH24:MI:SS') AS EPD_START_TIME,
+			TO_CHAR(EPD_END_TIME, 'YYYY-MM-DD HH24:MI:SS') AS EPD_END_TIME
+		FROM
+			IAAP_STT_RESULT_INFO
+		WHERE
+			APPLICATION_ID = #{applicationId}
+		ORDER BY EPD_START_TIME
+	</select>
+	
+	<select id="countCallInfoLogByApplicationId" parameterType="String" resultType="int">
+		SELECT
+			COUNT(1)
+		FROM
+			IAAP_STT_RESULT_INFO
+		WHERE
+			APPLICATION_ID = #{applicationId}
+		ORDER BY START_TIME_STAMP
+	</select>
+	
+	<select id="getWavFilePathByCallId" parameterType="String" resultType="String">
+		/* SttCallInfoMapper.getWavFilePathByCallId */
+		SELECT
+			WAV_FILE_PATH AS wavFilePath
+		FROM
+			IAAP_STT_CALL_INFO
+		WHERE
+			CALL_ID = #{callId}
+	</select>
+	
+	<select id="getWavFilePathByApplicationId" parameterType="String" resultType="String">
+		/* SttCallInfoMapper.getWavFilePathByApplicationId */
+		SELECT
+			WAV_FILE_PATH AS wavFilePath
+		FROM
+			IAAP_STT_CALL_INFO
+		WHERE
+			APPLICATION_ID = #{applicationId}
+	</select>
+	
+	<select id="getStreamingUrlParamsByCallId" parameterType="String" resultType="StreamUrlParamsVO">
+		/* SttCallInfoMapper.getStreamingUrlParamsByCallId */
+		SELECT
+			APPLICATION_ID as applicationId,
+			TO_CHAR(CALL_START_TIME, 'YYYYMMDD') AS callStartTime
+		FROM
+			IAAP_STT_CALL_INFO
+		WHERE
+			CALL_ID = #{callId}
+	</select>
+	
+	<select id="getStreamingUrlParamsByApplicationId" parameterType="String" resultType="StreamUrlParamsVO">
+		/* SttCallInfoMapper.getStreamingUrlParamsByApplicationId */
+		SELECT
+			APPLICATION_ID as applicationId,
+			TO_CHAR(CALL_START_TIME, 'YYYYMMDD') AS callStartTime
+		FROM
+			IAAP_STT_CALL_INFO
+		WHERE
+			APPLICATION_ID = #{applicationId}
+	</select>
+	
+	<select id="getCallStatusByApplicationId" parameterType="String" resultType="String">
+		/* SttCallInfoMapper.getCallStatusByApplicationId */
+		SELECT
+			CALL_STATUS
+		FROM
+			IAAP_STT_CALL_INFO
+		WHERE
+			APPLICATION_ID = #{applicationId}
+	</select>
+	
+	<update id="updateWavFilePath" parameterType="Map">
+		/* SttCallInfoMapper.updateWavFilePath */
+		UPDATE
+			IAAP_STT_CALL_INFO
+		SET
+			WAV_FILE_PATH = #{wavFilePath}
+		WHERE
+			APPLICATION_ID = #{applicationId}
+	</update>
+</mapper>

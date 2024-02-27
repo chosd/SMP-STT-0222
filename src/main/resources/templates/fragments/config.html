@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	<head th:fragment="configFragment">
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		
+		<title>STT</title>
+		
+		<!-- Load Favicon-->
+		<link href="/smp/assets/img/favicon.ico" rel="shortcut icon" type="image/x-icon">
+
+		<!-- CSS -->
+		<link href="/smp/libs/css/fonts.min.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components-web.css" rel="stylesheet">
+		<link href="/smp/libs/css/google-fonts_roboto_mono.css" rel="stylesheet">
+		<link href="/smp/libs/css/google-fonts_roboto_300_400_500_600_700.css" rel="stylesheet">
+		<link href="/smp/libs/css/google-fonts_rubik_300_400_500.css" rel="stylesheet">
+		<link href="/smp/libs/css/google-icon_material+icons.css" rel="stylesheet">
+		
+		<link href="/smp/libs/css/material-components/App.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/ComponentPage.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/ButtonCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/CardCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/IconButtonCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/CheckboxCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/ChipsCatalog2.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/DataTableCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/DialogCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/ListCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/DrawerFrameCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/ElevationCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/FabCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/ImageListCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/LayoutGridCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/LinearProgressIndicatorCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/MenuCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/RadioButtonCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/RippleCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/SelectCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/SliderCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/SnackbarCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/SwitchCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/TabsCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/TextFieldCatalog.css" rel="stylesheet">
+		<link href="/smp/libs/css/material-components/TopAppBarCatalog.css" rel="stylesheet">
+
+		<!-- material datepicker : https://github.com/FreddyFY/material-datepicker -->
+    	<link href="/smp/libs/css/material-datepicker.css" rel="stylesheet"/>
+
+		<link href="/smp/libs/css/toastr.min.css" rel="stylesheet" />
+		<!-- <link href="/smp/libs/css/audio.css" rel="stylesheet" /> -->
+		<link href="/smp/libs/css/jquery.timepicker.css" rel="stylesheet"/>
+
+		<link href="/smp/assets/css/dev.css" rel="stylesheet" />
+		<link href="/smp/assets/css/pages.css" rel="stylesheet" />
+		<!--<link href="/smp/assets/css/common.css" rel="stylesheet" />-->
+		
+		<!-- Rapeech css: 상담내역 상세 -->
+    	<link href="/smp/assets/css/custom.css" rel="stylesheet"/>
+    	<!--<link href="/smp/assets/css/page-custom.css" rel="stylesheet"/>-->
+    	<link href="/smp/assets/css/record-ui.css" rel="stylesheet"/>
+    
+		<!-- material datepicker : https://github.com/FreddyFY/material-datepicker -->
+		<link href="/smp/libs/css/material-datepicker.css" rel="stylesheet"/>
+
+		<!-- javascipt -->
+		<script type="text/javascript" src="/smp/libs/js/material-components-web.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/jquery-3.6.0.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/vue.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/toastr.min.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/moment.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/lodash.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/qs.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/material-datepicker.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/jszip.min.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/material-datepicker.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/jquery.timepicker.min.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/chart/package/dist/chart.js"></script>
+		<script type="text/javascript" src="/smp/libs/js/wavesurfer.js"></script>
+
+		<!-- custom js -->
+		<script type="text/javascript" src="/smp/assets/js/common-util.js"></script>
+		<script type="text/javascript" src="/smp/assets/js/spa-util.js"></script>
+		<script type="text/javascript" src="/smp/assets/js/stt-util.js"></script>
+		<script type="text/javascript" src="/smp/assets/js/custom-datepicker.js"></script>
+	</head>
+</html>

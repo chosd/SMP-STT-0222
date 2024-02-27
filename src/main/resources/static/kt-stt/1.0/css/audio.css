@@ -1,0 +1,49 @@
+@charset "utf-8";
+
+.media-area {border-radius:8px; background:linear-gradient(to top, #363740, #32323c, #282832); width:98%; padding:14px; margin:0 0 10px;}
+.media-area > .sound {border-radius: 4px; background:#fff; height:36px; margin:0 0 10px;}
+.media-area > .sound-info {width:100%; overflow:hidden;}
+.media-area > .sound-info .time {color:#fff; font-size:12px; margin-right:15px;}
+.media-area > .sound-info .sound-bar {width:70px; height:2px; position: relative; background:#1e1e28; border-radius:1px; display:inline-block; margin-left:3px;}
+.media-area > .sound-info .sound-bar > em {text-indent:-9999em; background:#fff; height:100%; position: absolute; top:0; left:0;}
+.media-area > .sound-info .sound-check {position: relative; cursor: pointer; height:23px; margin-right:12px;}
+.media-area > .sound-info .sound-check > input {opacity:0; position: absolute; top:3px; left:0; cursor: pointer;}
+.media-area > .sound-info .sound-check > label {font-size:12px; color:#fff; cursor: pointer; margin:0;}
+.media-area > .sound-info .sound-check > input:checked + label {color:#0fd2af;}
+.ftl {float: left;}
+.ftr {float: right;}
+.txt-green {color:#0fd2af!important;}
+
+.playBackRate {
+    font-size: 14px;
+    color: white;
+    margin-right: 10px;
+}
+
+.playBackRate:hover {
+    color: #27B2A5;
+}
+
+.playBackRateOn {
+    font-size: 14px;
+    color: #27B2A5;
+    margin-right: 10px;
+}
+
+.playLoop {
+    font-size: 13px;
+    color: white;
+    border: 1px solid black;
+    padding: 3px 10px;
+}
+
+.playLoop:hover {
+    color: #27B2A5;
+}
+
+.playLoopOn {
+    font-size: 13px;
+    color: #27B2A5;
+    border: 1px solid black;
+    padding: 3px 10px;
+}

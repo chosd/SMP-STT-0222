@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.recognition.mapper.SttRecognitionMapper">
+
+    <select id="getRecognitionDetail" parameterType="SttRecognitionSearchCondition" resultType="sttRecognitionDetailVO">
+	/* SttRecognitionMapper.getRecognitionDetail */
+		SELECT
+			A.ID verifyId
+			, A.DESCRIPTION verifyName
+			, A.END_AT endAt
+			, A.NAME datasetName
+			, A.DATASET_ID datasetId
+			, A.RESULT_MODEL_ID resultModelId
+			, A.CER avgCer
+		FROM ( 
+			SELECT
+				H.ID
+				, H.DESCRIPTION
+				, H.END_AT
+				, H.DEPLOY_ID
+				, D.NAME
+				, H.DATASET_ID
+				, to_char(H.REG_DT, 'yyyy-mm-dd') RESULT_MODEL_ID
+				, H.CER
+				,ROW_NUMBER() over(PARTITION BY H.DATASET_ID,to_char(H.REG_DT, 'yyyy-mm-dd') ORDER BY H.ID desc) rn
+			FROM IAAP_STT_VERIFY_HISTORY H
+			LEFT OUTER JOIN IAAP_STT_VERIFY_DATASET D ON H.DATASET_ID = D.ID
+			WHERE 1=1 
+				AND H.SERVICE_MODEL_ID = #{serviceCode}
+				AND H.SAVE_YN = 'Y'
+				AND H.STATUS = 'COMPLETE'
+				<if test="from != null">
+					AND H.REG_DT <![CDATA[ >= ]]> TO_DATE(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+				</if>
+				<if test="to != null">
+					AND H.REG_DT <![CDATA[ <= ]]> TO_DATE(#{to} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+				</if>
+		) A
+		where rn = 1
+    </select>
+    
+<!--    <select id="getRecognitionDetail" parameterType="SttRecognitionSearchCondition" resultType="sttRecognitionDetailVO">
+		WITH LATEST_DEPLOY_MNG AS (
+			SELECT 
+				ID,	RESULT_MODEL_ID, REG_DT
+			FROM
+				IAAP_STT_DEPLOY_MNG 
+			WHERE
+				( RESULT_MODEL_ID, REG_DT ) 
+					IN (
+						SELECT RESULT_MODEL_ID, MAX(REG_DT) 
+						FROM IAAP_STT_DEPLOY_MNG
+						GROUP BY RESULT_MODEL_ID
+					)
+				AND SAVE_YN = 'Y'
+		), 
+		GROUPED_VERIFY_HISTORY AS (
+			SELECT
+				LDM.RESULT_MODEL_ID, LDM.ID, LDM.REG_DT
+			FROM
+				IAAP_STT_VERIFY_HISTORY ISVH 
+			LEFT JOIN
+				LATEST_DEPLOY_MNG LDM
+			ON
+				ISVH.DEPLOY_ID = LDM.ID
+			<where>
+				LDM.RESULT_MODEL_ID IS NOT NULL
+				AND ISVH.SAVE_YN = 'Y'
+				AND ISVH.STATUS = 'COMPLETE'
+				<if test="from != null">
+					AND ISVH.REG_DT >= TO_DATE(#{from}, 'YYYY-MM-DD HH24:MI:SS')
+					AND LDM.REG_DT >= TO_DATE(#{from}, 'YYYY-MM-DD HH24:MI:SS')
+				</if>
+				<if test="to != null">
+					AND ISVH.REG_DT <![CDATA[ <= ]]> TO_DATE(#{to}, 'YYYY-MM-DD HH24:MI:SS')
+					AND LDM.REG_DT <![CDATA[ <= ]]> TO_DATE(#{to}, 'YYYY-MM-DD HH24:MI:SS')
+				</if>
+			</where>
+			GROUP BY LDM.RESULT_MODEL_ID, LDM.ID, LDM.REG_DT
+		)
+		SELECT GVH.ID AS deployId
+				, GVH.ID AS verifyId
+				, ISVD.NAME  AS datasetName
+				, ISVD.ID AS datasetId
+				, GVH.RESULT_MODEL_ID AS resultModelId
+				, AVG(ISVH.CER) AS avgCer
+				, GVH.REG_DT AS regDt
+		FROM IAAP_STT_VERIFY_HISTORY ISVH
+		JOIN 
+			GROUPED_VERIFY_HISTORY GVH
+		ON 
+			ISVH.DEPLOY_ID = GVH.ID
+		JOIN
+			IAAP_STT_VERIFY_DATASET ISVD
+		ON
+			ISVH.DATASET_ID = ISVD.ID
+		WHERE ISVH.SERVICE_MODEL_ID = #{serviceCode}
+		GROUP BY GVH.ID, ISVD.ID, ISVD.NAME, GVH.RESULT_MODEL_ID, GVH.ID, GVH.REG_DT
+		ORDER BY GVH.REG_DT
+    </select>-->
+</mapper>

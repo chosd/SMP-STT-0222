@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.reprocess.mapper.SttReprocessMapper">
+	<resultMap id="reprocessLogMap" type="reprocessLogDto">
+		<result column="RECORDS_REC_ID" property="sttId"/>
+		<result column="REC_ID" property="recId"/>
+		<result column="APPLICATION_ID" property="applicationId"/>
+		<result column="CALL_ID" property="callKey"/>
+		<result column="STATUS" property="reprocessStatus"
+			javaType="com.kt.smp.stt.reprocess.enums.ReprocessStatus" jdbcType="VARCHAR"
+        	typeHandler="com.kt.smp.stt.reprocess.handler.ReprocessStatusHandler"/>
+		<result column="SERVICE_CODE" property="serviceCode"/>
+		<result column="REC_STARTTIME" property="recStarttime"/>
+		<result column="STT_RESULTS" property="sttResults" javaType="java.lang.String" jdbcType="CLOB"/>
+	</resultMap>
+	<resultMap id="reprocessStatusMap" type="reprocessStatusDto">
+		<result column="STATUS" property="reprocessStatus"
+			javaType="com.kt.smp.stt.reprocess.enums.ReprocessStatus" jdbcType="VARCHAR"
+        	typeHandler="com.kt.smp.stt.reprocess.handler.ReprocessStatusHandler"/>
+	</resultMap>
+	
+	<update id="insert" parameterType="java.util.List">
+		/* SttReprocessMapper.insert */
+		INSERT INTO RECORDS_REC
+		( 
+			RECORDS_REC_ID,
+			APPLICATION_ID,
+			REC_ID,
+			CALL_ID,
+			DESCRIPTION,
+			FILE_NAME,
+			STT_RESULTS,
+			STATUS,
+			REC_STARTTIME,
+			REC_ENDTIME,
+			REQ_TYPE
+		) 
+		SELECT SEQ_RECORDS_REC.NEXTVAL, A.* FROM
+		( <foreach collection="list" item="item" index="index" separator="UNION ALL">
+			SELECT	#{item.applicationId} AS APPLICATION_ID,
+				#{item.recId} AS REC_ID,
+				#{item.callId} AS CALL_ID,
+				'설명',
+				'파일명',
+				'STT 결과',
+				'1000' AS STATUS,
+				TO_DATE(#{item.callStartTime}, 'YY-MM-DD HH24:MI:SS') AS REC_STARTTIME,
+				TO_DATE(#{item.callEndTime}, 'YY-MM-DD HH24:MI:SS') AS REC_ENDTIME,
+				'2' AS REQ_TYPE FROM DUAL
+		</foreach>
+		) A
+	</update>
+	
+	<select id="isApplicationIdDuplicated" parameterType="String" resultType="int">
+		/* SttReprocessMapper.isApplicationIdDuplicated */
+		SELECT
+        	CASE WHEN
+        		EXISTS(SELECT 1 FROM RECORDS_REC WHERE APPLICATION_ID = #{applicationId})
+        THEN 1 ELSE 0 END isExists 
+        FROM DUAL
+	</select>
+	
+	<select id="getReprocessLog" parameterType="String" resultMap="reprocessLogMap">
+		/* SttReprocessMapper.getReprocessLog */
+		SELECT
+			*
+		FROM (
+			SELECT RR.RECORDS_REC_ID,
+					RR.REC_ID,
+					RR.APPLICATION_ID,
+					RR.CALL_ID,
+					RR.STATUS,
+					RR.STT_RESULTS,
+					ISCI.SERVICE_CODE,
+					RR.REC_STARTTIME
+		FROM
+					RECORDS_REC RR
+		JOIN
+					IAAP_STT_CALL_INFO ISCI
+				ON
+					RR.APPLICATION_ID = ISCI.APPLICATION_ID
+		WHERE
+				RR.APPLICATION_ID = #{applicationId}
+		ORDER BY RR.RECORDS_REC_ID DESC
+		) WHERE ROWNUM <![CDATA[ <= ]]> 1
+	</select>
+	
+	<select id="getReprocessStatus" parameterType="String" resultMap="reprocessStatusMap">
+		/* SttReprocessMapper.getReprocessStatus */
+		SELECT
+			STATUS
+		FROM
+			RECORDS_REC
+		WHERE
+			(APPLICATION_ID, RECORDS_REC_ID) IN (
+						SELECT
+							APPLICATION_ID, MAX(RECORDS_REC_ID)
+						FROM
+							RECORDS_REC
+						WHERE
+							APPLICATION_ID = #{applicationId}
+						GROUP BY APPLICATION_ID
+			)
+	</select>
+	
+	<update id="updateReprocessStatus" parameterType="java.util.List">
+		/* SttReprocessMapper.updateReprocessStatus */
+		UPDATE
+			IAAP_STT_CALL_INFO
+		SET
+			CALL_STATUS = 4000
+		WHERE
+		<foreach collection="list" item="applicationId" separator=" OR ">
+			APPLICATION_ID = #{applicationId}
+		</foreach>
+	</update>
+	
+	<sql id="getFailedApplicationsYesterday">
+		/* SttReprocessMapper.getFailedApplicationsYesterday */
+        SELECT
+			APPLICATION_ID
+		FROM
+			RECORDS_STT_STATUS
+		WHERE
+			CALL_STATUS != 3000 AND CALL_STATUS != 4000
+		AND
+			CALL_STARTTIME >= TRUNC(CURRENT_DATE) - 1
+			AND CALL_STARTTIME <![CDATA[<]]> TRUNC(CURRENT_DATE)
+    </sql>
+	
+	<insert id="autoReprocess">
+		/* SttReprocessMapper.autoReprocess */
+		INSERT INTO RECORDS_REC
+			(
+				RECORDS_REC_ID ,APPLICATION_ID, REC_ID, CALL_ID
+				, DESCRIPTION, FILE_NAME, STT_RESULTS, STATUS
+				, REC_STARTTIME, REC_ENDTIME, REQ_TYPE
+			) 
+			SELECT
+				SEQ_RECORDS_REC.NEXTVAL AS RECORDS_REC_ID, a.APPLICATION_ID,a.REC_ID
+				, a.CALL_ID, '재처리 대상', a.WAV_FILE_PATH, 'STT 결과'
+				, '1000', a.CALL_START_TIME, a.CALL_END_TIME, '3'
+			FROM
+			(
+				SELECT
+					APPLICATION_ID,
+					REC_ID,
+					CALL_ID,
+					WAV_FILE_PATH,
+					CALL_START_TIME,
+					CALL_END_TIME
+				FROM
+					IAAP_STT_CALL_INFO ISCI
+				WHERE
+					APPLICATION_ID IN (
+						<include refid="getFailedApplicationsYesterday"/>
+					)
+				) a
+		LEFT OUTER JOIN RECORDS_REC RR
+			ON
+		RR.APPLICATION_ID  = a.APPLICATION_ID
+	</insert>
+	
+	<update id="updateAutoReprocessStatus">
+		/* SttReprocessMapper.updateAutoReprocessStatus */
+		UPDATE
+			IAAP_STT_CALL_INFO
+		SET
+			CALL_STATUS = 4000
+		WHERE
+			APPLICATION_ID IN (
+				<include refid="getFailedApplicationsYesterday"/>
+			)
+	</update>
+</mapper>

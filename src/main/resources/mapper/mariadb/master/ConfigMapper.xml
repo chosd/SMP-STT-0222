@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.multitenancy.mapper.ConfigMapper">
+
+    <select id="findAllConfig" resultType="configDto">
+        SELECT
+            ID,
+            SITE_CODE,
+            PROJECT_CODE,
+            ENGINE_PARAMETER,
+            DB_DRIVER_CLASS_NAME,
+            DB_URL,
+            DB_USERNAME,
+            DB_PASSWORD,
+            IS_DEFAULT
+        FROM IAAP_SERVICE_CONFIG
+        WHERE USE_YN = 'Y'
+    </select>
+
+    <select id="findAllUserDefinedConfig" resultType="configDto">
+        SELECT
+            ID,
+            SITE_CODE,
+            PROJECT_CODE,
+            ENGINE_PARAMETER,
+            DB_DRIVER_CLASS_NAME,
+            DB_URL,
+            DB_USERNAME,
+            DB_PASSWORD,
+            IS_DEFAULT
+        FROM IAAP_SERVICE_CONFIG
+        WHERE USE_YN = 'Y'
+        AND IS_DEFAULT = 'N'
+    </select>
+
+    <select id="findByProjectCode" resultType="configDto">
+        SELECT
+            ID,
+            SITE_CODE,
+            PROJECT_CODE,
+            ENGINE_PARAMETER,
+            DB_DRIVER_CLASS_NAME,
+            DB_URL,
+            DB_USERNAME,
+            DB_PASSWORD,
+            IS_DEFAULT
+        FROM IAAP_SERVICE_CONFIG
+        WHERE USE_YN = 'Y'
+        AND IS_DEFAULT = 'N'
+        AND PROJECT_CODE = #{projectCode}
+    </select>
+
+    <select id="findByEngineParameter" resultType="configDto">
+        SELECT
+            ID,
+            SITE_CODE,
+            PROJECT_CODE,
+            ENGINE_PARAMETER,
+            DB_DRIVER_CLASS_NAME,
+            DB_URL,
+            DB_USERNAME,
+            DB_PASSWORD,
+            IS_DEFAULT
+        FROM IAAP_SERVICE_CONFIG
+        WHERE USE_YN = 'Y'
+          AND IS_DEFAULT = 'N'
+          AND ENGINE_PARAMETER = #{engineParameter}
+    </select>
+
+    <insert id="save" parameterType="configSaveDto">
+        INSERT INTO IAAP_SERVICE_CONFIG
+        (
+            ID,
+            SITE_CODE,
+            PROJECT_CODE,
+            ENGINE_PARAMETER,
+            DB_DRIVER_CLASS_NAME,
+            DB_URL,
+            DB_USERNAME,
+            DB_PASSWORD,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP
+        ) VALUES
+        (
+            NEXTVAL(SEQ_IAAP_SERVICE_CONFIG),
+            #{siteCode},
+            #{projectCode},
+            #{engineParameter},
+            #{dbDriverClassName},
+            #{dbUrl},
+            #{dbUsername},
+            #{dbPassword},
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp}
+        )
+    </insert>
+
+    <update id="update" parameterType="configUpdateDto">
+        UPDATE IAAP_SERVICE_CONFIG
+        SET
+            ENGINE_PARAMETER = #{engineParameter},
+            DB_URL = #{dbUrl},
+            DB_USERNAME = #{dbUsername},
+            DB_PASSWORD = #{dbPassword},
+            UPD_DT = NOW(),
+            UPD_ID = #{updId},
+            UPD_IP = #{updIp}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE IAAP_SERVICE_CONFIG
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+</mapper>

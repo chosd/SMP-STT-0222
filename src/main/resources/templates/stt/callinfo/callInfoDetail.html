@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <link th:href='${smpServiceUriPrefix + "/css/audio.css"}' rel="stylesheet" />
+            <div class="contentRoot">
+                <div class="content-header">
+                    <h2>재처리 결과 상세 내역</h2>
+                    <div class="button-group">
+                        <button
+                            class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--default"
+                            onclick="goList()">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">keyboard_backspace</i>
+                            <span class="mdc-button__label">목록으로</span>
+                        </button>
+                        <button id="adminRegistrationDialogBtn"
+                                class="mdc-button mdc-button--outlined mdc-ripple-upgraded ms-auto md-size right-item"
+                                onclick="downloadList()">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon me-1">article_outlined</i>
+                            <span class="mdc-button__label">엑셀 다운로드</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="loadingBar">
+	                <!-- loading bar -->
+					<div v-show="searching" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate"
+						style="opacity: 1;">
+						<div class="mdc-linear-progress__buffering-dots"></div>
+						<div class="mdc-linear-progress__buffer"></div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+						<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+							<span class="mdc-linear-progress__bar-inner"></span>
+						</div>
+					</div>
+				</div>
+                <div class="content-body">
+                    <div class="card">
+                        <div class="card-body item-column-stack border-box custom-scrollbar">
+                            <div class="infoRoot call-info-data content-item-row-stack">
+                                <h4 class="mb-0">콜 정보</h4>
+                                <div class="card-call-info">
+                                    <div class="card-body">
+                                        <ul>
+                                            <li>
+                                                <dl>
+                                                    <dt>어플리케이션 ID</dt>
+                                                    <dd id="applicationId"></dd>
+                                                </dl>
+                                            </li>
+                                            <li>
+                                                <dl>
+                                                    <dt>서비스 모델</dt>
+                                                    <dd id="serviceModelName"></dd>
+                                                </dl>
+                                            </li>
+                                            <li>
+                                                <dl>
+                                                    <dt>시작/종료일시</dt>
+                                                    <dd>
+                                                        <span id="startAt"></span> ~ <span
+                                                        id="endAt"></span>
+                                                    </dd>
+                                                </dl>
+                                            </li>
+                                            <li>
+                                                <dl>
+                                                    <dt>콜키</dt>
+                                                    <dd id="recordFileName">
+                                                    </dd>
+                                                </dl>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="call-info-detail flex-ratio-one content-item-row-stack">
+                                <h4 class="mb-0">콜 내용</h4>
+								<div class="visiableSpeakerTypeContainer">
+									<input type="checkbox" id="txChkbox" v-model="visiableSpeakerType" value="T" @change="changedChkbox()"/>
+									<label for="txChkbox">상담사</label>
+									<input type="checkbox" id="rxChkbox" v-model="visiableSpeakerType" value="R" @change="changedChkbox()"/>
+									<label for="rxChkbox">고객</label>
+								</div>
+                                <div class="detailRoot">
+                                    <!-- users-chat -->
+                                    <div class="position-relative card-call-detail " id="users-chat">
+                                        <div class="chat-conversation chat-record" id="chat-conversation">
+                                            <!-- 인입시간정보 -->
+                                            <div class="chat-start">
+                                                <div class="time">
+                                                    시작 시간 : <span id="callStartTime">{{ callStartTime }}</span>
+                                                </div>
+                                            </div>
+                                            <!-- //인입시간정보 -->
+                                            <ul class="chat-conversation-list" id="users-conversation">
+                                                <template v-for="(item, index) in conversationList"
+                                                          ref="conversationListItems">
+                                                    <li v-if="item.rxtx === 'R'" class="chat-list left"  @click="onConversationClick(item)"
+                                                        id="chat-list-1">
+                                                        <div class="conversation-list">
+                                                            <div class="user-chat-content">
+                                                                <div class="ctext-wrap" v-bind:class="{ 'focus': item.isFocused}" :index="index">
+                                                                    <div class="ctext-wrap-content">
+                                                                        <p class="mb-0 ctext-content">
+                                                                            {{ item.sttSentence }}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="conversation-name">
+                                                                <small class="time">{{ item.regDts }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    <li v-if="item.rxtx === 'T'" class="chat-list right" @click="onConversationClick(item)"
+                                                        id="chat-list-1">
+                                                        <div class="conversation-list">
+                                                            <div class="conversation-name">
+                                                                <small class="time">{{ item.regDts }}</small>
+                                                            </div>
+                                                            <div class="user-chat-content">
+                                                                <div class="ctext-wrap" v-bind:class="{ 'focus': item.isFocused}" :index="index">
+                                                                    <div class="ctext-wrap-content">
+                                                                        <p class="mb-0 ctext-content"> {{ item.sttSentence }} </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="chat-avatar">
+                                                                <i class="rpi-callbot rpi-28px"></i>
+                                                        </div>
+                                                    </li>
+                                                </template>
+
+                                            </ul>
+                                            <!-- end chat-conversation-list -->
+
+                                            <!-- 상담종료시간 -->
+                                            <div class="chat-end">
+                                                <div class="time">
+                                                    종료 시간 : <span id="callEndTime">{{ callEndTime }}</span>
+                                                </div>
+                                            </div><!-- //상담종료시간 -->
+                                        </div>
+                                    </div><!-- //users-chat -->
+                                </div>
+                                <!--24.01.22 스카이라이프 재처리 내역에서 음원파일 재생 기능 제거-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+
+</th:block>
+
+<th:block layout:fragment="script">
+
+    <script type="text/javascript">
+      function downloadList (){
+        var downloadUrl = $("#smpServiceUriPrefix").val() + '/api/callinfo/download/'+ location.href.slice(location.href.lastIndexOf('/')+1);
+        window.open(downloadUrl, "_self", 'width=500, height=200, left=2000, top=2000');
+      }
+      var goList = () => {
+        history.back();
+      }
+      (function () {
+
+        const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+        const projectCode = $("#projectCode").val();
+        const DICTATION_DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/dictation/{dictationId}";
+
+        const LABEL = {
+          message: {
+            // 공통
+            API_ERROR_TITLE: "실패",
+            API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+            NOT_EXIST_CALL_INFO: "존재하지 않는 상담 내역입니다.",
+            NOT_EXIST_AUDIO_FILE: "음원 파일이 존재하지 않습니다.",
+            WAV_FILE_PATH_IS_NULL: "음원 파일경로가 존재하지 않습니다.",
+            CONVERSATION_NOT_EXIST: "해당 상담 어플리케이션 ID에 대한 대화록이 존재하지 않습니다.",
+            DELETE_LOG_CONFIRM: "STT결과를 삭제하시겠습니까?",
+            API_RETRY: "잠시 후 다시 시도해주세요.",
+            FAIL_TO_LOAD_WAV: "음원파일이 올바르지 않습니다. 잠시 후 다시 요청 해주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다."
+          }
+        };
+
+        const CALL_STATUS = {
+          1000: "시작",
+          2000: "진행중",
+          3000: "완료",
+          4000: "재처리"
+        }
+		
+		const visiableSpeakerTypeContainer = new Vue({
+			el: ".visiableSpeakerTypeContainer",
+			data: {
+				visiableSpeakerType: ["T", "R"]
+			},
+			methods: {
+				changedChkbox: function(e) {
+					const self = this;
+					
+					this.$nextTick(()=>{
+						
+						if (self.visiableSpeakerType.indexOf("T") === -1) {
+							$(".right").hide();
+						} else {
+							$(".right").show()
+						}
+						
+						if (self.visiableSpeakerType.indexOf("R") === -1) {
+							$(".left").hide();
+						} else {
+							$(".left").show()
+						}
+						
+					})
+				}
+			}
+		});
+		
+        const info = new Vue({
+          el: ".infoRoot",
+          data: {
+            LABEL: LABEL,
+            moment: moment,
+            fn: fn,
+            serviceUrlPrefix: serviceUrlPrefix,
+
+            // 로그 정보
+            callId: null,
+            applicationId: null,
+            callInfo: {},
+            searching: false
+          },
+          created: function () {
+            this.initPage(location.href);
+          },
+          mounted: function () {
+			console.log(">> callInfoDeatil page start");
+            if (_.isEmpty(this.callId)) {
+              toastr.error(LABEL.message.NOT_EXIST_CALL_INFO, LABEL.message.API_ERROR_TITLE);
+            }
+          },
+          methods: {
+
+            /**
+             * 초기 url을 기준으로 화면 내용 설정
+             */
+            initPage: function (href) {
+              // 현 URL에서 groupId를 추출함
+              this.callId = href.slice(href.lastIndexOf('/')+1);
+            },
+
+            /**
+             * 구글 Material component 초기화
+             */
+            initMaterialUx: function () {
+
+              // ripple material ux 적용
+              const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+              for (const el of elements) {
+                $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                  isUnbounded: true
+                } : void 0));
+              }
+
+              // input text material ux 적용
+              const textFields = document.querySelectorAll('.mdc-text-field');
+              for (const el of textFields) {
+                $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+              }
+            },
+            /**
+             * 입력된 정보를 기준으로 화면에 데이터를 출력한다.
+             * NOTE :: Google Material Input을 자연스럽게 사용하기 위해서 직접 찾아서 데이터를 제공
+             */
+            renderDatas: function (callinfo) {
+              const $applicationIdInput = $('#applicationId');
+              const $statusInput = $('#status');
+              const $serviceModelNameInput = $("#serviceModelName");
+              const $startAtInput = $("#startAt");
+              const $endAtInput = $("#endAt");
+              //24.01.22 callId
+              const $recordFileName = $("#recordFileName");
+
+              //초기값 설정
+              $applicationIdInput.text(callinfo.applicationId);
+              $statusInput.text(CALL_STATUS[callinfo.callStatus]);
+              $serviceModelNameInput.text(callinfo.serviceModelName);
+              //24.01.22 callId
+              $recordFileName.text(callinfo.callId);
+              $startAtInput.text(moment(callinfo.callStartTime).format("YYYY-MM-DD HH:mm:ss"));
+              $endAtInput.text(moment(callinfo.callEndTime).format("YYYY-MM-DD HH:mm:ss"));
+
+            }
+          }
+        });
+        const detail = new Vue({
+          el: ".detailRoot",
+          data: {
+            LABEL: LABEL,
+            moment: moment,
+            fn: fn,
+            serviceUrlPrefix: serviceUrlPrefix,
+            serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+            callStartTime: "",
+            callEndTime: "",
+            // 로그 정보
+            callId: null,
+            isPlaying: false,
+            searching: false,
+            getConversationAjax: null,
+            fetchInterval: null,
+            startDelayTime: 0,
+            // STT결과 목록 -> CHUB detail 대화 목록
+            conversationList: []
+          },
+          created: function () {
+            this.initPage(location.href);
+          },
+          mounted: function () {
+
+            var self = this;
+
+			$('#drawer-main-content-viewer').one('page.move', function () {
+                  if (self.fetchInterval && self.searching) {
+					  clearInterval(self.fetchInterval);
+				  }
+            });
+
+            this.initMaterialUx();
+            //24.01.22 스카이라이프 재처리 결과 음원재생 제거
+            //this.initWavesurfer();
+          },
+          methods: {
+
+            initPage: function (href) {
+              var self = this;
+              // 현 URL에서 applicationId를 추출함
+              this.callId = href.slice(href.lastIndexOf('/')+1);
+              this.getConversationDetail(this.callId);
+              //24.01.22 스카이라이프 재처리 결과 음원재생 제거
+            },
+
+            /**
+             * 구글 Material component 초기화
+             */
+            initMaterialUx: function () {
+
+              // ripple material ux 적용
+              const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+              for (const el of elements) {
+                $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                  isUnbounded: true
+                } : void 0));
+              }
+
+              // input text material ux 적용
+              const textFields = document.querySelectorAll('.mdc-text-field');
+              for (const el of textFields) {
+                $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+              }
+            },
+            /**
+             * wavesurfer 초기화 및 이벤트 처리
+             */
+             //24.01.22 스카이라이프 재처리 결과 음원재생 제거
+            
+            checkIsFileExist: function(fileUrl, callback) {
+              const self = this;
+              let fetchCount = 0;
+              this.fetchInterval = setInterval(()=>{
+                fetch(fileUrl)
+                    .then (response => {
+                      if (response.status === 200) {
+                        callback(fileUrl);
+                        clearInterval(self.fetchInterval);
+                      }
+                    });
+                
+                if (++fetchCount > 5) {
+                  clearInterval(self.fetchInterval);
+                  toastr.error(LABEL.message.WAV_FILE_PATH_IS_NULL);
+                }
+              }, 500);
+            },
+            
+            toHHMMSS: function(param) {
+              var sec_num = parseInt(param, 10);
+              var hours   = Math.floor(sec_num / 3600);
+              var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+              var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+              if (hours   < 10) {hours   = "0"+hours;}
+              if (minutes < 10) {minutes = "0"+minutes;}
+              if (seconds < 10) {seconds = "0"+seconds;}
+              return hours+':'+minutes+':'+seconds;
+            },
+            /**
+             * 대화록에서 특정 시간이 속한 대화 조회
+             */
+            findConversationByTime: function(currentTime) {
+				const self = this;
+				
+				let targetTimeStamp;
+				let minDiff = Number.MAX_SAFE_INTEGER + 1;
+				
+				// 현재 플레이어 시간과 가장 근접한 대화 찾기
+				this.conversationList.forEach((log)=>{
+					
+					const diff = currentTime - log.startTimeStamp;
+					if (diff <= minDiff && diff >= 0) {
+						minDiff = diff;
+						targetTimeStamp = log.startTimeStamp;
+					}
+					
+				});
+				
+				// 가장 근접한 대화 반환
+                return this.conversationList.find((log) => {
+				    return log.startTimeStamp === targetTimeStamp;
+				});
+				
+            },
+            //24.01.23 대화 클릭시 음원파일 동적이벤트 제거
+
+            /**
+             * 특정 대화 포커싱
+             */
+            focusConversation: function(target) {
+              if (target.isFocused) {
+                return;
+              }
+
+              this.conversationList.forEach((log) => {
+                if ( (log.sttResultIdx === target.sttResultIdx) && (log.speakerType === target.speakerType)) {
+                  log.isFocused = true;
+                  return;
+                }
+                log.isFocused = false;
+              });
+
+              setTimeout(()=>{
+                $(".focus")[0]?.scrollIntoView({ behavior: "smooth", block: "center"});
+              }, 50)
+            },
+            getConversationDetail: function (callId) {
+              var self = this;
+              this.getConversationAjax = $.ajax({
+                method: "GET",
+                url: this.serviceUrlPrefix + "/api/callinfo2/" + callId,
+                dataType: "json",
+                success: function (data, textCode, response) {
+					
+                  self.$nextTick(function() {
+                    self.initMaterialUx();
+                    info.renderDatas(data);
+                    //대화리스트 매핑
+                    self.renderConversationList(data);
+                  });
+                },
+                error: function (err) {
+                  toastr.error(err.responseText, LABEL.message.API_RETRY);
+                }
+              });
+            },
+            /**
+             * 입력된 정보를 기준으로 화면에 데이터를 출력한다.
+             * NOTE :: Google Material Input을 자연스럽게 사용하기 위해서 직접 찾아서 데이터를 제공
+             */
+            //24.01.23 CHUB detail conversationList 확인필요
+            renderConversationList: function (data) {
+			  
+              this.callStartTime = data.callStartTime;
+              this.callEndTime = data.callEndTime;
+              const conversationList = this.addIsFocusedProperty(data);
+ 			  this.startDelayTime = this.getStartDelayTime(data);
+              this.conversationList = conversationList || [];
+            },
+            /**
+             * 배열을 돌며 isFocused 프로퍼티를 추가하고 false로 초기화
+             */
+            addIsFocusedProperty: function(data) {
+			  const startDelayTime = this.getStartDelayTime(data); 
+			  const conversationLog = data.conversationList;
+              const self = this;
+              return conversationLog.map((log)=>{
+                log.isFocused = false;
+                //24.01.23 CHUB 날짜 필드 참고 필요
+                //log.startTimeStamp = self.msToSec(log.startTimeStamp);
+                //log.endTimeStamp = self.msToSec(log.endTimeStamp);
+                //log.endTime = self.extractTimeInDatetime(log.endTime)
+                return log;
+              });
+            },
+            getStartDelayTime: function(data){
+				const epdStartTime = this.getMinEpdStartTime(data.conversationList);
+				const callStartTime = new Date(data.callStartTime);
+				
+				return (epdStartTime - callStartTime) / 1000;
+			},
+            getMinEpdStartTime: function(conversationList) {
+				const epdStartTimeList = conversationList.map((conversation)=>{
+					return new Date(conversation.startTime);
+				});
+				
+				return new Date(Math.min(...epdStartTimeList));
+			},
+            /**
+             * wavesurfer player와 대화록 포커싱 동기화
+             */
+             //24.01.22 음원 재셍 기능 제거
+
+            /**
+             * 모든 발화 말풍선 포커스 해제
+             */
+            unfocusAllConversation: function() {
+              this.conversationList.forEach((log) => {
+                log.isFocused = false;
+              });
+            },
+            /**
+             * ms 시간단위를 s(sec) 으로 변환하여 반환
+             */
+            msToSec: function(ms) {
+              return ms / 1000;
+            },
+            /**
+             * YYYY-mm-dd HH:mm:ss 에서 HH:mm:ss 만 반환
+             */
+            extractTimeInDatetime: function(datetime) {
+              return datetime.split(" ")[1];
+            }
+          }
+        });
+      })();
+    </script>
+</th:block>
+</html>

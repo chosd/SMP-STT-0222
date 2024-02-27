@@ -1,0 +1,2693 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+  <div class="contentRoot">
+    <div class="content-header">
+      <h2>AM 학습데이터 관리</h2>
+      <div class="button-group">
+        <!--등록-->
+        <button id="insert-dialog-btn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded">
+          <span class="mdc-button__ripple"></span>
+          <i class="material-icons mdc-button__icon me-1">add</i>
+          <span class="mdc-button__label">등록</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <div class="card">
+        <div class="card-header pb-4">
+          <div class="form-row md-size multiline-align-top">
+            <!-- >> 모델타입 검색 -->
+            <div class="mdc-select mdc-select--outlined mdc-select--no-label" id="modelTypes-mdc-select">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">모델타입</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+									<span class="mdc-select__selected-text"></span>
+								</span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li v-for="sp in modelTypes" class="mdc-deprecated-list-item"
+                      :data-value="sp.key"
+                      @click="searchCondition.modelType = sp.key"
+                      :class="{'mdc-deprecated-list-item--selected': searchCondition.modelType == sp.key} "
+                      :aria-selected="searchCondition.modelType == sp.key ? 'true' : 'false'">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">{{ sp.value }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <!-- << 데이터 구분 검색 -->
+
+            <!-- >> 서비스 모델 검색 -->
+            <div class="mdc-select mdc-select--outlined mdc-select--no-label" id="serviceModels-mdc-select">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">서비스 모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+									<span class="mdc-select__selected-text"></span>
+								</span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li v-for="sp in serviceModels" class="mdc-deprecated-list-item"
+                      :data-value="sp.key"
+                      @click="searchCondition.serviceModelId = sp.key"
+                      :class="{'mdc-deprecated-list-item--selected': searchCondition.serviceModelId == sp.key} "
+                      :aria-selected="searchCondition.serviceModelId == sp.key ? 'true' : 'false'">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">{{ sp.value }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <!-- << 서비스 모델 검색 -->
+
+            <!-- << 데이터셋 검색 -->
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto search-bar">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"
+                     v-model="searchCondition.datasetName"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">정답지 데이터셋</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <!-- << 데이터셋 검색 -->
+
+            <!-- << 작성자 검색 -->
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto search-bar">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"
+                     v-model="searchCondition.uploadedBy"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">작성자</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <!-- << 작성자 검색 -->
+
+            <!-- << 설명 검색 -->
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto search-bar">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"
+                     v-model="searchCondition.description"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">설명</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <!-- << 설명 검색 -->
+
+            <!-- >> 등록일 검색 -->
+            <div class="flex-auto flex-ratio-two">
+              <div class="form-row h-100">
+                <div id="from-date-mdc"
+                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                  <i class="material-icons mdc-text-field__icon">event</i>
+                  <input type="text" class="mdc-text-field__input"
+                         aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                  <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                    <div class="mdc-notched-outline__leading"></div>
+                    <div class="mdc-notched-outline__notch">
+                      <label class="mdc-floating-label">등록일(from)</label>
+                    </div>
+                    <div class="mdc-notched-outline__trailing"></div>
+                  </div>
+                </div>
+                <div id="to-date-mdc"
+                     class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                  <i class="material-icons mdc-text-field__icon">event</i>
+                  <input type="text" class="mdc-text-field__input"
+                         aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                  <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                    <div class="mdc-notched-outline__leading"></div>
+                    <div class="mdc-notched-outline__notch">
+                      <label class="mdc-floating-label">등록일(to)</label>
+                    </div>
+                    <div class="mdc-notched-outline__trailing"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line">
+                <p
+                  class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg">
+                  등록일이 없는 경우는 전체 기간을 뜻합니다.
+                </p>
+              </div>
+            </div>
+            <!-- << 등록일 검색 -->
+
+            <!-- << 검색 버튼 -->
+            <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="search(true)">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon me-1">search</i>
+              <span class="mdc-button__label">검색</span>
+            </button>
+            <!-- << 검색 버튼 -->
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="table-controls form-row md-size">
+            <!--검색 결과-->
+            <div class="table-result-info flex-auto">
+              <h4>검색결과 : <span>{{ pageInfo.total }}</span>건</h4>
+            </div>
+
+            <!--엑셀 다운로드-->
+            <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded" @click="downloadListExcel">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon me-1">file_download</i>
+              <span class="mdc-button__label">다운로드</span>
+            </button>
+
+            <!--일괄 삭제-->
+            <button id="delete-dialog-btn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--error">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">delete</i>
+              <span class="mdc-button__label">일괄 삭제</span>
+            </button>
+
+            <!--선택 삭제-->
+            <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--error"
+                    @click="deleteSelected">
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">delete</i>
+              <span class="mdc-button__label">선택 삭제</span>
+            </button>
+
+            <!-- 페이지 사이즈 조절 -->
+            <div class="mdc-select mdc-select--outlined mdc-select--no-label">
+              <div class="mdc-select__anchor">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">레코드 수</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+									<span class="mdc-select__selected-text"></span>
+								</span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <li v-for="ps in pageSizes" class="mdc-deprecated-list-item" :data-value="ps"
+                      @click="searchCondition.pageSize = ps; currentPage = 1; search();"
+                      :class="{'mdc-deprecated-list-item--selected': searchCondition.pageSize == ps} "
+                      :aria-selected="searchCondition.pageSize == ps ? 'true' : 'false'">
+                    <span class="mdc-deprecated-list-item__ripple"></span>
+                    <span class="mdc-deprecated-list-item__text">{{ ps }}개</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <!-- 목록 테이블 -->
+            <div class="mdc-data-table">
+              <div class="mdc-data-table__table-containercon">
+                <table class="mdc-data-table__table">
+                  <thead>
+                  <tr class="mdc-data-table__header-row">
+                    <th class="mdc-data-table__header-cell mdc-data-table__header-cell--checkbox text-center"
+                        role="columnheader" scope="col">
+                      <div class="mdc-form-field">
+                        <div
+                          class="mdc-checkbox mdc-data-table__header-row-checkbox mdc-checkbox--upgraded mdc-checkbox--selected mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                          <input type="checkbox" class="mdc-checkbox__native-control" aria-checked="mixed"
+                                 @click="selectAllRows" id="toggleDelete"/>
+                          <div class="mdc-checkbox__background">
+                            <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                              <path class="mdc-checkbox__checkmark-path" fill="none"
+                                    d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                            </svg>
+                            <div class="mdc-checkbox__mixedmark"></div>
+                          </div>
+                          <div class="mdc-checkbox__ripple"></div>
+                        </div>
+                      </div>
+                    </th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">No.</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">데이터 구분</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">MODEL TYPE</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">서비스 모델</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">정답지 데이터셋</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">학습음성갯수</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">설명</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">작성자</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">등록일시</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">수정일시</th>
+                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">다운로드</th>
+                  </tr>
+                  </thead>
+                  <tbody class="mdc-data-table__content">
+                  <tr v-if="searchResults.length == 0" class="mdc-data-table__row" aria-selected="false"
+                      style="cursor: pointer;">
+                    <td class="mdc-data-table__cell text-center" colspan="10">검색된 결과가 없습니다.</td>
+                  </tr>
+                  <tr v-else v-for="(row, i) in searchResults" class="detail-service-row mdc-data-table__row"
+                      aria-selected="false" style="cursor: pointer;">
+                    <td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
+                      <div
+                        class="mdc-checkbox mdc-data-table__row-checkbox mdc-checkbox--upgraded mdc-ripple-upgraded mdc-ripple-upgraded--unbounded">
+                        <input type="checkbox" class="mdc-checkbox__native-control deleteChk" aria-labelledby="u60"
+                               :value="row.id"/>
+                        <div class="mdc-checkbox__background">
+                          <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                            <path class="mdc-checkbox__checkmark-path" fill="none"
+                                  d="M1.73,12.91 8.1,19.28 22.79,4.59"></path>
+                          </svg>
+                          <div class="mdc-checkbox__mixedmark"></div>
+                        </div>
+                        <div class="mdc-checkbox__ripple"></div>
+                      </div>
+                    </td>
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ pageInfo.total - ( (currentPage - 1) * searchCondition.pageSize + i) }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ convertDataSourceLabel(row.dataSource) }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ convertModelTypeLabel(row.modelType) }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ convertServiceModelLabel(row.serviceModelId) }}
+                    </td>
+                    <td class="mdc-data-table__cell" @click="() => openDetailDialog(row.id)">
+                      {{ row.datasetName }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ (row.trainVoiceCount > 0) ? row.trainVoiceCount : "-" }}
+                    </td>
+                    <td class="mdc-data-table__cell" @click="() => openDetailDialog(row.id)">
+                      {{ row.description }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ row.regId }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ row.regDt }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center" @click="() => openDetailDialog(row.id)">
+                      {{ row.updDt }}
+                    </td>
+                    <td class="mdc-data-table__cell text-center">
+                        <button
+                            class="up-priority-btn mdc-icon-button material-icons mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-theme--primary"
+                            :data-id="row.id" @click="download($event, row.id, row.datasetName)">
+                            file_download
+                        </button>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- pagination -->
+          <div class="table-pagination mdc-data-table__pagination">
+            <div class="mdc-data-table__pagination-trailing mdc-chip-set mdc-chip-set--choice">
+              <div class="mdc-data-table__pagination-navigation">
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-first-page="true" @click="gotoPage(1)">
+                  <div class="mdc-button__icon">first_page</div>
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-prev-page="true" @click="gotoPage(currentPage - 1)">
+                  <div class="mdc-button__icon">chevron_left</div>
+                </button>
+
+                <button v-for="(paging, index) in pages"
+                        class="mdc-chip mdc-data-table__pagination-button fs-6 bg-transparent"
+                        :class="{ 'mdc-chip--selected' : paging == currentPage }"
+                        @click="gotoPage(paging)">
+                  {{ paging }}
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-next-page="true" @click="gotoPage(currentPage + 1)">
+                  <div class="mdc-button__icon">chevron_right</div>
+                </button>
+                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                        data-last-page="true" @click="gotoPage(pageInfo.pages)">
+                  <div class="mdc-button__icon">last_page</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- >>> 등록 팝업 -->
+  <div id="insert-dialog" class="mdc-dialog" role="alertdialog" aria-modal="true"
+       aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description" tabindex="-1">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">AM 학습데이터 등록</h2>
+          <button class="mdc-icon-button material-icons close-button" tabindex="-1">
+            close
+          </button>
+        </div>
+        <!-- loading bar -->
+        <div id="insert-dialog-loadingbar" role="progressbar"
+             class="mdc-linear-progress mdc-linear-progress--indeterminate" hidden>
+          <div class="mdc-linear-progress__buffering-dots"></div>
+          <div class="mdc-linear-progress__buffer"></div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+          <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+            <span class="mdc-linear-progress__bar-inner"></span>
+          </div>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+            * 항목은 필수입력사항입니다.</br>
+            음성파일 압축은 해당 파일경로에서 해주세요.
+          </p>
+
+          <!-- 등록팝업 서비스 모델 -->
+          <div class="form-row">
+            <div id="insert-serviceModel-mdc-select"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+              <div class="mdc-select__anchor" aria-required="true">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">서비스 모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+										<span class="mdc-select__selected-text"></span>
+								</span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <!--dynamic data-->
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 등록팝업 모델타입 -->
+          <div class="form-row">
+            <div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100"
+                 id="insert-modelType-mdc-select">
+              <div class="mdc-select__anchor" aria-required="true">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">모델타입</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+																<span class="mdc-select__selected-text"></span>
+														</span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-layout-grid__inner mdc-menu-surface--fixed" style="z-index: 9999;">
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list">
+                    <!--dynamic data-->
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 등록팝업 정답지 데이터 셋-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input id="insert-dataset-input" required type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">정답지 데이터셋 이름</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-dataset-helper-line"></div>
+            </div>
+            <button id="insert-dataset-dupcheck-btn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size"
+                    disabled>
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">group</i>
+              <span class="mdc-button__label">중복확인</span>
+            </button>
+          </div>
+
+          <!-- 초기데이터 직접 업로드 체크박스  -->
+          <!-- 기존 데이터가 없을 경우 hidden 제거 추가 -->
+          <div class="mdc-form-field" id="direct-upload-checkbox-div">
+            <div class="mdc-checkbox" id="direct-upload-checkbox">
+              <input class="mdc-checkbox__native-control chk-am-dataset" type="checkbox"
+                     id="direct-upload-checkbox-value"/>
+              <div class="mdc-checkbox__background">
+                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                  <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                </svg>
+                <div class="mdc-checkbox__mixedmark"></div>
+              </div>
+            </div>
+            <label for="direct-upload-checkbox-value">
+              <h3>초기 데이터 직접 업로드</h3>
+            </label>
+          </div>
+          <!-- 등록팝업 기본경로 -->
+          <div class="form-row multiline-align-top">
+
+            <div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+              <input readonly id="insert-basepath-input" type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">기본 디렉토리</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 등록팝업 상세경로-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input id="insert-detailpath-input" required type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">상세 디렉토리명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-detailpath-helper-line"></div>
+            </div>
+            <button id="insert-detailpath-dupcheck-btn"
+                    class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size" disabled>
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">group</i>
+              <span class="mdc-button__label">중복확인</span>
+            </button>
+          </div>
+
+          <!-- 등록팝업 정답지 파일 -->
+          <div readonly id="insert-answer-file-div" class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+            <input id="insert-answer-file-input" type="file" class="d-none" accept=""/>
+            <div id="insert-answer-file-name"
+                 class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+              <i class="mdc-text-field__icon material-icons">attach_file</i>
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"/>
+              <label for="insert-answer-file-input" class="w-100 h-100 position-absolute"
+                     style="z-index: 2; cursor: pointer"></label>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">정답지 파일</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 등록팝업 음성 파일 -->
+          <div class="form-row" id="insert-voice-file-div">
+            <input id="insert-voice-file-input" type="file" class="d-none" accept=".tar.gz"/>
+            <div id="insert-voice-file-name"
+                 class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+              <i class="mdc-text-field__icon material-icons">attach_file</i>
+              <input type="text" required="required" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text"/>
+              <label for="insert-voice-file-input" class="w-100 h-100 position-absolute"
+                     style="z-index: 2; cursor: pointer"></label>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">음성(tar.gz) 파일</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 초기 데이터 정답지 파일명 -->
+          <div class="form-row" id="direct-insert-msg">
+            <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">*확장자명을 포함하여
+              입력해주세요.
+              <br> 예) answer.txt, wav.tar.gz</p>
+          </div>
+          <div class="form-row multiline-align-top" id="direct-insert-answer-div">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                <input type="text" required="required" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" id="direct-insert-answer-input"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">정답지 파일명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="direct-insert-answer-helper-line">
+              </div>
+            </div>
+          </div>
+
+          <!--초기 데이터 음성 파일명-->
+          <div class="form-row multiline-align-top" id="direct-insert-voice-div">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                <input type="text" required="required" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" id="direct-insert-voice-input"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">음성(tar.gz) 파일명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="direct-insert-voice-helper-line">
+              </div>
+            </div>
+          </div>
+
+          <!--설명-->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                <input type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" id="insert-description-input"/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">설명</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="insert-description-helper-line">
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button id="insert-btn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">등록</span>
+          </button>
+          <button
+            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg close-button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">취소</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <!-- <<< 등록 팝업 -->
+
+  <!-- >>> 상세 팝업 -->
+  <div id="detail-dialog" class="mdc-dialog mdc-dialog--scrollable" role="alertdialog" aria-modal="true"
+       aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">AM 학습데이터 상세</h2>
+          <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+            close
+          </button>
+        </div>
+        <section class="mdc-dialog__content form-row-stack">
+          <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+            *항목은 필수입력사항입니다.
+          </p>
+
+          <!-- 모델타입 select -->
+          <div class="form-row">
+            <div id="detail-modelType-mdc-select"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+              <div class="mdc-select__anchor" aria-required="true">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">모델타입</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <!--dynamic data-->
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 상세조회 서비스 모델 select -->
+          <div class="form-row">
+            <div id="detail-serviceModel-mdc-select"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+              <div class="mdc-select__anchor" aria-required="true">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">서비스 모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                <ul class="mdc-deprecated-list">
+                  <!--dynamic data-->
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 상세조회 정답지 데이터셋 이름 -->
+          <div class="form-row multiline-align-top">
+            <div class="flex-auto">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 lg-size">
+                <input id="detail-dataset-input" type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">정답지 데이터셋 이름</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              <div class="mdc-text-field-helper-line" id="detail-dataset-helper-line"></div>
+            </div>
+            <button id="detail-dataset-dupcheck-btn" class="mdc-button mdc-button--outlined mdc-ripple-upgraded lg-size"
+                    disabled>
+              <span class="mdc-button__ripple"></span>
+              <i class="material-icons mdc-button__icon">group</i>
+              <span class="mdc-button__label">중복확인</span>
+            </button>
+          </div>
+
+          <!-- 상세조회 데이터 경로 -->
+          <div class="flex-auto">
+            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+                <input id="detail-datapath-input" type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly value=""/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">데이터 경로</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 상세조회 정답지파일 -->
+          <div class="flex-auto">
+            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+                <input id="detail-answer-file-input" type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly value=""/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">정답지 파일</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 상세조회 음성파일 -->
+          <div class="flex-auto">
+            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-8">
+              <div class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+                <input id="detail-voice-file-input" type="text" class="mdc-text-field__input"
+                       aria-describedby="text-field-outlined-shape-one-helper-text" readonly value=""/>
+                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label">음성 파일</label>
+                  </div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 설명 -->
+          <div class="flex-auto">
+            <div class="sample mdc-layout-grid__inner">
+              <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+                <div class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                  <input type="text" class="mdc-text-field__input"
+                         aria-describedby="text-field-outlined-shape-one-helper-text"
+                         id="detail-description-input"
+                  />
+                  <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                    <div class="mdc-notched-outline__leading"></div>
+                    <div class="mdc-notched-outline__notch">
+                      <label class="mdc-floating-label">설명</label>
+                    </div>
+                    <div class="mdc-notched-outline__trailing"></div>
+                  </div>
+                </div>
+                <div class="mdc-text-field-helper-line" id="detail-description-helper-line"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 기본 정보 -->
+          <h4>기본 정보</h4>
+          <div class="form-row">
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly
+                     id="detail-reg-date"
+                     value=""/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">등록일</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+              <input type="text" class="mdc-text-field__input"
+                     aria-describedby="text-field-outlined-shape-one-helper-text" readonly
+                     id="detail-upd-regId"
+                     value=""/>
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label class="mdc-floating-label">등록자</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button
+            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-error mdc-theme--error-bg"
+            id="delete-btn">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">삭제</span>
+          </button>
+          <button
+            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg dialog-close-btn"
+            data-mdc-dialog-action="close">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">취소</span>
+          </button>
+          <button id="update-btn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">수정</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <!-- <<< 상세 팝업 -->
+
+  <!-- >>> 삭제 팝업 -->
+  <div id="delete-dialog" class="mdc-dialog mdc-dialog--scrollable" role="alertdialog" aria-modal="true"
+       aria-labelledby="simple-dialog-label" aria-describedby="simple-dialog-description">
+    <div class="mdc-dialog__scrim"></div>
+    <div class="mdc-dialog__container">
+      <div class="mdc-dialog__surface">
+        <div class="mdc-dialog__header">
+          <h2 class="mdc-dialog__title">AM 학습데이터 일괄 삭제</h2>
+          <button class="mdc-icon-button material-icons close-button" data-mdc-dialog-action="close" tabindex="-1">
+            close
+          </button>
+        </div>
+
+        <section class="mdc-dialog__content form-row-stack">
+          <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-theme--error">
+            *항목은 필수입력사항입니다.
+          </p>
+
+          <!-- 서비스 모델 select -->
+          <div class="form-row">
+            <div id="delete-serviceModel-mdc-select"
+                 class="mdc-select mdc-select--outlined mdc-select--no-label mdc-select--required w-100">
+              <div class="mdc-select__anchor" aria-required="true">
+                <div class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <div class="mdc-notched-outline__notch">
+                    <label class="mdc-floating-label mdc-floating-label--required">서비스 모델</label>
+                  </div>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </div>
+                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                <span class="mdc-select__dropdown-icon"></span>
+              </div>
+              <div class="mdc-layout-grid__inner mdc-menu-surface--fixed" style="z-index: 9999;">
+                <div id="selectWrapper" class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                  <ul class="mdc-deprecated-list">
+                    <!--dynamic data-->
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="mdc-dialog__actions">
+          <button
+            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg dialog-close-btn"
+            data-mdc-dialog-action="close">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">취소</span>
+          </button>
+          <button id="deleteAll-btn" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">일괄 삭제</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <!-- <<< 삭제 팝업 -->
+
+  <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+  <input type="hidden" readonly id="defaultPageSize" th:value="${defaultPageSize}">
+</th:block>
+
+<th:block layout:fragment="script">
+  <script type="text/javascript">
+    (function () {
+      var siteCode = "[[${siteCode}]]";
+      var projectCode = "[[${projectCode}]]";
+      var basePath = "[[${basePath}]]" + "/trainData";
+
+      new Vue({
+        el: ".contentRoot",
+        data: {
+          // 팝업
+          insertDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#insert-dialog')),
+
+          detailDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#detail-dialog')),
+          deleteDialog: mdc.dialog.MDCDialog.attachTo(document.querySelector('#delete-dialog')),
+
+          // 검색
+          searchCondition: {
+            pageSize: $("#defaultPageSize").val(),
+            amDataId: 0,
+            modelType: "",
+            serviceModelId: "",
+            datasetName: "",
+            uploadedBy: "",
+            description : "",
+            from: "",
+            to: ""
+          },
+          searching: false,
+          searchResults: [],
+
+          // pagination
+          pageSizes: [10, 20, 30, 40, 50],
+          currentPage: 1,
+          pageInfo: {
+            pages: 1,
+            total: 1
+          },
+          pageNumLists: [1],
+
+          // 검색 조건
+          dataTypes: [],
+          serviceModels: [],
+
+          // 모델별 검색 결과 수
+          serviceModelResultList : [],
+
+          // 데이터 구분 (dataSource)
+          dataSource : [
+            {key : 0, value : ""},
+            {key : 1, value : "일반"},
+            {key : 2, value : "전사"}
+          ],
+
+          // 등록, 상세 obj
+          newObj: JSON.parse(JSON.stringify(
+            {
+              "amDataId": 0,
+              "serviceModelId": "",
+              "modelType": "",
+              "datasetName": "",
+              "description": "",
+              "basePath": "",
+              "detailPath": "",
+              "answerFileName": "",
+              "voiceFileName": "",
+              "detailPathDupCheck": true,
+              "datasetDupCheck": true
+            }
+          )),
+          detailObj: JSON.parse(JSON.stringify(
+            {
+              "id": 0,
+              "serviceModelId": "",
+              "modelType": "",
+              "description": "",
+              "basePath": "",
+              "detailPath": "",
+              "datasetName": "",
+              "detailPathDupCheck": true,
+              "datasetDupCheck": true,
+              "regDt": "",
+              "regId": "",
+              "answerFile": "",
+              "voiceFile": ""
+            }
+          )),
+          prevDetailObj: JSON.parse(JSON.stringify(
+            {
+              "id": 0,
+              "serviceModelId": "",
+              "modelType": "",
+              "description": "",
+              "basePath": "",
+              "detailPath": "",
+              "datasetName": "",
+              "detailPathDupCheck": true,
+              "datasetDupCheck": true,
+              "regDt": "",
+              "regId": "",
+              "answerFile": "",
+              "voiceFile": ""
+            }
+          )),
+          deleteObj: JSON.parse(JSON.stringify({"serviceModelId": ""})),
+
+          prevDataset: "",
+          prevModelType: "",
+          prevDescription: "",
+
+          // constant
+          CONTENTS_MAX_LENGTH: 255,
+          REPEAT_COUNT_MAX_VAL: 10000,
+          DESCRIPTION_MAX_LENGTH: 255,
+          DATASET_MAX_LENGTH: 30,
+
+          modelTypes: [
+            //{key: "E2ESL", value: "E2ESL(지도)"},
+            //{key: "E2EMSL", value: "E2EMSL(반지도)"}
+            //{key: "E2EUSL", value: "E2EUSL(비지도)"}
+          ],
+
+          newDataAnswerFile: "",
+          newDataVoiceFile: "",
+
+          // etc
+          currentXhr: [],		// 모달 내 XHR 중단할 때 사용
+          checkXhrAbort: false,	// 모달 내에서 등록/저장 등 업로드 시엔 컨펌 추가
+          currentDialog: null     // vue data에서 정의한 모달의 key. ( :string)
+        },
+
+        computed: {
+          pages: function () {
+            const list = [];
+            for (let index = this.startPage; index <= this.endPage; index += 1) {
+              list.push(index);
+            }
+            return list;
+          },
+          startPage() {
+            return parseInt((this.currentPage - 1) / 5) * 5 + 1;
+          },
+          endPage() {
+            var lastPage = parseInt((this.currentPage - 1) / 5 + 1) * 5;
+            return lastPage <= this.pageInfo.pages ? lastPage : this.pageInfo.pages;
+          }
+        },
+        created: function () {
+          // Base url 받아오기
+          const baseUrl = document.querySelector('#smpServiceUriPrefix').value;
+          this.baseUrl = baseUrl;
+
+          //this.initModelType()
+
+          var self = this;
+
+          // 모델타입 구분값
+          this.initModelTypes(() => {
+
+            // 검색바의 모델타입 mdc-select 초기화
+            self.$nextTick(function () {
+              const $select = $("#modelTypes-mdc-select")[0];
+              $($select).data('instance').destroy();
+
+              const newMdcSelect = new mdc.select.MDCSelect($select);
+              $($select).data('instance', newMdcSelect);
+            })
+
+            // /*// insert, detail select에 서비스 추가
+            var ulHtmlStr = '';
+            for (var i = 0; i < this.modelTypes.length; i++) {
+              var modelType = this.modelTypes[i];
+              var htmlStr = `
+						    <li class="mdc-deprecated-list-item ${i == 0 ? 'mdc-deprecated-list-item--selected' : ''}"
+						        ${i == 0 ? 'aria-selected ' : ''}
+						        data-value="${modelType.key}">
+						        <span class="mdc-deprecated-list-item__ripple"></span>
+						        <span class="mdc-deprecated-list-item__text">${i == 0 ? '선택' : modelType.value}</span>
+						    </li>`
+              ulHtmlStr += htmlStr;
+            }
+
+            $("#insert-modelType-mdc-select ul").html(ulHtmlStr)
+            $("#detail-modelType-mdc-select ul").html(ulHtmlStr)
+          })
+          this.initServiceModels(() => {
+
+            // 검색바 서비스모델 mdc-select 초기화
+            self.$nextTick(function () {
+              const $select = $("#serviceModels-mdc-select")[0];
+              $($select).data('instance').destroy();
+
+              const newMdcSelect = new mdc.select.MDCSelect($select);
+              $($select).data('instance', newMdcSelect);
+            })
+
+            // insert, detail select에 서비스 추가
+            var ulHtmlStr = '';
+            for (var i = 0; i < this.serviceModels.length; i++) {
+              var serviceModel = this.serviceModels[i];
+              var htmlStr = `
+                            <li class="mdc-deprecated-list-item ${i == 0 ? 'mdc-deprecated-list-item--selected' : ''}"
+                                ${i == 0 ? 'aria-selected ' : ''}
+                                data-value="${serviceModel.key}">
+                                <span class="mdc-deprecated-list-item__ripple"></span>
+                                <span class="mdc-deprecated-list-item__text">${i == 0 ? '선택' : serviceModel.value}</span>
+                            </li>`
+              ulHtmlStr += htmlStr;
+            }
+
+            $("#insert-serviceModel-mdc-select ul").html(ulHtmlStr)
+            $("#detail-serviceModel-mdc-select ul").html(ulHtmlStr)
+            $("#delete-serviceModel-mdc-select ul").html(ulHtmlStr)
+
+            const $insertServiceSelect = $("#insert-serviceModel-mdc-select")[0];
+            $($insertServiceSelect).data('instance').destroy();
+            const newInsertMdcSelect = new mdc.select.MDCSelect($insertServiceSelect);
+            $($insertServiceSelect).data('instance', newInsertMdcSelect);
+
+            const $detailServiceSelect = $("#detail-serviceModel-mdc-select")[0];
+            $($detailServiceSelect).data('instance').destroy();
+            const newUpdateMdcSelect = new mdc.select.MDCSelect($detailServiceSelect);
+            $($detailServiceSelect).data('instance', newUpdateMdcSelect);
+
+            const $deleteServiceSelect = $("#delete-serviceModel-mdc-select")[0];
+            $($deleteServiceSelect).data('instance').destroy();
+            const newDeleteMdcSelect = new mdc.select.MDCSelect($deleteServiceSelect);
+            $($deleteServiceSelect).data('instance', newDeleteMdcSelect);
+          })
+
+          this.initServiceModelResultList();
+          this.search();
+        },
+        mounted: function () {
+
+          // 페이지 이동시 처리
+          $('#drawer-main-content-viewer').one('page.move', function () {
+            //console.log("page move out");
+            var $fromAtInput = $('#from-date-mdc');
+            var $toAtInput = $('#to-date-mdc');
+            $fromAtInput.data('datepicker').destroy();
+            $toAtInput.data('datepicker').destroy();
+          });
+          this.initMaterialUx();
+          this.initSearchBarEvents();
+
+          var self = this;
+
+          // >>> 등록 dialog 설정
+          var insertDialog = this.insertDialog;
+
+          /*$('#insert-dialog-btn').off('click').on('click', function () {
+            insertDialog.open();
+          });*/
+
+          insertDialog.listen('MDCDialog:opening', function () {
+
+            // 화면 및 데이터 초기화
+            self.initializeInsertDialog();
+
+            // component 이벤트 등록
+
+            $("#insert-serviceModel-mdc-select").off('MDCSelect:change').on('MDCSelect:change', self.onChangeInsertServiceModel)
+            $("#insert-modelType-mdc-select").off('MDCSelect:change').on('MDCSelect:change', self.onChangeInsertModelType)
+            $("#insert-dataset-input").off('keyup').on('keyup', self.onChangeInsertDataset)
+            $("#insert-dataset-dupcheck-btn").off('click').on('click', self.onClickInsertDatasetDupCheck)
+            $("#insert-detailpath-input").off('keyup').on('keyup', self.onChangeInsertDetailPath)
+            $("#insert-detailpath-dupcheck-btn").off('click').on('click', self.onClickInsertDetailPathDupCheck)
+            $("#insert-answer-file-input").off('change').on('change', self.onChangeInsertAnswerFile);
+            $("#insert-voice-file-input").off('change').on('change', self.onChangeInsertVoiceFile);
+            $("#direct-insert-answer-input").off('keyup').on('keyup', self.onChangeDirectInsertAnswer);
+            $("#direct-insert-voice-input").off('keyup').on('keyup', self.onChangeDirectInsertVoice);
+            $("#insert-description-input").off('keyup').on('keyup', self.onChangeInsertDescription);
+
+            /* 초기 데이터 직접 업로드 체크박스 여부에 따라 input 박스가 달라짐 */
+            $("#direct-upload-checkbox").off('click').on('click', self.onChangeDirectInsert);
+
+
+            $("#insert-btn").off('click').on('click', function () {
+              if ($("#direct-upload-checkbox-value").is(":checked")) {
+                self.directInsert();
+              } else self.insert();
+            });
+          });
+
+          $('#insert-dialog-btn').off('click').on('click', function () {
+            self.insertDialog.open();
+            self.currentDialog = 'insertDialog';
+          });
+          // <<< 등록 dialog 설정
+
+
+          // >>> 상세 dialog 설정
+          var detailDialog = this.detailDialog;
+          detailDialog.listen('MDCDialog:opening', function () {
+            // 화면 및 데이터 초기화
+            self.initializeUpdateDialog();
+
+            // 이벤트 등록
+            $("#detail-modelType-mdc-select").off('MDCSelect:change').on('MDCSelect:change', self.onChangeUpdateModelType)
+            $("#detail-serviceModel-mdc-select").off('MDCSelect:change').on('MDCSelect:change', self.onChangeUpdateServiceModel)
+            $("#detail-dataset-input").off('keyup').on('keyup', self.onChangeUpdateDataset)
+            $("#detail-dataset-dupcheck-btn").off('click').on('click', self.onClickUpdateDatasetDupCheck)
+            $("#detail-description-input").off('keyup').on('keyup', self.onChangeUpdateDescription)
+
+            $("#update-btn").off('click').on('click', self.update)
+            $("#delete-btn").off('click').on('click', self.delete)
+          });
+
+
+          // >>> 삭제 dialog 설정
+          var deleteDialog = this.deleteDialog;
+
+          $('#delete-dialog-btn').off('click').on('click', function () {
+            deleteDialog.open();
+          });
+
+          deleteDialog.listen('MDCDialog:opening', function () {
+            // 화면 및 데이터 초기화
+            self.initializeDeleteDialog();
+
+            // 이벤트 등록
+            $("#delete-serviceModel-mdc-select").off('MDCSelect:change').on('MDCSelect:change', self.onChangeDeleteServiceModel)
+
+            $("#deleteAll-btn").off('click').on('click', self.deleteAll)
+          });
+          // <<< 삭제 dialog 설정
+
+          // 모달 닫기 및 xhr 종료 이벤트 바인딩
+          $('.close-button').off('click').on('click', function () {
+            self.onCloseDialog();
+          })
+          $('.mdc-dialog').on('keydown', function (e) {
+            if (e.key === 'Escape') self.onCloseDialog();
+          })
+        },
+        methods: {
+          initMaterialUx: function () {
+            // ripple material ux 적용
+            const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+            for (const el of elements) {
+              if ($(el).data('ripple') != null) {
+                $(el).data('ripple').destroy();
+              }
+              $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                isUnbounded: true
+              } : void 0));
+            }
+
+            // input text material ux 적용
+            const textFields = document.querySelectorAll('.mdc-text-field');
+            for (const el of textFields) {
+              if ($(el).data('instance') != null) {
+                $(el).data('instance').destroy();
+              }
+              $(el).data('instance', mdc.textField.MDCTextField.attachTo(el));
+            }
+
+            // select material ux 적용
+            const selects = document.querySelectorAll('.mdc-select');
+            for (const el of selects) {
+                const select = mdc.select.MDCSelect.attachTo(el);
+                $(el).data('instance', select); //
+            }
+
+            // linear progress material ux 적용
+            const progresses = document.querySelectorAll('.mdc-linear-progress');
+            for (const el of progresses) {
+              const progress = mdc.linearProgress.MDCLinearProgress.attachTo(el);
+              $(el).data('instance', progress); //
+            }
+
+            // datepicker material ux 적용
+            this.initMaterialDatepickers();
+
+            // dialog에 close 이벤트 주는 방법: escape key, dialog 외부 클릭 막기.
+
+          },
+
+          initMaterialDatepickers: function () {
+
+            // datepicker 적용
+            var self = this;
+            var $fromAtInput = $('#from-date-mdc');
+            var $toAtInput = $('#to-date-mdc');
+
+
+            // https://github.com/FreddyFY/material-datepicker
+            var datepickerOption = {
+              lang: "en",
+              orientation: "portrait",
+              color: document.defaultView.getComputedStyle(document.documentElement).getPropertyValue("--mdc-theme-primary"),
+              closeAfterClick: false,
+              outputFormat: 'YYYY-MM-DD',
+              topHeaderFormat: 'YYYY MM',
+              headerFormat: 'Do' // 1st 2nd ... 30th 31st
+            };
+
+            if ($fromAtInput.data('datepicker') != null) {
+              $fromAtInput.data('datepicker').destroy();
+            }
+
+            $fromAtInput.data('datepicker', new MaterialDatepicker($fromAtInput.data('instance').input, $.extend({}, datepickerOption, {
+              onChange: function (date) {
+                if (_.isEmpty($fromAtInput.data('instance').value)) {
+                  self.searchCondition.from = "";
+                } else {
+                  self.searchCondition.from = moment(date).format("YYYY-MM-DD");
+                }
+              }
+            })));
+
+            if ($toAtInput.data('datepicker') != null) {
+              $toAtInput.data('datepicker').destroy();
+            }
+
+            $toAtInput.data('datepicker', new MaterialDatepicker($toAtInput.data('instance').input, $.extend({}, datepickerOption, {
+              onChange: function (date) {
+                if (_.isEmpty($toAtInput.data('instance').value)) {
+                  self.searchCondition.to = "";
+                } else {
+                  self.searchCondition.to = moment(date).format("YYYY-MM-DD");
+                }
+              }
+            })));
+            $fromAtInput.data('instance').value = '';
+            $toAtInput.data('instance').value = '';
+          },
+
+          // 팝업 데이터 초기화
+          initModelTypes: function (callback) {
+            this.modelTypes = [
+              {key: 0, value: "전체"},
+              {key: "E2ESL", value: "E2ESL(지도)"}
+              //{key: "E2EUSL", value: "E2EUSL(비지도)"}, 수협은 해당 안됨
+              //{key: "E2EMSL", value: "E2EMSL(반지도)"}
+            ];
+            callback();
+          },
+          initServiceModels: function (callback) {
+
+            $.ajax({
+              url: this.baseUrl + "/trainData/api/serviceModelList",
+              method: "get",
+              contentType: 'application/json; charset=UTF-8',
+              dataType: "json"
+            }).done(data => {
+              var resultList = [];
+              if (data && data.result && data.result.length > 0) {
+                var result = data.result;
+                result.forEach(r => {
+                  resultList.push(
+                    {key: r.serviceCode, value: r.serviceModelName}
+                  );
+                })
+              }
+              this.serviceModels = [{key: 0, value: "전체"}];
+              this.serviceModels.push(...resultList);
+              callback();
+            });
+          },
+          // 모델별 amdata 결과 수
+          initServiceModelResultList: function () {
+
+            $.ajax({
+              url: this.baseUrl + "/trainData/api/serviceModelResultList",
+              method: "get",
+              contentType: 'application/json; charset=UTF-8',
+              dataType: "json"
+            }).done(data => {
+              // console.log(data.result);
+              this.serviceModelResultList = data.result;
+            });
+          },
+          initModelType: function () {
+            var ulHtmlStr = '';
+            ulHtmlStr += `
+                            <li class="mdc-deprecated-list-item mdc-deprecated-list-item--selected" aria-selected data-value="0">
+                                <span class="mdc-deprecated-list-item__ripple"></span>
+                                <span class="mdc-deprecated-list-item__text">"선택"</span>
+                            </li>`
+
+            for (var i = 0; i < this.modelTypes.length; i++) {
+              var selectModelType = this.modelTypes[i];
+
+              var htmlStr = `
+                            <li class="mdc-deprecated-list-item" data-value="${selectModelType.key}">
+                                <span class="mdc-deprecated-list-item__ripple"></span>
+                                <span class="mdc-deprecated-list-item__text">${selectModelType.value}</span>
+                            </li>`
+              ulHtmlStr += htmlStr;
+
+              //this.SERVICE_MODEL_ID_TO_NAME[serviceModel.id] = serviceModel.serviceModelName;
+            }
+
+            $("#insert-modelType-mdc-select ul").html(ulHtmlStr)
+          },
+
+          // 검색
+          search: function (isSearchButtonClicked) {
+            this._setSearching(true);
+
+            this.searchCondition.datasetName = this.searchCondition.datasetName;
+            this.searchCondition.uploadedBy = this.searchCondition.uploadedBy.trim();
+            this.searchCondition.description = this.searchCondition.description;
+
+            var searchConditions = {...this.searchCondition}
+
+            if (isSearchButtonClicked) {
+              searchConditions['pageNum'] = 1;
+            } else {
+              searchConditions['pageNum'] = this.currentPage;
+            }
+
+
+            commonObject.deleteNullOrDefaultFields(searchConditions);
+            var queryString = Qs.stringify(searchConditions);
+
+            $.ajax({
+              url: this.baseUrl + "/trainData/api/amListPage?" + queryString,
+              method: "get",
+              contentType: 'application/json; charset=UTF-8',
+              dataType: "json"
+            }).done(data => {
+              this._setSearchResultsPageInfo(data); // 검색 결과 페이지 정보 저장
+              this._setSearchResults(data.result); // 검색 결과 목록
+            }).always(() => {
+              this._setSearching(false);
+              this.initCheckBox();
+            })
+          },
+
+          // 상세조회
+          detail: function (amDataId, callback) {
+
+            $.ajax({
+              url: this.baseUrl + "/trainData/api/amDetail/" + amDataId,
+              method: "get",
+              contentType: 'application/json; charset=UTF-8',
+              dataType: "json"
+            }).done(result => {
+              this.detailObj = {...result.result};
+
+              this.detailObj.datasetDupCheck = true;
+              this.prevDetailObj = {...result.result};
+              this.prevDataset = result.result.datasetName;
+              this.prevModelType = result.result.modelType;
+              this.prevDescription = result.result.description;
+
+              callback();
+            });
+          },
+
+          // 등록
+          insert: function (e) {
+            if (!this.validateInsert()) {
+              return;
+            }
+
+            var newObj = {...this.newObj}
+
+            var formData = new FormData();
+            formData.append("amDataId", this.newObj.amDataId);
+            formData.append("serviceModelId", this.newObj.serviceModelId);
+            formData.append("modelType", this.newObj.modelType);
+            formData.append("datasetName", this.newObj.datasetName);
+            formData.append("basePath", this.newObj.basePath);
+            formData.append("detailPath", this.newObj.detailPath);
+
+            // 초기 데이터 직접 업로드 checked 경우 값 체크용
+            /*if ($("#direct-upload-checkbox-value").is(":checked")) {
+                if(this.newObj.answerFileName != null && this.newObj.answerFileName != ''&& this.newObj.voiceFileName != null && this.newObj.voiceFileName != ''){
+                  formData.append("answerFileName", this.newObj.answerFileName);
+                  formData.append("voiceFileName", this.newObj.voiceFileName);
+                }
+            }*/
+
+            if ($("#insert-answer-file-input").val()) {
+              formData.append("answerFile", this.newDataAnswerFile);
+            }
+            formData.append("voiceFile", this.newDataVoiceFile);
+            formData.append("description", this.newObj.description);
+
+            delete newObj['datasetDupCheck']
+            delete newObj['detailPathDupCheck']
+            // console.log("formData : " + formData);
+
+            // abort 시 confirm 필요한 대상엔 true로 설정
+            this.checkXhrAbort = true;
+            let apiUrl = this.baseUrl + "/trainData/api/amDataInsert";
+
+            if (confirm("등록하시겠습니까?")) {
+              this.setInsertDialogLoading(true);
+              this.dispatchProcessing('process');
+              var self = this;
+              let xhr = $.ajax({
+                url: apiUrl,
+                method: "post",
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                dataType: "json",
+                data: formData
+              }).done(result => {
+                if (result.code == "200") {
+                  toastr.success(result.message);
+                  this.insertDialog.close();
+                } else {
+                  toastr.error(result.message);
+                }
+              }).always(() => {
+                this.search();
+                this.setInsertDialogLoading(false);
+                // 배열에서 해당 xhr 제거 및 checkXhrAbort 초기화
+                let result = self.currentXhr.find(obj => obj.id === apiUrl);
+                if (result) {
+                  let index = self.currentXhr.indexOf(result);
+                  self.currentXhr.splice(index, 1);
+                }
+                self.checkXhrAbort = false;
+                self.dispatchProcessing('done');
+              });
+              // abort 적용을 위해 xhr 객체에 id를 추가해 배열에 push
+              let result = {id: apiUrl, xhr};
+              self.currentXhr.push(result);
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+          },
+
+          // 초기 데이터 직접 업로드
+          directInsert: function (e) {
+
+            if (!this.validateInsert()) {
+              return;
+            }
+
+            var newObj = {...this.newObj}
+            // console.log(newObj);
+
+            delete newObj['datasetDupCheck']
+            delete newObj['detailPathDupCheck']
+
+            if (confirm("초기 데이터를 업로드 하시겠습니까?")) {
+              $.ajax({
+                url: this.baseUrl + "/trainData/api/amDataDirectInsert",
+                method: "post",
+                data: JSON.stringify(newObj),
+                contentType: 'application/json; charset=UTF-8',
+                dataType: "json"
+
+              }).done(data => {
+                // console.log(data);
+                if (data.resultCode == "0000") {
+                  toastr.success("초기 데이터가 등록 되었습니다.");
+                  this.insertDialog.close();
+                } else if(data.resultCode == "1002"){
+                  toastr.error("해당 서비스 모델에 등록된 초기 경로가 있습니다.");
+                } else {
+                  toastr.error(data.resultMsg);
+                }
+              }).always(() => {
+                this.search();
+              });
+            }
+          },
+
+          _updateProgress: function (currCount, totalCount) {
+            var progressMdc = $("#progressbar").data('instance');
+            if (progressMdc.foundation.isClosed()) {
+              progressMdc.open();
+            }
+            var percentage = (currCount / totalCount);
+            progressMdc.progress = percentage;
+          },
+          _closeProgress: function () {
+            var progressMdc = $("#progressbar").data('instance');
+            progressMdc.close();
+          },
+
+          // 수정
+          update: function (e) {
+
+            if (!this.validateUpdate()) {
+              return;
+            }
+
+            var updateObj = {...this.detailObj}
+
+            delete updateObj['datasetDupCheck']
+
+            if (confirm("수정하시겠습니까?")) {
+              $.ajax({
+                url: this.baseUrl + "/trainData/api/amUpdate",
+                method: "post",
+                data: JSON.stringify(updateObj),
+                contentType: 'application/json; charset=UTF-8',
+                dataType: "json"
+
+              }).done(result => {
+                toastr.success(result.resultMsg);
+
+                if (result.resultCode == "0000") {
+                  this.detailDialog.close();
+                }
+              }).always(() => {
+                this.search();
+              });
+            }
+          },
+
+          // 삭제
+          delete: function () {
+
+            var trainDataId = this.detailObj.id;
+            var trainDataIdList = [trainDataId];
+            var postBody = {
+              trainDataIdList: trainDataIdList
+            };
+
+            if (confirm("삭제하시겠습니까?")) {
+              $.ajax({
+                url: this.baseUrl + "/trainData/api/amDelete",
+                method: "post",
+                contentType: 'application/json; charset=UTF-8',
+                dataType: "json",
+                data: JSON.stringify(postBody)
+              }).done(result => {
+
+                toastr.success(result.resultMsg)
+                this.detailDialog.close();
+              }).always(() => {
+
+                this.search();
+              });
+            }
+          },
+
+          // 선택 삭제
+          deleteSelected: function () {
+
+            var trainDataIdList = $.map($('.deleteChk:checkbox:checked'), function (chk) {
+              return $(chk).val();
+            });
+
+            if (trainDataIdList && trainDataIdList.length == 0) {
+              toastr.error("삭제 할 항목을 선택해주세요.");
+              return;
+            }
+
+            var postBody = {
+              trainDataIdList: trainDataIdList
+            };
+
+            if (confirm("선택한 항목을 삭제하시겠습니까?")) {
+              $.ajax({
+                url: this.baseUrl + "/trainData/api/amDelete",
+                method: "post",
+                contentType: 'application/json; charset=UTF-8',
+                dataType: "json",
+                data: JSON.stringify(postBody)
+              }).done(result => {
+
+                toastr.success(result.resultMsg)
+                this.search();
+
+                this.initCheckBox();
+              });
+            }
+          },
+
+          // 일괄 삭제
+          deleteAll: function () {
+
+            if (!this.validateDelete()) {
+              return;
+            }
+
+            var data = {
+              serviceModelId: this.deleteObj.serviceModelId
+            }
+
+            if (confirm("선택한 서비스 모델의 학습 데이터를 모두 삭제하시겠습니까?")) {
+              $.ajax({
+                url: this.baseUrl + "/trainData/api/amDeleteAll",
+                method: "post",
+                contentType: 'application/json; charset=UTF-8',
+                dataType: "json",
+                data: JSON.stringify(data)
+              }).done(result => {
+
+                toastr.success(result.resultMsg)
+                this.deleteDialog.close();
+
+                this.initCheckBox();
+
+              }).always(() => {
+                this.search();
+              });
+            }
+          },
+
+          // 엑셀 다운로드
+          downloadListExcel: function (e) {
+            if (confirm("AM학습데이터 검색결과 엑셀파일을 다운로드 하시겠습니까?")) {
+              var searchConditions = {...this.searchCondition}
+
+              commonObject.deleteNullOrDefaultFields(searchConditions);
+              var queryString = Qs.stringify(searchConditions);
+
+              var downloadUrl = this.baseUrl + "/file/excel/amTrainData?" + queryString
+                + "&x-smp-site-code=" + siteCode + "&x-smp-project-code=" + projectCode;
+              window.open(downloadUrl, "_self", 'width=200, height=200, left=2000, top=2000');
+            }
+          },
+
+          downloadBulkSampleExcel: function (e) {
+            if (confirm("대량등록 엑셀 양식을 다운로드하시겠습니까?")) {
+              var downloadUrl = this.baseUrl + "/file/excel/trainData/sample?x-smp-site-code=" + siteCode + "&x-smp-project-code=" + projectCode;
+              window.open(downloadUrl, "_self", 'width=500, height=200, left=2000, top=2000');
+            }
+          },
+
+          // 등록 팝업 초기화
+          initializeInsertDialog: function () {
+
+            var $insertServiceModelElement = $("#insert-serviceModel-mdc-select")[0];
+            $($insertServiceModelElement).data('instance').setSelectedIndex(0);
+
+            // 모델타입 추가
+            var $insertModelTypeElement = $("#insert-modelType-mdc-select")[0];
+
+            $($insertModelTypeElement).data('instance').setSelectedIndex(0);
+
+            // 기본디렉토리
+            $($('#insert-basepath-input')[0].parentElement).data('instance').value = basePath;
+            this._showValidationHelperLine('', $("#insert-basepath-helper-line"), '기본 디렉토리');
+            this.newObj.basePath = '/trainData';
+
+            // 설명
+            $($('#insert-description-input')[0].parentElement).data('instance').value = '';
+            this._showValidationHelperLine('', $("#insert-description-helper-line"), '설명');
+
+            // 정답지 데이터셋 추가
+            $($('#insert-dataset-input')[0].parentElement).data('instance').value = '';
+            this._showValidationHelperLine('', $("#insert-dataset-helper-line"), '정답지 데이터셋 이름');
+
+            // 상세 디렉토리명
+            $($('#insert-detailpath-input')[0].parentElement).data('instance').value = '';
+            this._showValidationHelperLine('', $("#insert-detailpath-helper-line"), '상세 디렉토리명');
+
+            // 정답지파일 추가
+            $("#insert-answer-file-name").data('instance').value = '';
+            $("#insert-answer-file-input").val('');
+
+            // 음성파일 추가
+            $("#insert-voice-file-name").data('instance').value = '';
+            $("#insert-voice-file-input").val('');
+
+            // 초기 등록 데이터 input init
+            $($('#direct-insert-answer-input')[0].parentElement).data('instance').value = '';
+            $($('#direct-insert-voice-input')[0].parentElement).data('instance').value = '';
+
+            // 모델별 검색결과가 없을 경우 직접 업로드 체크박스 보이기
+            // 로직 활성화 하려면 true
+            this.onShowDirectInsertCheckbox(false);
+
+            // 초기 직접 업로드 데이터 입력창 숨기기
+            $("#direct-upload-checkbox-value").prop("checked", false);
+            this.onChangeDirectInsert();
+            this._showValidationHelperLine('', $("#direct-insert-answer-helper-line"), '정답지 파일명');
+            this._showValidationHelperLine('', $("#direct-insert-voice-helper-line"), '음성(tar.gz) 파일명');
+
+          },
+
+          // 상세 팝업 초기화
+          initializeUpdateDialog: function () {
+
+            // 모델타입
+            var $detailModelTypeSelect = $("#detail-modelType-mdc-select")[0];
+            $($detailModelTypeSelect).data('instance').value = this.detailObj.modelType;
+            $("#detail-modelType-mdc-select > div").attr("readonly", true);
+            $("#detail-modelType-mdc-select > div").attr("disabled", true);
+            // 서비스 모델
+            var $detailServiceModelSelect = $("#detail-serviceModel-mdc-select")[0];
+            $($detailServiceModelSelect).data('instance').value = String(this.detailObj.serviceModelId);
+            $("#detail-serviceModel-mdc-select > div").attr("readonly", true);
+            $("#detail-serviceModel-mdc-select > div").attr("disabled", true);
+            // 정답지 데이터셋명
+            $($('#detail-dataset-input')[0].parentElement).data('instance').value = this.detailObj.datasetName;
+            this._showValidationHelperLine('', $("#detail-dataset-helper-line"), '정답지 데이터셋 이름');
+            this._disableUpdateDatasetDuplCheckBtn(true);
+
+            // 데이터 경로
+            if (this.detailObj.amDataPath != null && this.detailObj.amDataPath != undefined && this.detailObj.amDataPath != '') {
+              $($('#detail-datapath-input')[0].parentElement).data('instance').value = this.detailObj.amDataPath;
+            }
+            $($('#detail-datapath-input')[0].parentElement).prop("disabled", true);
+
+            // 정답지 파일
+            if (this.detailObj.answerFileName != null && this.detailObj.answerFileName != undefined && this.detailObj.answerFileName != '') {
+              $($('#detail-answer-file-input')[0].parentElement).data('instance').value = this.detailObj.answerFileName;
+            }
+            $($('#detail-answer-file-input')[0].parentElement).prop("disabled", true);
+
+            // 음성 파일
+            if (this.detailObj.voiceFileName != null && this.detailObj.voiceFileName != undefined && this.detailObj.voiceFileName != '') {
+              $($('#detail-voice-file-input')[0].parentElement).data('instance').value = this.detailObj.voiceFileName;
+            }
+            $($('#detail-voice-file-input')[0].parentElement).prop("disabled", true);
+
+            // 설명
+            if (this.detailObj.description != null && this.detailObj.description != undefined && this.detailObj.description != '') {
+              $($('#detail-description-input')[0].parentElement).data('instance').value = this.detailObj.description;
+              this._showValidationHelperLine('', $("#detail-description-helper-line"), '설명');
+            } else {
+              $($('#detail-description-input')[0].parentElement).data('instance').value = '';
+              this._showValidationHelperLine('', $("#detail-description-helper-line"), '설명');
+            }
+            // 등록일
+            $($('#detail-reg-date')[0].parentElement).data('instance').value = this.detailObj.regDt
+            // 수정일
+            $($('#detail-upd-regId')[0].parentElement).data('instance').value = this.detailObj.regId
+
+          },
+
+          // 상세 팝업 초기화
+          initializeDeleteDialog: function () {
+
+            // 서비스 모델
+            var $deleteServiceModelSelect = $("#delete-serviceModel-mdc-select")[0];
+            $($deleteServiceModelSelect).data('instance').setSelectedIndex(0);
+
+            $("#selectWrapper").css('max-height', '');
+            $("#selectWrapper").css('max-height', '200px');
+          },
+
+          // 검색 이벤트
+          initSearchBarEvents: function () {
+            var self = this;
+            $('.search-bar input').on("keydown", function (e) {
+              if (e.keyCode == 13) {
+                self.search(true);
+              }
+            });
+          },
+
+          _setSearchResults: function (result) {
+            this.searchResults = result;
+          },
+          _setSearchResultsPageInfo: function (data) {
+            this.pageInfo.pages = data.pages;
+            this.pageInfo.total = data.total;
+            this.currentPage = data.pageNum;
+          },
+          _setSearching: function (searching) {
+            this.searching = searching;
+          },
+
+          // 페이지네이션
+          gotoPage: function (pageNum) {
+            let validPageNum = pageNum;
+            if (pageNum < 1) {
+              validPageNum = 1;
+            } else if (pageNum > this.pageInfo.pages) {
+              validPageNum = this.pageInfo.pages;
+            }
+
+            this.currentPage = validPageNum;
+            this.search();
+          },
+
+          // insert 이벤트
+
+          onChangeInsertServiceModel: function (e) {
+            this.newObj.serviceModelId = $(e.target).data('instance').value;
+          },
+          onChangeInsertDescription: function (e) {
+
+            e.stopPropagation();
+            var newDescription = e.target.value;
+            //e.target.value = newDescription;
+
+            var $helperLine = $("#insert-description-helper-line")
+
+            if (this.validateDescription(e.target.value)) {
+              this._showValidationHelperLine("VALID", $helperLine, "설명");
+              this.newObj.description = newDescription;
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "설명");
+              e.target.focus();
+            }
+
+          },
+          onChangeInsertDataset: function (e) {
+
+            e.stopPropagation();
+            var newDataset = e.target.value;
+            e.target.value = newDataset;
+
+            var $helperLine = $("#insert-dataset-helper-line")
+
+            if (this.validateDataset(e.target.value)) {
+              this._showValidationHelperLine("VALID", $helperLine, "정답지 데이터셋 이름");
+              this.newObj.datasetName = newDataset;
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "정답지 데이터셋 이름");
+              e.target.focus();
+            }
+
+            this.newObj.datasetDupCheck = false;
+
+            if (this.validateDataset(e.target.value)) {
+              this._disableDatasetDuplCheckBtn(false)
+              this._showValidationHelperLine("DUPCHECK", $helperLine, "정답지 데이터셋 이름");
+            } else {
+              this._disableDatasetDuplCheckBtn(true)
+              this._showValidationHelperLine("INVALID", $helperLine, "정답지 데이터셋 이름");
+              e.target.focus();
+            }
+            this.newObj.datasetName = newDataset;
+
+          },
+          onChangeInsertDetailPath: function (e) {
+
+            e.stopPropagation();
+            var newDetailPath = e.target.value;
+            e.target.value = newDetailPath;
+
+            var $helperLine = $("#insert-detailpath-helper-line")
+            var regExp = /[^0-9a-zA-Z]/g;
+            if (regExp.test(e.target.value)) {
+              e.target.value = e.target.value.replace(regExp, '');
+              newDetailPath = e.target.value
+            }
+
+            if (this.validateDetailPath(e.target.value)) {
+              this._showValidationHelperLine("VALID", $helperLine, "상세 디렉토리명");
+              this.newObj.detailPath = newDetailPath;
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "상세 디렉토리명");
+              e.target.focus();
+            }
+
+            this.newObj.detailPathDupCheck = false;
+
+            if (this.validateDetailPath(e.target.value)) {
+              this._disableDetailPathDuplCheckBtn(false)
+              this._showValidationHelperLine("DUPCHECK", $helperLine, "상세 디렉토리명");
+            } else {
+              this._disableDetailPathDuplCheckBtn(true)
+              this._showValidationHelperLine("INVALID", $helperLine, "상세 디렉토리명");
+              e.target.focus();
+            }
+            this.newObj.detailPath = newDetailPath;
+
+
+          },
+          onChangeDirectInsertAnswer: function (e) {
+
+            e.stopPropagation();
+            var newAnswerFileName = e.target.value;
+            e.target.value = newAnswerFileName;
+
+            var $helperLine = $("#direct-insert-answer-helper-line")
+
+            var regExp = /[^0-9a-zA-Z._-]/g;
+            if (regExp.test(e.target.value)) {
+              e.target.value = e.target.value.replace(regExp, '');
+              newAnswerFileName = e.target.value
+            }
+
+            // console.log("현재값 answer 1 : " + newAnswerFileName);
+
+            if (this.validateDirectFilename(e.target.value)) {
+              this._showValidationHelperLine("VALID", $helperLine, "파일명");
+              this.newObj.answerFileName = newAnswerFileName;
+            } else {
+              this._showValidationHelperLine("FILECHECK", $helperLine, "설명");
+              e.target.focus();
+            }
+
+            // console.log("newAnswerFileName : " + this.newObj.answerFileName);
+
+          },
+          onChangeDirectInsertVoice: function (e) {
+
+            e.stopPropagation();
+            var newVoiceFileName = e.target.value;
+            e.target.value = newVoiceFileName;
+
+            var $helperLine = $("#direct-insert-voice-helper-line")
+
+            // console.log("현재값 voice 1 : " + newVoiceFileName);
+
+            var regExp = /[^0-9a-zA-Z._-]/g;
+            if (regExp.test(e.target.value)) {
+              e.target.value = e.target.value.replace(regExp, '');
+              newVoiceFileName = e.target.value
+            }
+
+            if (this.validateDirectFilename(e.target.value)) {
+              if (this.validateDirectVoiceFilename(e.target.value)) {
+                this._showValidationHelperLine("VALID", $helperLine, "파일명");
+                this.newObj.voiceFileName = newVoiceFileName;
+              } else {
+                this._showValidationHelperLine("FILENAMECHECK", $helperLine, ".tar.gz");
+                e.target.focus();
+              }
+            } else {
+              this._showValidationHelperLine("FILECHECK", $helperLine, "설명");
+              e.target.focus();
+            }
+
+            // console.log("voiceFileName : " + this.newObj.voiceFileName);
+
+          },
+          onClickInsertDatasetDupCheck: function () {
+            var self = this;
+
+            if (!this.validateDatasetDuplicate()) {
+              return;
+            }
+
+            this.checkDuplicateDataset(this.newObj, function () {
+              if (self.newObj.datasetDupCheck) {
+                self._showValidationHelperLine('VALID', $("#insert-dataset-helper-line"), '정답지 데이터셋');
+              } else {
+                self._showValidationHelperLine('DUPCHECK', $("#insert-dataset-helper-line"), '정답지 데이터셋');
+              }
+            });
+          },
+          onClickInsertDetailPathDupCheck: function () {
+            var self = this;
+
+            if (!this.validateDetailPathDuplicate()) {
+              return;
+            }
+
+            this.checkDuplicateDetailPath(this.newObj, function () {
+              if (self.newObj.detailPathDupCheck) {
+                self._showValidationHelperLine('VALID', $("#insert-detailpath-helper-line"), '상세 디렉토리명');
+              } else {
+                self._showValidationHelperLine('DUPCHECK', $("#insert-detailpath-helper-line"), '상세 디렉토리명');
+              }
+            });
+          },
+          onClickUpdateDatasetDupCheck: function () {
+
+            var self = this;
+
+            this.checkDuplicateDataset(this.detailObj, function () {
+
+              if (self.detailObj.datasetDupCheck) {
+                self._showValidationHelperLine('VALID', $("#detail-dataset-helper-line"), '정답지 데이터셋 이름');
+              } else {
+                self._showValidationHelperLine('DUPCHECK', $("#detail-dataset-helper-line"), '정답지 데이터셋 이름');
+              }
+            });
+
+          },
+          onChangeInsertModelType: function (e) {
+            this.newObj.modelType = $(e.target).data('instance').value;
+
+            if ($(e.target).data('instance').value == 'E2ESL' || $(e.target).data('instance').value == 'E2EMSL') {
+              //$('#insert-dataset-input').attr("readonly" , false);
+              $('#insert-answer-file-div').attr("readonly", false);
+            } else if ($(e.target).data('instance').value == 'E2EUSL') {
+              //$('#insert-dataset-input').attr("readonly" , true);
+              $('#insert-answer-file-div').attr("readonly", true);
+            }
+
+          },
+          onChangeInsertAnswerFile: function (e) {
+            this.newDataAnswerFile = e.target.files[0]
+            var fileName = e.target.files[0].name;
+            $("#insert-answer-file-name").data('instance').value = fileName;
+
+          },
+          onChangeInsertVoiceFile: function (e) {
+            this.newDataVoiceFile = e.target.files[0]
+            //if(this.newDataVoiceFile.size > 50000000){ // 50M 제한
+            //toastr.error("파일용량 초과");
+            //return;
+            //}
+            var fileName = e.target.files[0].name;
+            $("#insert-voice-file-name").data('instance').value = fileName;
+
+          },
+
+
+          _disableDatasetDuplCheckBtn: function (disabled) {
+            $("#insert-dataset-dupcheck-btn").prop("disabled", disabled);
+          },
+          _disableDetailPathDuplCheckBtn: function (disabled) {
+            $("#insert-detailpath-dupcheck-btn").prop("disabled", disabled);
+          },
+          _showValidationHelperLine: function (mode, $helperline, key) {
+            if (mode == "VALID") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+													사용 가능한 ${key}입니다.
+												</p>`
+              )
+            } else if (mode == "DUPCHECK") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--warning ">
+													${key} 중복 체크를 해주세요.
+												</p>`
+              )
+            } else if (mode == "INVALID") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error ">
+												유효하지 않은 ${key}입니다.
+											</p>`
+              )
+            } else if (mode == "FILECHECK") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error ">
+										파일 확장자를 함께 입력해주세요.
+										</p>`
+              )
+            } else if (mode == "FILENAMECHECK") {
+              $helperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error ">
+										${key} 확장자 파일명을 입력해주세요.
+										</p>`
+              )
+            } else {
+              $helperline.html('');
+            }
+          },
+
+          // 초기 데이터 업로드 체크박스 보이기 여부, 모델별 데이터가 있을 경우 보이지 않음
+          onShowDirectInsertCheckbox: function (showYn) { // 테스트를 위한 적용 여부
+            if(showYn){
+              const list = this.serviceModelResultList;
+              if(list.length > 0){
+                let modelResult = 0;
+                for (let model of list){
+                  modelResult = model > 0 ? modelResult + 1 : modelResult;
+                }
+
+                if(modelResult >= list.length){
+                  $("#direct-upload-checkbox-div").hide();
+                } else { $("#direct-upload-checkbox-div").show(); }
+              }
+            }
+          },
+
+          // insert 추가 초기데이터 체크 여부에 따라 input 박스 변화
+          onChangeDirectInsert: function () {
+            if ($("#direct-upload-checkbox-value").is(":checked")) {
+
+              // 체크 했을 경우
+              $("#direct-insert-msg").show();
+              $("#direct-insert-answer-div").show();
+              $("#direct-insert-voice-div").show();
+
+              $("#insert-answer-file-div").hide();
+              $("#insert-voice-file-div").hide();
+
+              // text input 필수 입력 활성화
+              $("#direct-insert-answer-input").attr("required", true);
+              $("#direct-insert-voice-input").attr("required", true);
+
+              // file input 필수 입력 해제
+              $("#insert-answer-file-input").attr("required", false);
+              $("#insert-voice-file-input").attr("required", false);
+
+            } else {
+
+              // 체크 해제 했을 경우
+              $("#direct-insert-msg").hide();
+              $("#direct-insert-answer-div").hide();
+              $("#direct-insert-voice-div").hide();
+
+              $("#insert-answer-file-div").show();
+              $("#insert-voice-file-div").show();
+
+              // text input 필수 입력 해제
+              $("#direct-insert-answer-input").attr("required", false);
+              $("#direct-insert-voice-input").attr("required", false);
+
+              // file input 필수 입력 해제
+              $("#insert-answer-file-input").attr("required", true);
+              $("#insert-voice-file-input").attr("required", true);
+            }
+          },
+
+
+          // update 이벤트
+          onChangeUpdateModelType: function (e) {
+            this.detailObj.modelType = $(e.target).data('instance').value;
+          },
+          onChangeUpdateServiceModel: function (e) {
+            this.detailObj.serviceModelId = ($(e.target).data('instance').value).toString();
+          },
+          onChangeUpdateDataset: function (e) {
+
+            e.stopPropagation();
+            var newDataset = e.target.value.trim();
+            e.target.value = newDataset;
+
+            var $helperLine = $("#detail-dataset-helper-line")
+
+            if (newDataset != this.prevDataset) {
+              this.detailObj.datasetDupCheck = false;
+
+              if (this.validateDataset(e.target.value)) {
+                this._disableUpdateDatasetDuplCheckBtn(false)
+                this._showValidationHelperLine("DUPCHECK", $helperLine, "정답지 데이터셋 이름");
+              } else {
+                this._disableUpdateDatasetDuplCheckBtn(true)
+                this._showValidationHelperLine("INVALID", $helperLine, "정답지 데이터셋 이름");
+                e.target.focus();
+              }
+
+            } else {
+              this.detailObj.serverNameDupCheck = true;
+              this._disableUpdateDatasetDuplCheckBtn(true)
+              this._showValidationHelperLine("", $helperLine, "정답지 데이터셋 이름");
+            }
+
+            this.detailObj.datasetName = newDataset;
+          },
+          onChangeUpdateRepeat: function (e) {
+
+            e.stopPropagation();
+            var newObj = e.target.value.trim();
+            e.target.value = newObj;
+
+            var $helperLine = $("#detail-repeat-helper-line")
+
+            if (this.validateRepeat(e.target.value)) {
+              this._showValidationHelperLine("", $helperLine, "가중치");
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "가중치");
+              e.target.focus();
+            }
+
+            this.detailObj.repeatCount = newObj;
+          },
+          onChangeUpdateDescription: function (e) {
+
+            e.stopPropagation();
+            var newObj = e.target.value;
+            //e.target.value = newObj;
+
+            var $helperLine = $("#detail-description-helper-line")
+
+            if (this.validateDescription(e.target.value)) {
+              this._showValidationHelperLine("", $helperLine, "설명");
+            } else {
+              this._showValidationHelperLine("INVALID", $helperLine, "설명");
+              e.target.focus();
+            }
+
+            this.detailObj.description = newObj;
+          },
+          _disableUpdateDatasetDuplCheckBtn: function (disabled) {
+            $("#detail-dataset-dupcheck-btn").prop("disabled", disabled);
+          },
+
+          // delete 이벤트
+          onChangeDeleteServiceModel: function (e) {
+            this.deleteObj.serviceModelId = $(e.target).data('instance').value;
+          },
+
+          // 데이터셋명 중복 체크
+          checkDuplicateDataset: function (obj, callback) {
+
+            var newObj = {
+              "datasetName": String(obj.datasetName),
+              "serviceModelId": String(obj.serviceModelId)
+            }
+
+            $.ajax({
+              url: this.baseUrl + "/trainData/api/existAmData",
+              method: "post",
+              data: newObj,
+              dataType: "json"
+            }).done(data => {
+
+              if (data.resultCode == "0000") {
+                obj.datasetDupCheck = true;
+              } else {
+
+                toastr.error("이미 등록된 정답지 데이터셋명 입니다.");
+              }
+              callback();
+            })
+
+          },
+
+          // 하위 디렉토리 중복 체크
+          checkDuplicateDetailPath: function (obj, callback) {
+
+            var newObj = {
+              "detailPath": String(obj.detailPath),
+              "serviceModelId": String(obj.serviceModelId)
+            }
+
+            $.ajax({
+              url: this.baseUrl + "/trainData/api/existDirPath",
+              method: "post",
+              data: newObj,
+              dataType: "json"
+            }).done(data => {
+
+              if (data.resultCode == "0000") {
+                obj.detailPathDupCheck = true;
+              } else {
+
+                toastr.error("이미 등록된 디렉토리 입니다.");
+              }
+              callback();
+            })
+
+          },
+
+          // 데이터셋명 중복 검사시 서비스모델값 체크
+          validateDatasetDuplicate: function () {
+
+            // 서비스 모델
+            if (this.newObj.serviceModelId == null || this.newObj.serviceModelId == undefined || this.newObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            return true;
+          },
+          // 상세디렉토리 중복 검사시 서비스모델값 체크
+          validateDetailPathDuplicate: function () {
+
+            // 서비스 모델
+            if (this.newObj.serviceModelId == null || this.newObj.serviceModelId == undefined || this.newObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            return true;
+          },
+
+          // 유효성 검사 (액션별)
+          validateInsert: function () {
+            var voiceFileText = $("#insert-voice-file-name").data('instance').value;
+
+            // 서비스 모델
+            if (this.newObj.serviceModelId == null || this.newObj.serviceModelId == undefined || this.newObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            // 모델타입
+            if (this.newObj.modelType == null || this.newObj.modelType == undefined || this.newObj.modelType == 0) {
+              toastr.error("모델타입을 선택해주세요.");
+              return;
+            }
+
+            // 설명
+            if (!this.validateDescription($($("#insert-description-input")[0].parentElement).data('instance').value)) {
+              toastr.error("설명은 최대" + this.DESCRIPTION_MAX_LENGTH + "자 까지 입력 가능합니다.")
+              return;
+            }
+
+            // 정답지 데이터셋 길이체크
+            if (!this.validateDataset($($("#insert-dataset-input")[0].parentElement).data('instance').value)) {
+              toastr.error("데이터셋 이름은 최대" + this.DATASET_MAX_LENGTH + "자 까지 입력 가능합니다.")
+              return;
+            }
+            if (!this.newObj.datasetDupCheck) {
+              toastr.error("정답지 데이터셋 중복 체크를 진행해주세요.")
+              return false;
+            }
+            // 정답지 데이터셋 빈값
+            if (this.newObj.datasetName == null || this.newObj.datasetName == undefined || this.newObj.datasetName == "") {
+              toastr.error("정답지 데이터셋 이름을 입력해주세요.");
+              return;
+            }
+
+            // 상세 디렉토리 경로 입력여부
+            if (this.newObj.detailPath == null || this.newObj.detailPath == undefined || this.newObj.detailPath == "") {
+              toastr.error("상세 디렉토리명을 입력해주세요.");
+              return;
+            }
+
+            if (!$("#direct-upload-checkbox-value").is(":checked")) {
+              // 음성파일 업로드 여부
+              if (voiceFileText == null || voiceFileText == undefined || voiceFileText == "") {
+                toastr.error("음원파일을 입력해주세요.");
+                return;
+              }
+            }
+
+            // 초기 데이터 직접 업로드가 체크되어 있을 경우
+            if ($("#direct-upload-checkbox-value").is(":checked")) {
+              // 정답지 파일명 빈값
+              if (this.newObj.answerFileName == null || this.newObj.answerFileName == undefined || this.newObj.answerFileName == "") {
+                toastr.error("정답지 파일명을 입력해주세요.");
+                return;
+              }
+
+              // 음성 파일명 빈값
+              if (this.newObj.voiceFileName == null || this.newObj.voiceFileName == undefined || this.newObj.voiceFileName == "") {
+                toastr.error("음원 파일명을 입력해주세요.");
+                return;
+              }
+            }
+
+            return true;
+          },
+
+          validateUpdate: function () {
+            // 모델타입
+            if (this.detailObj.modelType == null || this.detailObj.modelType == undefined || this.detailObj.modelType == 0) {
+              toastr.error("모델타입을 선택해주세요.")
+              return;
+            }
+
+
+            if (this.detailObj.serviceModelId == null || this.detailObj.serviceModelId == undefined || this.detailObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            // 정답지 데이터셋명
+            if (!this.validateDataset($($("#detail-dataset-input")[0].parentElement).data('instance').value)) {
+              toastr.error("데이터셋 이름은 최대" + this.DATASET_MAX_LENGTH + "자 까지 입력 가능합니다.")
+              return false;
+            }
+
+            if (!this.newObj.datasetDupCheck) {
+              toastr.error("정답지 데이터셋 중복 체크를 진행해주세요.")
+              return false;
+            }
+
+            // 설명
+            if (!this.validateDescription($($("#insert-description-input")[0].parentElement).data('instance').value)) {
+              toastr.error("설명은 최대" + this.DESCRIPTION_MAX_LENGTH + "자 까지 입력 가능합니다.")
+              return;
+            }
+
+
+            return true;
+          },
+          validateDelete: function () {
+
+            // 서비스 모델
+            if (this.deleteObj.serviceModelId == null || this.deleteObj.serviceModelId == undefined || this.deleteObj.serviceModelId == 0) {
+              toastr.error("서비스 모델을 선택해주세요.")
+              return;
+            }
+
+            return true;
+          },
+          // 유효성 검사 (필드별)
+          validateContents: function (value) {
+            // 최대 글자, 빈 값, 한글(자음/모음 제외)만 입력 가능
+            var regexp = /^[가-힣\s]+$/gi;
+            var newValue = value.trim();
+
+            return newValue.length <= this.DATASET_MAX_LENGTH && newValue.length > 0 && regexp.test(newValue);
+          },
+          validateRepeat: function (value) {
+            // 최대 글자, 빈 값, 1 ~ 10,000만 입력 가능
+            if (value == null || value == undefined || value.length == 0) {
+              return false;
+            }
+            var regexp = /^[0-9]+$/;
+            var newValue = Number(value.trim());
+
+            return newValue <= this.REPEAT_COUNT_MAX_VAL && newValue > 0 && regexp.test(newValue);
+          },
+          validateDescription: function (value) {
+            // 최대 글자
+            var newValue = value.trim();
+            return newValue.length <= this.DESCRIPTION_MAX_LENGTH;
+          },
+          validateDataset: function (value) {
+            // 최대 글자
+            var newValue = value.trim();
+            return newValue.length <= this.DATASET_MAX_LENGTH;
+          },
+          validateDetailPath: function (value) {
+            // 최대 글자
+            var newValue = value.trim();
+            return true;
+          },
+          validateDirectFilename: function (value) {
+            if (value.includes('.')) {
+              return value.length - value.indexOf('.') >= 4;
+            } else return false;
+          },
+          validateDirectVoiceFilename: function (value) {
+            return value.endsWith('.tar.gz'); // .tar.gz로 끝나는지 확인
+          },
+          _showInsertContentsValidation: function (mode) {
+            var $herlperline = $("#insert-contents-helper-line");
+            if (mode == "VALID") {
+              $herlperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--success">
+                                    입력 가능한 LM 학습데이터입니다.
+                                </p>`
+              )
+            } else if (mode == "DUPCHECK") {
+              $herlperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--warning ">
+                                    LM 학습데이터 중복 체크를 해주세요.
+                                </p>`
+              )
+            } else if (mode == "INVALID") {
+              $herlperline.html(
+                `<p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg mdc-theme--error ">
+                                    입력 형식에 맞지 않는 LM 학습데이터입니다. 한글(자음/모음 제외) 및 255자 내외만 입력 가능합니다.
+                                </p>`
+              )
+            } else {
+              $herlperline.html('');
+            }
+          },
+
+          // 상세 페이지 오픈
+          openDetailDialog: function (trainDataId) {
+            var self = this;
+            this.detail(trainDataId, () => self.detailDialog.open());
+          },
+          download: function(event, id, datasetName) {
+				//$("#datasetListLoadingBar").css('opacity', 1);
+				
+                event.stopPropagation();
+                $.ajax({
+                    method: "GET",
+                    url: this.baseUrl + "/trainData/api/amDataset/" +id+"/download",
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (data) {
+
+                        var a = document.createElement('a');
+                        var url = window.URL.createObjectURL(data);
+                        a.href = url;
+                        a.download = datasetName;
+                        document.body.append(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    }, error : function (){
+                        toastr.error("데이터셋 다운로드에 실패하였습니다.초기 대용량 데이터 여부 및 파일 저장경로를 확인해 주세요.");
+                    }, complete: function() {
+						//$("#datasetListLoadingBar").css('opacity', 0);
+					}
+                });
+            },
+          selectAllRows: function () {
+            var toggle = $("#toggleDelete").is(':checked');
+
+            $('.deleteChk:checkbox').each(function () {
+              $(this).prop('checked', toggle);
+            });
+          },
+          convertModelTypeLabel: function (key) {
+            var value = ""
+            this.modelTypes.forEach(model => {
+              if (model.key == key) {
+                value = model.value;
+              }
+            })
+            return value;
+          },
+          convertDataSourceLabel : function (key) {
+            var value = ""
+            this.dataSource.forEach(model => {
+              if (model.key == key) {
+                value = model.value;
+              }
+            })
+            return value;
+          },
+          convertServiceModelLabel: function (key) {
+            var value = ""
+            this.serviceModels.forEach(model => {
+              if (model.key == key) {
+                value = model.value;
+              }
+            })
+            return value;
+          },
+          initCheckBox: function () {
+            $("#toggleDelete").prop('checked', false);
+            $('.deleteChk:checkbox').each(function () {
+              $(this).prop('checked', false);
+            });
+          },
+          setInsertDialogLoading: function (option) {
+            if (option == true) {
+              $("#insert-dialog-loadingbar").show();
+              return;
+            }
+            $("#insert-dialog-loadingbar").hide();
+          },
+
+          /**
+           * 모달 닫을 때 데이터 요청/전송 취소
+           */
+          onCloseDialog: function () {
+            const self = this;
+            if (self.currentXhr.length !== 0) {
+              if (self.checkXhrAbort && !confirm('취소 시 저장 및 업로드가 중단됩니다.')) return;
+              [...self.currentXhr].forEach(xhrItem => xhrItem.xhr.abort())
+              self.dispatchProcessing('done');
+            }
+            if (self.currentDialog) {
+              self[self.currentDialog].close();
+              self.currentDialog = null;
+            }
+          },
+
+          /**
+           *
+           * @param state: 'process' || 'done'
+           * 디스패치 시 모달 본문에 유저 동작 방지 적용 및 닫기/취소를 제외한 버튼 비활성화
+           */
+          dispatchProcessing: function (state) {
+            let $modalSurface;
+            let $modalBtn;
+            if (state === 'process') {
+              // 닫기/취소를 제외한 버튼 선택
+              $modalBtn = $('.mdc-dialog--open .mdc-dialog__surface .mdc-button').not('.close-button');
+              // 현재 열려있는 모달 선택
+              $modalSurface = $('.mdc-dialog--open .mdc-dialog__surface');
+              $modalBtn.prop('disabled', true);
+              $modalSurface.addClass('is-processing');
+            } else if (state === 'done') {
+              // 진행 중인 모달 선택.
+              // 모달 닫는게 먼저 실행되면 .mdc-dialog--open으로 선택 불가
+              $modalBtn = $('.mdc-dialog__surface.is-processing .mdc-button').not('.close-button');
+              $modalSurface = $('.mdc-dialog__surface.is-processing');
+              $modalBtn.prop('disabled', false);
+              $modalSurface.removeClass('is-processing');
+            }
+          },
+        }
+      });
+    })();
+  </script>
+</th:block>
+
+
+</html>

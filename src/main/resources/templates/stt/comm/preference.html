@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+	<style>
+		.input-unit {
+			height: 100%;
+			display: flex;
+			align-items: center;
+			margin-right: 1em;
+			font-size: 1.1em;
+			color: #ccc;
+		}
+		
+		/* Chrome, Safari, Edge, Opera */
+		input::-webkit-outer-spin-button,
+		input::-webkit-inner-spin-button {
+		  -webkit-appearance: none;
+		  margin: 0;
+		}
+		
+		/* Firefox  */
+		input[type='number'] {
+		  -moz-appearance: textfield;
+		}
+	</style>
+	<div class="contentRoot">
+		<div class="content-header">
+			<h2>환경 설정</h2>
+		</div>
+        <!-- loading bar -->
+        <div id="preferenceLoadingBar" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 1;">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+        </div>
+		<div class="content-body custom-scrollbar card-row-stack">
+			<!-- >>> 스케줄러 설정 -->
+			<div id="schedulerConfig" class="card h-auto">
+				<div class="card-header">
+					<div class="form-row md-size">
+						<div class="flex-auto">
+							<h4 class="mb-0">스케줄러 설정</h4>
+						</div>
+						<button id="schedulerRollbackBtn"
+							class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg" disabled="" @click="rollbackSchedulerConfig">
+							<span class="mdc-button__ripple"></span> 
+							<i class="material-icons mdc-button__icon">undo</i>
+							<span class="mdc-button__label">되돌리기</span>
+						</button>
+						<button id="schedulerSaveBtn" @click="saveSchedulerConfig"
+							class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" disabled="">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">save</i>
+							<span class="mdc-button__label">저장</span>
+						</button>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="form-row-stack">
+						<div class="form-row item-column-stack">
+							<h4>스케줄러 사용 여부</h4>
+							<div class="item-column-stack half-gap">
+								<div class="mdc-form-field fs-6">
+									<div class="mdc-radio">
+										<input class="mdc-radio__native-control" type="radio" id="radio-scheduler-use"
+											   v-model="configValue.schedulerUseYn" name="schedulerUseYn" value="Y"
+											   @change="checkManageBtnActive">
+										<div class="mdc-radio__background">
+											<div class="mdc-radio__outer-circle"></div>
+											<div class="mdc-radio__inner-circle"></div>
+										</div>
+										<div class="mdc-radio__ripple"></div>
+										<div class="mdc-radio__focus-ring"></div>
+									</div>
+									<label for="radio-scheduler-use">사용</label>
+								</div>
+								<div class="mdc-form-field fs-6">
+									<div class="mdc-radio">
+										<input class="mdc-radio__native-control" type="radio" id="radio-scheduler-unuse"
+											   v-model="configValue.schedulerUseYn" name="schedulerUseYn" value="N"
+											   @change="checkManageBtnActive">
+										<div class="mdc-radio__background">
+											<div class="mdc-radio__outer-circle"></div>
+											<div class="mdc-radio__inner-circle"></div>
+										</div>
+										<div class="mdc-radio__ripple"></div>
+										<div class="mdc-radio__focus-ring"></div>
+									</div>
+									<label for="radio-scheduler-unuse">미사용</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-list">
+							<h4 class="mt-0 mb-3">스케줄러 동작 주기</h4>
+							<div class="form-row">
+								<div class="form-row gap-5">
+									<div id="hwResourceCycle" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+										<input type="number" class="mdc-text-field__input"
+											aria-describedby="text-field-outlined-shape-one-helper-text" required
+											value=""/>
+										<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+											<div class="mdc-notched-outline__leading"></div>
+											<div class="mdc-notched-outline__notch">
+												<label class="mdc-floating-label">HW 리소스 조회</label>
+											</div>
+											<div class="mdc-notched-outline__trailing"></div>
+										</div>
+										<div class="input-unit">초</div>
+									</div>
+									<div id="statisticsCycle"
+										class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+										<input type="number" class="mdc-text-field__input"
+											aria-describedby="text-field-outlined-shape-one-helper-text" required />
+										<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+											<div class="mdc-notched-outline__leading"></div>
+											<div class="mdc-notched-outline__notch">
+												<label class="mdc-floating-label">통계 (요청,오류)</label>
+											</div>
+											<div class="mdc-notched-outline__trailing"></div>
+										</div>
+										<div class="input-unit">분</div>
+									</div>
+									<div id="removerStandard"
+										class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+										<input type="number" class="mdc-text-field__input"
+											aria-describedby="text-field-outlined-shape-one-helper-text" required />
+										<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+											<div class="mdc-notched-outline__leading"></div>
+											<div class="mdc-notched-outline__notch">
+												<label class="mdc-floating-label">삭제 기준</label>
+											</div>
+											<div class="mdc-notched-outline__trailing"></div>
+										</div>
+										<div class="input-unit">일</div>
+									</div>
+									<div id="removerTime"
+										class="flex-auto mdc-select mdc-select--outlined mdc-select--no-label mdc-select--focused mdc-select--activated">
+										<div tabindex="0" aria-disabled="false" class="mdc-select__anchor">
+											<div
+												class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+												<span class="mdc-notched-outline__leading"></span>
+												<div class="mdc-notched-outline__notch">
+													<label class="mdc-floating-label mdc-floating-label--float-above" style="color: var(--mdc-theme-primary);">삭제 실행 시간*</label>
+												</div>
+												<span class="mdc-notched-outline__trailing"></span>
+											</div>
+											<span class="mdc-select__selected-text-container overflow-hidden">
+												<span class="mdc-select__selected-text"></span>
+											</span>
+											<span class="mdc-select__dropdown-icon"></span>
+										</div>
+										<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth mdc-menu-surface--is-open-below mdc-menu-surface--open"
+											style="height: 300px;">
+											<ul class="mdc-deprecated-list">
+												<li v-for="item in time" :data-value="item" tabindex="-1"
+													class="mdc-deprecated-list-item">
+													<span class="mdc-deprecated-list-item__ripple"></span> <span
+														class="mdc-deprecated-list-item__text ">{{ item }} 시</span>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-list">
+							<h4 class="mt-0 mb-1">데이터 삭제 대상</h4>
+								<div class="form-row multiline-align-top">
+									<div class="check-form-list">
+										<div v-for="item in datasToRemoveBaseList" class="mdc-form-field"
+											:key="item.description">
+											<div class="mdc-checkbox isChkbox">
+												<input type="checkbox"
+													:id="'checkbox-data-remove-' + item.description"
+													:value="item" v-model="configValue.removerDataList"
+													class="mdc-checkbox__native-control isChkbox" @change="checkManageBtnActive"/>
+												<div class="mdc-checkbox__background">
+													<svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+														<path class="mdc-checkbox__checkmark-path" fill="none"
+															d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+													</svg>
+													<div class="mdc-checkbox__mixedmark isChkbox"></div>
+												</div>
+												<div class="mdc-checkbox__ripple isChkbox"></div>
+											</div>
+											<label :for="'checkbox-data-remove-' + item.description"
+												class="isChkbox">{{ item.name }}</label>
+										</div>
+									</div>
+								</div>
+						</div>
+						<div class="form-list">
+							<h4 class="mt-0 mb-1">파일 삭제 대상</h4>
+							<div class="form-row multiline-align-top">
+								<div class="form-row-stack">
+									<div class="form-row">
+										<div class="check-form-list-container">
+											<div class="check-form-list">
+												<div v-for="item in filesToRemoveBaseList" class="mdc-form-field"
+													:key="item.description">
+													<div class="mdc-checkbox isChkbox">
+														<input type="checkbox"
+															:id="'checkbox-file-remove-' + item.description"
+															:value="item"
+															class="mdc-checkbox__native-control isChkbox" @change="checkManageBtnActive"
+															v-model="configValue.removerFileList" />
+														<div class="mdc-checkbox__background">
+															<svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+																<path class="mdc-checkbox__checkmark-path" fill="none"
+																	d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+															</svg>
+															<div class="mdc-checkbox__mixedmark isChkbox"></div>
+														</div>
+														<div class="mdc-checkbox__ripple isChkbox"></div>
+													</div>
+													<label :for="'checkbox-file-remove-' + item.description"
+														class="isChkbox">{{
+														item.name }}</label>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- <<< 스케줄러 설정 -->
+
+			<!-- >>> HW 리소스 임계치 설정 -->
+			<div id="hwResourceConfig" class="card h-auto">
+				<div class="card-header">
+					<div class="form-row md-size">
+						<div class="flex-auto">
+							<h4 class="mb-0">HW 리소스 임계치 설정</h4>
+						</div>
+						<button id="hwResourceRollbackBtn" disabled @click="rollbackHwResourceConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg">
+							<span class="mdc-button__ripple"></span> 
+							<i class="material-icons mdc-button__icon">undo</i>
+							<span class="mdc-button__label">되돌리기</span>
+						</button>
+						<button id="hwResourceSaveBtn" disabled @click="saveHwResourceConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+							<span class="mdc-button__ripple"></span> 
+							<i class="material-icons mdc-button__icon">save</i>
+							<span class="mdc-button__label">저장</span>
+						</button>
+					</div>
+				</div>
+				<div class="card-body clear-min-h mb-3">
+					<div class="form-row-stack">
+						<div class="form-row gap-5">
+							<div id="cpu" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="number" class="mdc-text-field__input"
+									aria-describedby="text-field-outlined-shape-one-helper-text" required />
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label">CPU 사용률</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+								<div class="input-unit">%</div>
+							</div>
+							<div id="memory" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="number" class="mdc-text-field__input"
+									aria-describedby="text-field-outlined-shape-one-helper-text" required />
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label">메모리 사용률</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+								<div class="input-unit">%</div>
+							</div>
+							<div id="storage" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+								<input type="number" class="mdc-text-field__input"
+									aria-describedby="text-field-outlined-shape-one-helper-text" required />
+								<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+									<div class="mdc-notched-outline__leading"></div>
+									<div class="mdc-notched-outline__notch">
+										<label class="mdc-floating-label">디스크 사용률</label>
+									</div>
+									<div class="mdc-notched-outline__trailing"></div>
+								</div>
+								<div class="input-unit">%</div>
+							</div>
+							<div class="flex-auto empty-box"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- >>> HW 리소스 임계치 설정 -->
+
+			<!-- <<< Agent 관련 설정 -->
+			<div id="agentConfig" class="card h-auto">
+				<div class="card-header">
+					<div class="form-row md-size">
+						<div class="flex-auto">
+							<h4 class="mb-0">Agent 관련 설정</h4>
+						</div>
+						<button id="agentConfigRollbackBtn" disabled="" @click="rollbackAgentConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">undo</i>
+							<span class="mdc-button__label">되돌리기</span>
+						</button> 
+						<button id="agentConfigSaveBtn" disabled="" @click="saveAgentConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">save</i>
+							<span class="mdc-button__label">저장</span>
+						</button>
+					</div>
+				</div>
+				<div class="card-body" style="padding: 16px 30px !important;">
+					<div class="form-row item-column-stack">
+						<h4>세션 조회 대상 서버 설정</h4>
+						<div class="item-column-stack half-gap">
+							<div class="mdc-form-field fs-6">
+								<div class="mdc-radio">
+									<input class="mdc-radio__native-control" type="radio" id="radio-session-target-host"
+										   @change="checkManageBtnActive"
+										   v-model="configValue.sessionTarget" name="sessionTargetServer" value="host">
+									<div class="mdc-radio__background">
+										<div class="mdc-radio__outer-circle"></div>
+										<div class="mdc-radio__inner-circle"></div>
+									</div>
+									<div class="mdc-radio__ripple"></div>
+									<div class="mdc-radio__focus-ring"></div>
+								</div>
+								<label for="radio-session-target-host">Default</label>
+							</div>
+							<div class="mdc-form-field fs-6">
+								<div class="mdc-radio">
+									<input class="mdc-radio__native-control" type="radio" id="radio-session-target-sub"
+										   @change="checkManageBtnActive"
+										   v-model="configValue.sessionTarget" name="sessionTargetServer" value="sub">
+									<div class="mdc-radio__background">
+										<div class="mdc-radio__outer-circle"></div>
+										<div class="mdc-radio__inner-circle"></div>
+									</div>
+									<div class="mdc-radio__ripple"></div>
+									<div class="mdc-radio__focus-ring"></div>
+								</div>
+								<label for="radio-session-target-sub">Deploy</label>
+							</div>
+						</div>
+					</div>
+					<h5 class="form-sub-title mt-4">Multipart 설정</h5>
+					<div>
+						<div class="form-row">
+							<div class="flex-auto item-column-stack align-items-center">
+								<h4>배포 Host (default)</h4>
+								<div class="item-column-stack half-gap">
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-deploy-host-n" @change="checkManageBtnActive"
+												   v-model="configValue.multipartHostDeploy" name="multipartHostDeploy"
+												   value="N">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="mdc-radio__focus-ring"></div>
+										</div>
+										<label for="radio-multipart-deploy-host-n">경로지정</label>
+									</div>
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-deploy-host-y" @change="checkManageBtnActive"
+												   v-model="configValue.multipartHostDeploy" name="multipartHostDeploy"
+												   value="Y">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="mdc-radio__focus-ring"></div>
+										</div>
+										<label for="radio-multipart-deploy-host-y">Multipart</label>
+									</div>
+								</div>
+							</div>
+							<div class="flex-auto item-column-stack align-items-center">
+								<h4>배포 Host (Deploy)</h4>
+								<div class="item-column-stack half-gap">
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-deploy-sub-n" @change="checkManageBtnActive"
+												   v-model="configValue.multipartSubDeploy" name="multipartSubDeploy"
+												   value="N">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="radio-multipart-deploy-sub"></div>
+										</div>
+										<label for="radio-multipart-deploy-sub-n">경로지정</label>
+									</div>
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-deploy-sub-y" @change="checkManageBtnActive"
+												   v-model="configValue.multipartSubDeploy" name="multipartSubDeploy"
+												   value="Y">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="mdc-radio__focus-ring"></div>
+										</div>
+										<label for="radio-multipart-deploy-sub-y">Multipart</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="flex-auto item-column-stack align-items-center">
+								<h4>테스트 Host (default)</h4>
+								<div class="item-column-stack half-gap">
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-test-host-n" @change="checkManageBtnActive"
+												   v-model="configValue.multipartHostTest" name="multipartHostTest"
+												   value="N">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="mdc-radio__focus-ring"></div>
+										</div>
+										<label for="radio-multipart-test-host-n">경로지정</label></div>
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-test-host-y" @change="checkManageBtnActive"
+												   v-model="configValue.multipartHostTest" name="multipartHostTest"
+												   value="Y">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="mdc-radio__focus-ring"></div>
+										</div>
+										<label for="radio-multipart-test-host-y">Multipart</label></div>
+								</div>
+							</div>
+							<div class="flex-auto item-column-stack align-items-center">
+								<h4>테스트 Host (Deploy)</h4>
+								<div class="item-column-stack half-gap">
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-test-sub-n"
+												   v-model="configValue.multipartSubTest" name="multipartSubTest"
+												   value="N">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="mdc-radio__focus-ring"></div>
+										</div>
+										<label for="radio-multipart-test-sub-n">경로지정</label>
+									</div>
+									<div class="mdc-form-field fs-6">
+										<div class="mdc-radio">
+											<input class="mdc-radio__native-control" type="radio"
+												   id="radio-multipart-test-sub-y"
+												   v-model="configValue.multipartSubTest" name="multipartSubTest"
+												   value="Y">
+											<div class="mdc-radio__background">
+												<div class="mdc-radio__outer-circle"></div>
+												<div class="mdc-radio__inner-circle"></div>
+											</div>
+											<div class="mdc-radio__ripple"></div>
+											<div class="mdc-radio__focus-ring"></div>
+										</div>
+										<label for="radio-multipart-test-sub-y">Multipart</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- <<< Agent 관련 설정 -->
+
+			<!-- <<< 신뢰도 값 관련 설정 -->
+			<div id="confidenceConfig" class="card h-auto">
+				<div class="card-header">
+					<div class="form-row md-size">
+						<div class="flex-auto">
+							<h4 class="mb-0">신뢰도 설정</h4>
+						</div>
+					</div>
+				</div>
+				<!-- loading bar -->
+				<div id="confidence-loadingbar" role="progressbar"
+					class="mdc-linear-progress mdc-linear-progress--indeterminate" hidden>
+					<div class="mdc-linear-progress__buffering-dots"></div>
+					<div class="mdc-linear-progress__buffer"></div>
+					<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+						<span class="mdc-linear-progress__bar-inner"></span>
+					</div>
+					<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+						<span class="mdc-linear-progress__bar-inner"></span>
+					</div>
+				</div>
+				<div v-if="serviceModelList.length == 0" style="padding: 30px; display:flex; align-items: center; flex-direction:column;">
+					<p>등록된 서비스 모델이 없습니다.</p>
+				</div>
+				<div v-else class="card-body clear-min-h mb-3" v-for="(serviceModel, index) in serviceModelList" >
+					<div class="mdc-form-field">
+						<div class="form-row-stack" style="width: 100%;">
+							<div class="form-row gap-5">
+								<div class="flex-auto">
+		                            <div class="mdc-text-field text-field mdc-text-field--outlined lg-size">
+		                                <input type="text" class="mdc-text-field__input"
+		                                       aria-describedby="text-field-outlined-shape-one-helper-text"
+		                                       :id="'confidence-serviceModel-' + serviceModel.serviceCode" readonly :value="serviceModel.serviceModelName"
+		                                />
+		                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+		                                    <div class="mdc-notched-outline__leading"></div>
+		                                    <div class="mdc-notched-outline__notch">
+		                                        <label class="mdc-floating-label">서비스 모델</label>
+		                                    </div>
+		                                    <div class="mdc-notched-outline__trailing"></div>
+		                                </div>
+		                            </div>
+		                            <div class="mdc-text-field-helper-line" id="insert-confidence-helper-line">
+		                            </div>
+		                        </div>
+					            <!--신뢰도값-->
+		                        <div class="flex-auto">
+		                            <div class="mdc-text-field text-field mdc-text-field--outlined lg-size">
+		                                <input type="text" class="mdc-text-field__input"
+		                                       aria-describedby="text-field-outlined-shape-one-helper-text"
+		                                       :id="'insert-confidence-input-' + serviceModel.serviceCode"
+		                                />
+		                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+		                                    <div class="mdc-notched-outline__leading"></div>
+		                                    <div class="mdc-notched-outline__notch">
+		                                        <label class="mdc-floating-label mdc-floating-label--required">신뢰도 값</label>
+		                                    </div>
+		                                    <div class="mdc-notched-outline__trailing"></div>
+		                                </div>
+		                            </div>
+		                            <div class="mdc-text-field-helper-line" id="insert-confidence-helper-line">
+		                            </div>
+		                        </div>
+			                    <!--파일 암호화 유무-->
+			                    <div class="flex-auto item-column-stack half-gap align-items-center">
+			                        <h4>암호화 유무</h4>
+			                        <div class="item-column-stack half-gap">
+										<div class="mdc-form-field fs-6">
+											<div class="mdc-radio mdc-ripple-upgraded mdc-ripple-upgraded--unbounded"
+												 style="--mdc-ripple-fg-size: 0px; --mdc-ripple-fg-scale: NaN; --mdc-ripple-left: 0px; --mdc-ripple-top: 0px;">
+												<input class="mdc-radio__native-control" type="radio"
+													   :id="'insert-encrypt-y-' + serviceModel.serviceCode" :name="'encrypt_yn-' + serviceModel.serviceCode" value="Y" checked>
+												<div class="mdc-radio__background">
+													<div class="mdc-radio__outer-circle"></div>
+													<div class="mdc-radio__inner-circle"></div>
+												</div>
+												<div class="mdc-radio__ripple"></div>
+												<div class="mdc-radio__focus-ring"></div>
+											</div>
+											<label for="'insert-encrypt-y' + serviceModel.serviceCode">예</label>
+										</div>
+										<div class="mdc-form-field fs-6">
+											<div class="mdc-radio mdc-ripple-upgraded mdc-ripple-upgraded--unbounded"
+												 style="--mdc-ripple-fg-size: 0px; --mdc-ripple-fg-scale: NaN; --mdc-ripple-left: 0px; --mdc-ripple-top: 0px;">
+												<input class="mdc-radio__native-control" type="radio"
+													   :id="'insert-encrypt-n-' + serviceModel.serviceCode":name="'encrypt_yn-' + serviceModel.serviceCode" value="N">
+												<div class="mdc-radio__background">
+													<div class="mdc-radio__outer-circle"></div>
+													<div class="mdc-radio__inner-circle"></div>
+												</div>
+												<div class="mdc-radio__ripple"></div>
+												<div class="mdc-radio__focus-ring"></div>
+											</div>
+											<label for="'insert-encrypt-n' + serviceModel.serviceCode">아니오</label>
+										</div>
+			                        </div>
+		                        </div>
+			                    <!--현재 파일 저장 개수-->
+		                        <div class="flex-auto">
+		                            <div class="mdc-text-field text-field mdc-text-field--outlined lg-size">
+		                                <input type="text" class="mdc-text-field__input"
+		                                       aria-describedby="text-field-outlined-shape-one-helper-text"
+		                                       :id="'insert-fileSaveCount-input-' + serviceModel.serviceCode"
+		                                       readonly
+		                                />
+		                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+		                                    <div class="mdc-notched-outline__leading"></div>
+		                                    <div class="mdc-notched-outline__notch">
+		                                        <label class="mdc-floating-label mdc-floating-label--required">파일 현재 저장 개수</label>
+		                                    </div>
+		                                    <div class="mdc-notched-outline__trailing"></div>
+		                                </div>
+		                            </div>
+		                            <div class="mdc-text-field-helper-line" id="insert-fileSaveCount-helper-line">
+		                            </div>
+		                        </div>
+			                     <!-- 파일 최대 저장 개수 -->
+		                        <div class="flex-auto">
+		                            <div class="mdc-text-field text-field mdc-text-field--outlined lg-size">
+		                                <input type="text" class="mdc-text-field__input"
+		                                       aria-describedby="text-field-outlined-shape-one-helper-text"
+		                                       :id="'insert-fileStartCount-input-' + serviceModel.serviceCode"
+		                                />
+		                                <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+		                                    <div class="mdc-notched-outline__leading"></div>
+		                                    <div class="mdc-notched-outline__notch">
+		                                        <label class="mdc-floating-label mdc-floating-label--required">파일 최대 저장 개수</label>
+		                                    </div>
+		                                    <div class="mdc-notched-outline__trailing"></div>
+		                                </div>
+		                            </div>
+		                            <div class="mdc-text-field-helper-line" id="insert-fileStartCount-helper-line">
+		                            </div>
+		                        </div>
+							</div>
+							<div class="form-row md-size">
+								<div class="flex-auto">
+								</div>
+								<button :id="'start-btn-' + serviceModel.serviceCode" :value="serviceModel.serviceCode" disabled=""  class="start-btn mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+									<span class="mdc-button__ripple"></span>
+									<i class="material-icons mdc-button__icon">play_arrow</i>
+									<span class="mdc-button__label">시작</span>
+								</button> 
+								<button :id="'stop-btn-' + serviceModel.serviceCode" :value="serviceModel.serviceCode" disabled="" class="stop-btn mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg">
+									<span class="mdc-button__ripple"></span>
+									<i class="material-icons mdc-button__icon">pause</i>
+									<span class="mdc-button__label">중지</span>
+								</button>
+								<button :id="'insert-btn-' + serviceModel.serviceCode" :value="serviceModel.serviceCode" disabled="" class="insert-btn mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+									<span class="mdc-button__ripple"></span>
+									<i class="material-icons mdc-button__icon">save</i>
+									<span class="mdc-button__label">변경</span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- <<< 신뢰도 값 관련 설정 -->
+			<!-- >>> 암호화 설정 -->
+			<div id="encryptConfig" class="card h-auto">
+				<div class="card-header">
+					<div class="form-row md-size">
+						<div class="flex-auto">
+							<h4 class="mb-0">암호화 설정</h4>
+						</div>
+						<button id="encryptConfigRollbackBtn" disabled="" @click="rollbackEncryptConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">undo</i>
+							<span class="mdc-button__label">되돌리기</span>
+						</button> 
+						<button id="encryptConfigSaveBtn" disabled="" @click="saveEncryptConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">save</i>
+							<span class="mdc-button__label">저장</span>
+						</button>
+					</div>
+				</div>
+				<div class="card-body clear-min-h mb-3">
+					<div class="form-row">
+						<div class="flex-auto item-column-stack align-items-center">
+							<h4 class="position-relative">텍스트 데이터 암호화
+								<small>(STT결과,전사,검증)</small>
+							</h4>
+							<div class="item-column-stack half-gap">
+								<div class="mdc-form-field fs-6">
+									<div class="mdc-radio">
+										<input class="mdc-radio__native-control" type="radio" id="radio-text-encrypt-Y"
+											   @change="checkManageBtnActive"
+											   v-model="configValue.textEncrypt" name="checkTextEncrypt" value="Y">
+										<div class="mdc-radio__background">
+											<div class="mdc-radio__outer-circle"></div>
+											<div class="mdc-radio__inner-circle"></div>
+										</div>
+										<div class="mdc-radio__ripple"></div>
+										<div class="mdc-radio__focus-ring"></div>
+									</div>
+									<label for="radio-text-encrypt-Y">암호화</label>
+								</div>
+								<div class="mdc-form-field fs-6">
+									<div class="mdc-radio">
+										<input class="mdc-radio__native-control" type="radio" id="radio-text-encrypt-N"
+											   @change="checkManageBtnActive"
+											   v-model="configValue.textEncrypt" name="checkTextEncrypt" value="N">
+										<div class="mdc-radio__background">
+											<div class="mdc-radio__outer-circle"></div>
+											<div class="mdc-radio__inner-circle"></div>
+										</div>
+										<div class="mdc-radio__ripple"></div>
+										<div class="mdc-radio__focus-ring"></div>
+									</div>
+									<label for="radio-text-encrypt-N">안 함</label>
+								</div>
+							</div>
+						</div>
+						<div class="flex-auto item-column-stack align-items-center">
+							<h4>wav 암호화</h4>
+							<div class="item-column-stack half-gap">
+								<div class="mdc-form-field fs-6">
+									<div class="mdc-radio">
+										<input class="mdc-radio__native-control" type="radio"
+											   id="radio-wav-encrypt-Y"
+											   @change="checkManageBtnActive"
+											   v-model="configValue.wavEncrypt" name="checkWavEncrypt" value="Y">
+										<div class="mdc-radio__background">
+											<div class="mdc-radio__outer-circle"></div>
+											<div class="mdc-radio__inner-circle"></div>
+										</div>
+										<div class="mdc-radio__ripple"></div>
+										<div class="mdc-radio__focus-ring"></div>
+									</div>
+									<label for="radio-wav-encrypt-Y">암호화</label>
+								</div>
+								<div class="mdc-form-field fs-6">
+									<div class="mdc-radio">
+										<input class="mdc-radio__native-control" type="radio"
+											   id="radio-wav-encrypt-N"
+											   @change="checkManageBtnActive"
+											   v-model="configValue.wavEncrypt" name="checkWavEncrypt" value="N">
+										<div class="mdc-radio__background">
+											<div class="mdc-radio__outer-circle"></div>
+											<div class="mdc-radio__inner-circle"></div>
+										</div>
+										<div class="mdc-radio__ripple"></div>
+										<div class="mdc-radio__focus-ring"></div>
+									</div>
+									<label for="radio-wav-encrypt-N">안 함</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- <<< 암호화 설정 -->
+			<!-- >>> 기타 설정 -->
+			<div id="etcConfig" class="card h-auto">
+				<div class="card-header">
+					<div class="form-row md-size">
+						<div class="flex-auto">
+							<h4 class="mb-0">기타 설정</h4>
+						</div>
+						<button id="etcConfigRollbackBtn" disabled="" @click="rollbackEtcConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-default mdc-theme--default-bg">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">undo</i>
+							<span class="mdc-button__label">되돌리기</span>
+						</button> 
+						<button id="etcConfigSaveBtn" disabled="" @click="saveEtcConfig" class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+							<span class="mdc-button__ripple"></span>
+							<i class="material-icons mdc-button__icon">save</i>
+							<span class="mdc-button__label">저장</span>
+						</button>
+					</div>
+				</div>
+				<div class="card-body clear-min-h mb-3">
+					<div class="form-row w-50 gap-5">
+						<div id="defaultRecordCount"
+							class="flex-auto mdc-select mdc-select--outlined mdc-select--no-label mdc-select--focused mdc-select--activated">
+							<div tabindex="0" aria-disabled="false" class="mdc-select__anchor">
+								<div
+									class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+									<span class="mdc-notched-outline__leading"></span>
+									<div class="mdc-notched-outline__notch"><label
+											class="mdc-floating-label mdc-floating-label--float-above"
+											style="color: var(--mdc-theme-primary);">리스트 default 레코드 수</label></div> <span
+										class="mdc-notched-outline__trailing"></span>
+								</div>
+								<span class="mdc-select__selected-text-container overflow-hidden">
+									<span class="mdc-select__selected-text"></span>
+								</span>
+								<span class="mdc-select__dropdown-icon"></span>
+							</div>
+							<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth mdc-menu-surface--is-open-below mdc-menu-surface--open">
+								<ul class="mdc-deprecated-list">
+									<li :data-value="10" tabindex="-1" class="mdc-deprecated-list-item">
+										<span class="mdc-deprecated-list-item__ripple"></span>
+										<span class="mdc-deprecated-list-item__text">10 개</span>
+									</li>
+									<li :data-value="20" tabindex="-1" class="mdc-deprecated-list-item">
+										<span class="mdc-deprecated-list-item__ripple"></span>
+										<span class="mdc-deprecated-list-item__text">20 개</span>
+									</li>
+									<li :data-value="30" tabindex="-1" class="mdc-deprecated-list-item">
+										<span class="mdc-deprecated-list-item__ripple"></span>
+										<span class="mdc-deprecated-list-item__text">30 개</span>
+									</li>
+									<li :data-value="40" tabindex="-1" class="mdc-deprecated-list-item">
+										<span class="mdc-deprecated-list-item__ripple"></span>
+										<span class="mdc-deprecated-list-item__text">40 개</span>
+									</li>
+									<li :data-value="50" tabindex="-1" class="mdc-deprecated-list-item">
+										<span class="mdc-deprecated-list-item__ripple"></span>
+										<span class="mdc-deprecated-list-item__text">50 개</span>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div id="confidenceChartThreshold" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+							<input type="number" step="0.01" min="0" max="1" class="mdc-text-field__input"
+								aria-describedby="text-field-outlined-shape-one-helper-text" required/>
+							<div class="mdc-notched-outline mdc-notched-outline--upgraded">
+								<div class="mdc-notched-outline__leading"></div>
+								<div class="mdc-notched-outline__notch">
+									<label class="mdc-floating-label">신뢰도 차트 임계값</label>
+								</div>
+								<div class="mdc-notched-outline__trailing"></div>
+							</div>
+							<div class="input-unit"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- <<< 기타 설정 -->
+		</div>
+	</div>
+
+	<input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+	<input type="hidden" readonly id="removeListAll" th:value="${removeListAll}">
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript">
+			var schedulerConfig = new Vue({
+				el: "#schedulerConfig",
+				data: {
+					baseUrl: $("#smpServiceUriPrefix").val() + "/api/preference",
+					configValue: {},
+					initialValue: {},
+					time: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+					removerDataDescriptionList: [],
+					removerFileDescriptionList: [],
+					datasToRemoveBaseList: JSON.parse($("#removeListAll").val()).datasToRemoveList,
+					filesToRemoveBaseList: JSON.parse($("#removeListAll").val()).filesToRemoveList,
+				},
+				created: function () {
+				},
+				mounted: function () {
+					// 페이지 이동시 처리 
+					$('#drawer-main-content-viewer').one('page.move', function () {
+						console.log("page move out");
+					});
+
+					const self = this;
+
+					this.initMaterialUx();
+					this.getPreferenceValueAll();
+					$("#preferenceLoadingBar").css('opacity', 0);
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							$(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0));
+						}
+
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const el of textFields) {
+							$(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+						}
+
+						// select material ux 적용
+						const selectEl = document.querySelector('#removerTime');
+						var $select = mdc.select.MDCSelect.attachTo(selectEl);
+						var $el = $(selectEl);
+						var value = $el.attr('data-value');
+						// 초기값 설정
+						_.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+						$el.data('select', $select);
+					},
+					doRefresh: function () {
+						const self = this;
+
+						const $schedulerRollbackBtn = $('#schedulerRollbackBtn');
+						const $schedulerSaveBtn = $('#schedulerSaveBtn');
+						const $hwResourceCycle = $("#hwResourceCycle");
+						const $removerStandard = $("#removerStandard");
+						const $removerTime = $("#removerTime");
+						const $statisticsCycle = $("#statisticsCycle");
+
+						$schedulerSaveBtn.prop('disabled', true);
+						$schedulerRollbackBtn.prop('disabled', true);
+
+						$hwResourceCycle.data('textField').value = this.configValue.hwResourceCycle;
+						$removerStandard.data('textField').value = this.configValue.removerStandard;
+						$statisticsCycle.data('textField').value = this.configValue.statisticsCycle;
+
+						$removerTime.data('select').value = this.configValue.removerTime;
+						$removerTime.data('select').unlisten("MDCSelect:change");
+						
+						$removerTime.data('select').listen('MDCSelect:change', function (e) {
+							self.configValue.removerTime = $("#removerTime").data('select').value;
+							self.checkManageBtnActive();
+						});
+
+						$('.mdc-text-field').removeClass('mdc-text-field--invalid');
+						
+						$hwResourceCycle.unbind('keyup').bind('keyup', function () {
+							self.configValue.hwResourceCycle = $hwResourceCycle.data('textField').value;
+							self.checkManageBtnActive();
+						});
+						
+						$removerStandard.unbind('keyup').bind('keyup', function () {
+							self.configValue.removerStandard = $removerStandard.data('textField').value;
+							self.checkManageBtnActive();
+						});
+						
+						$statisticsCycle.unbind('keyup').bind('keyup', function () {
+							self.configValue.statisticsCycle = $statisticsCycle.data('textField').value;
+							self.checkManageBtnActive();
+						});
+					},
+					/**
+					 * 저장 및 되돌리기 버튼 활성화 여부 처리
+					 */
+					checkManageBtnActive: function () {
+						
+						// 초기 데이터와 현재 데이터 정렬해서 비교
+						this.initialValue.removerFileList.sort((a, b)=>{
+							return a.name.localeCompare(b.name);	
+						});
+						
+						this.configValue.removerFileList.sort((a, b)=>{
+							return a.name.localeCompare(b.name);	
+						});
+						
+						this.initialValue.removerDataList.sort((a, b)=>{
+							return a.name.localeCompare(b.name);	
+						});
+						
+						this.configValue.removerDataList.sort((a, b)=>{
+							return a.name.localeCompare(b.name);
+						});
+						
+						const $schedulerRollbackBtn = $('#schedulerRollbackBtn');
+						const $schedulerSaveBtn = $('#schedulerSaveBtn');
+
+						if (_.isEqual(this.configValue, this.initialValue)) {
+							this.setModifyButtonDisabled(true);
+							return;
+						} 
+							this.setModifyButtonDisabled(false);
+					},
+					setModifyButtonDisabled: function(option) {
+						const $schedulerRollbackBtn = $('#schedulerRollbackBtn');
+						const $schedulerSaveBtn = $('#schedulerSaveBtn');
+							
+						if (option) {
+							$schedulerSaveBtn.prop('disabled', true);
+							$schedulerRollbackBtn.prop('disabled', true);
+						} else {
+							$schedulerSaveBtn.prop('disabled', false);
+							$schedulerRollbackBtn.prop('disabled', false);
+						}
+					},
+					getPreferenceValueAll: async function () {
+						const self = this;
+						$("#preferenceLoadingBar").css('opacity', 1);
+						$.ajax({
+							url: this.baseUrl,
+							method: "GET",
+							dataType: "json"
+						})
+						.done(function (response) {
+							if (response.resultCode === "0000") {
+								self.renderConfigDatas(response.result);
+							}
+							// TODO: 예외처리
+						})
+						.fail(function (error) {
+							// TODO: 예외처리
+						})
+						.always(function() {
+						});
+					},
+					renderConfigDatas: function (configDatas) {
+						this.renderSchedulerData(configDatas.schedulerConfig);
+						etcConfig.renderEtcData(configDatas.etcConfig);
+						agentConfig.renderAgentData(configDatas.agentConfig);
+						hwResourceConfig.renderThresholdData(configDatas.thresholdConfig);
+						encryptConfig.renderEncryptData(configDatas.encryptConfig);
+					},
+					renderSchedulerData: function (data) {
+						data.removerFileList.sort();
+						data.removerDataList.sort();
+						this.configValue = {...data};
+						this.initialValue = {...data};
+						this.removerFileDescriptionList = data.removerFileList.map((item) => {
+							return item.description;
+						});
+
+						this.removerDataDescriptionList = data.removerDataList.map((item) => {
+							return item.description;
+						});
+
+						this.doRefresh();
+					},
+					rollbackSchedulerConfig: function() {
+						if(!confirm("변경된 정보를 되돌리시겠습니까?")){
+							return;
+						}
+						this.configValue = {...this.initialValue};
+						this.doRefresh();
+						this.setModifyButtonDisabled(true);
+					},
+					saveSchedulerConfig: function() {
+						if (!this.validateBodyData()) {
+							return;
+						}
+						
+						if(!confirm("저장하시겠습니까?")){
+							return;
+						}
+						
+						const self = this;
+						
+						$.ajax({
+							url: this.baseUrl + "/scheduler",
+							method: "POST",
+							dataType: "json",
+							contentType: "application/json",
+							data: JSON.stringify(this.makeRequestObj())
+						})
+						.done(function (response) {
+							if (response.resultCode === "0000") {
+								toastr.success("저장이 완료되었습니다");
+								self.initialValue = {...self.configValue};
+								self.checkManageBtnActive();
+								return;
+							}
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						})
+						.fail(function (error) {
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						});
+					},
+					makeRequestObj: function() {
+						const removerFileDescriptionList = this.configValue.removerFileList.map((item)=>{
+							return item.description;
+						});
+						const removerDataDescriptionList = this.configValue.removerDataList.map((item)=>{
+							return item.description;
+						})
+						
+						const body = {...this.configValue};
+						body.removerFileList = removerFileDescriptionList;
+						body.removerDataList = removerDataDescriptionList;
+						
+						return body;
+					},
+					validateBodyData: function() {
+						const hwResourceCycle = this.configValue.hwResourceCycle;
+						const removerStandard = this.configValue.removerStandard;
+						const statisticsCycle = this.configValue.statisticsCycle;
+						
+						const regex = new RegExp(/^[0-9]+$/);
+						
+						const checkInput = (value) => {
+      							return regex.test(value);
+    					};
+						
+						if(!checkInput(hwResourceCycle) || !checkInput(removerStandard) || !checkInput(statisticsCycle)){
+							toastr.error("스케줄러 동작 주기는 0 이상의 정수만 입력하실 수 있습니다.");
+							return false;
+						}
+												
+						return true;
+					}
+				}
+			});
+
+			var hwResourceConfig = new Vue({
+				el: "#hwResourceConfig",
+				data: {
+					baseUrl: $("#smpServiceUriPrefix").val() + "/api/preference",
+					configValue: {
+						cpu: "",
+						memory: "",
+						storage: ""
+					},
+					initialValue: {
+						cpu: "",
+						memory: "",
+						storage: ""
+					}
+				},
+				created: function () {
+				},
+				mounted: function () {
+					this.initMaterialUx();
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							$(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0));
+						}
+
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const el of textFields) {
+							$(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+						}
+					},
+					renderThresholdData: function (data) {
+						const stringData = this.convertObjectNumberToString(data);
+						this.configValue = stringData;
+						this.initialValue = {...stringData};
+						this.doRefresh();
+					},
+					doRefresh: function () {
+						const self = this;
+						
+						const $cpu = $("#cpu");
+						const $memory = $("#memory");
+						const $storage = $("#storage");
+
+						$cpu.data('textField').value = this.configValue.cpu;
+						$memory.data('textField').value = this.configValue.memory;
+						$storage.data('textField').value = this.configValue.storage;
+
+						$cpu.unbind('keyup').bind('keyup', function () {
+							self.configValue.cpu = $cpu.data('textField').value;
+							self.checkManageBtnActive();
+						});
+						
+						$memory.unbind('keyup').bind('keyup', function () {
+							self.configValue.memory = $memory.data('textField').value;
+							self.checkManageBtnActive();
+						});
+						
+						$storage.unbind('keyup').bind('keyup', function () {
+							self.configValue.storage = $storage.data('textField').value;
+							self.checkManageBtnActive();
+						});
+						$('.mdc-text-field').removeClass('mdc-text-field--invalid');
+					},
+					checkManageBtnActive: function() {
+						if (_.isEqual(this.configValue, this.initialValue)) {
+							this.setModifyButtonDisabled(true);
+							return;
+						}
+						this.setModifyButtonDisabled(false);
+					},
+					setModifyButtonDisabled: function(option) {
+						const $hwResourceRollbackBtn = $('#hwResourceRollbackBtn');
+						const $hwResourceSaveBtn = $('#hwResourceSaveBtn');
+							
+						if (option) {
+							$hwResourceSaveBtn.prop('disabled', true);
+							$hwResourceRollbackBtn.prop('disabled', true);
+						} else {
+							$hwResourceSaveBtn.prop('disabled', false);
+							$hwResourceRollbackBtn.prop('disabled', false);
+						}
+					},
+					convertObjectNumberToString: function(obj) {
+						for (let key in obj) {
+							obj[key] = obj[key].toString();
+						}
+						return obj;
+					},
+					rollbackHwResourceConfig: function() {
+						if(!confirm("변경된 정보를 되돌리시겠습니까?")){
+							return;
+						}
+						this.configValue = {...this.initialValue};
+						this.doRefresh();
+						this.setModifyButtonDisabled(true);
+					},
+					saveHwResourceConfig: function() {
+						const self = this;
+						
+						if(!this.validateBodyData()){
+							return;
+						}
+						
+						if(!confirm("저장하시겠습니까?")){
+							return;
+						}
+						$.ajax({
+							url: this.baseUrl + "/threshold",
+							method: "POST",
+							dataType: "json",
+							contentType: "application/json",
+							data: JSON.stringify(this.configValue)
+						})
+						.done(function (response) {
+							if (response.resultCode === "0000") {
+								toastr.success("저장이 완료되었습니다");
+								self.initialValue = {...self.configValue};
+								self.checkManageBtnActive();
+								return;
+							}
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						})
+						.fail(function (error) {
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						});
+					},
+					validateBodyData: function() {
+						const cpu = this.configValue.cpu;
+						const memory = this.configValue.memory;
+						const storage = this.configValue.storage;
+						
+						const regex = new RegExp(/^(100|[1-9]\d{0,1}|0)$/);
+						
+						const checkInput = (value) => {
+      							return regex.test(value);
+    					};
+						
+						if(!checkInput(cpu) || !checkInput(memory) || !checkInput(storage)){
+							toastr.error("임계치는 0부터 100까지의 정수만 입력이 가능합니다.");
+							return false;
+						}
+												
+						return true;
+					}
+				}
+			});
+
+			var agentConfig = new Vue({
+				el: "#agentConfig",
+				data: {
+					baseUrl: $("#smpServiceUriPrefix").val() + "/api/preference",
+					configValue: {
+						multipartHostTest: "",
+						multipartSubTest: "",
+						multipartHostDeploy: "",
+						multipartSubDeploy: "",
+						sessionTarget: ""
+					},
+					initialValue: {
+						multipartHostTest: "",
+						multipartSubTest: "",
+						multipartHostDeploy: "",
+						multipartSubDeploy: "",
+						sessionTarget: ""
+					},
+				},
+				created: function () {
+				},
+				methods: {
+					renderAgentData: function (data) {
+						this.configValue = data;
+						this.initialValue = {...data};
+					},
+					checkManageBtnActive: function() {
+						if(_.isEqual(this.configValue, this.initialValue)) {
+							this.setModifyButtonDisabled(true);
+							return;
+						}
+						this.setModifyButtonDisabled(false);
+					},
+					rollbackAgentConfig: function() {
+						if(!confirm("변경된 정보를 되돌리시겠습니까?")){
+							return;
+						}
+						this.configValue = {...this.initialValue};
+						this.setModifyButtonDisabled(true);
+					},
+					setModifyButtonDisabled: function(option) {
+						const $agentConfigRollbackBtn = $('#agentConfigRollbackBtn');
+						const $agentConfigSaveBtn = $('#agentConfigSaveBtn');
+							
+						if (option) {
+							$agentConfigSaveBtn.prop('disabled', true);
+							$agentConfigRollbackBtn.prop('disabled', true);
+						} else {
+							$agentConfigSaveBtn.prop('disabled', false);
+							$agentConfigRollbackBtn.prop('disabled', false);
+						}
+					},
+					saveAgentConfig: function() {
+						const self = this;
+						if(!confirm("저장하시겠습니까?")){
+							return;
+						}
+						$.ajax({
+							url: this.baseUrl + "/agent",
+							method: "POST",
+							dataType: "json",
+							contentType: "application/json",
+							data: JSON.stringify(this.configValue)
+						})
+						.done(function (response) {
+							if (response.resultCode === "0000") {
+								toastr.success("저장이 완료되었습니다");
+								self.initialValue = {...self.configValue};
+								self.checkManageBtnActive();
+								return;
+							}
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						})
+						.fail(function (error) {
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						});
+					}
+				}
+			});
+
+			var etcConfig = new Vue({
+				el: "#etcConfig",
+				data: {
+					baseUrl: $("#smpServiceUriPrefix").val() + "/api/preference",
+					recordList: ["5", "10", "50", "100"],
+					configValue : {
+						recordCount: "",
+						confidenceChartThreshold: "",
+					},
+					initialValue: {
+						recordCount: "",
+						confidenceChartThreshold: "",
+					},
+					reRender: true
+				},
+				created: function () {
+				},
+				mounted: function() {
+					this.initMaterialUx();
+					this.reRender = !this.reRender; 
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							$(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0));
+						}
+						
+						// select material ux 적용
+						const selectEl = document.querySelector('#defaultRecordCount');
+						var $select = mdc.select.MDCSelect.attachTo(selectEl);
+						var $el = $(selectEl);
+						var value = $el.attr('data-value');
+						// 초기값 설정
+						_.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+						$el.data('select', $select);
+						
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const el of textFields) {
+							$(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+						}
+						
+					},
+					doRefresh: function() {
+						const self = this;
+						
+						const $defaultRecordCount = $("#defaultRecordCount");
+						const $confidenceChartThreshold = $("#confidenceChartThreshold");
+						
+						$defaultRecordCount.data('select').value = this.configValue.recordCount;
+						$confidenceChartThreshold.data('textField').value = this.configValue.confidenceChartThreshold;
+
+						$defaultRecordCount.data('select').unlisten("MDCSelect:change");
+						$defaultRecordCount.data('select').listen('MDCSelect:change', function (e) {
+							self.configValue.recordCount = $("#defaultRecordCount").data('select').value;
+							self.checkManageBtnActive();
+						});
+						
+
+						$confidenceChartThreshold.unbind('keyup').bind('keyup', function () {
+							self.configValue.confidenceChartThreshold = $confidenceChartThreshold.data('textField').value;
+							self.checkManageBtnActive();
+						});
+						
+					},
+					renderEtcData: function (data) {
+						this.configValue = data;
+						this.initialValue = {...data};
+						this.doRefresh();
+						$("#preferenceLoadingBar").css('opacity', 0);
+					},
+					checkManageBtnActive: function() {
+						if(_.isEqual(this.configValue, this.initialValue)) {
+							this.setModifyButtonDisabled(true);
+							return;
+						}
+						this.setModifyButtonDisabled(false);
+					},
+					rollbackEtcConfig: function() {
+						if(!confirm("변경된 정보를 되돌리시겠습니까?")){
+							return;
+						}
+						this.configValue = {...this.initialValue};
+						this.doRefresh();
+						this.setModifyButtonDisabled(true);
+					},
+					setModifyButtonDisabled: function(option) {
+						const $etcConfigRollbackBtn = $('#etcConfigRollbackBtn');
+						const $etcConfigSaveBtn = $('#etcConfigSaveBtn');
+						
+						if (option) {
+							$etcConfigSaveBtn.prop('disabled', true);
+							$etcConfigRollbackBtn.prop('disabled', true);
+						} else {
+							$etcConfigSaveBtn.prop('disabled', false);
+							$etcConfigRollbackBtn.prop('disabled', false);
+						}
+					},
+					saveEtcConfig: function() {
+						
+						if (!this.validate()) {
+							return;
+						}
+						
+						const self = this;
+						
+						if(!confirm("저장하시겠습니까?")){
+							return;
+						}
+						
+						$.ajax({
+							url: this.baseUrl + "/etc",
+							method: "POST",
+							dataType: "json",
+							contentType: "application/json",
+							data: JSON.stringify(this.configValue)
+						})
+						.done(function (response) {
+							if (response.resultCode === "0000") {
+								toastr.success("저장이 완료되었습니다");
+								self.initialValue = {...self.configValue};
+								self.checkManageBtnActive();
+								return;
+							}
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						})
+						.fail(function (error) {
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						});
+					},
+					validate: function() {
+						const confidenceChartThreshold = this.configValue.confidenceChartThreshold;
+						
+						const regex = new RegExp(/^(0(\.\d+)?|1(\.0+)?)$/);
+						
+						const checkInput = (value) => {
+      							return regex.test(value);
+    					};
+						
+						if (!checkInput(confidenceChartThreshold)) {
+							toastr.error("신뢰도 임계값은 0과 1사이의 수만 입력할 수 있습니다.")
+							return false;
+						}
+						return true;
+					}
+				}
+			});
+			
+			var confidenceConfig = new Vue({
+				el: "#confidenceConfig",
+				data: {
+	                message: {
+	                    // 공통
+	                    API_ERROR_TITLE: "실패",
+	                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+	                    SUCCESS_SET: "성공적으로 변경하였습니다.",
+	                    SUCCESS_START: "성공적으로 시작하였습니다.",
+	                    SUCCESS_STOP: "성공적으로 중지하였습니다.",
+						INVALID_SERVICEMODEL_ERROR: "서비스모델값을 선택 해주세요.",
+	                },
+					serviceModelList: JSON.parse("[[${serviceModelList}]]".replaceAll('&quot;', "\"")),
+					confidenceList: JSON.parse("[[${confidenceList}]]".replaceAll('&quot;', "\"")),
+					setConfidenceLoadingBar: $("#confidence-loadingbar"),
+					serviceUrlPrefix: $("#smpServiceUriPrefix").val(),
+					serviceCode: "",
+					serviceModelId: "",
+				},
+				created: function () {
+				},
+				mounted: function() {
+					const self = this;
+					this.initMaterialUx();
+					
+					this.confidenceList.forEach((confidence)=>{
+
+						if (confidence.exeYn === "Y") {
+							
+							$('#insert-fileStartCount-input-'+confidence.serviceCode).attr("readonly",true);
+							$('#insert-btn-'+confidence.serviceCode).removeAttr("disabled");
+							$('#start-btn-'+confidence.serviceCode).attr("disabled",true);
+							$('#stop-btn-'+confidence.serviceCode).removeAttr("disabled");
+							$($('#insert-fileStartCount-input-'+confidence.serviceCode)[0].parentElement).data('textField').value = confidence.fileStartCount;
+							$($('#insert-fileSaveCount-input-'+confidence.serviceCode)[0].parentElement).data('textField').value = confidence.fileSaveCount;	
+						} else {
+							$('#insert-fileStartCount-input-'+confidence.serviceCode).removeAttr("readonly");
+							$('#insert-btn-'+confidence.serviceCode).attr("disabled",true);
+							$('#start-btn-'+confidence.serviceCode).removeAttr("disabled");
+							$('#stop-btn-'+confidence.serviceCode).attr("disabled",true);
+							$($('#insert-fileSaveCount-input-'+confidence.serviceCode)[0].parentElement).data('textField').value = 0;
+                        	$($('#insert-fileStartCount-input-'+confidence.serviceCode)[0].parentElement).data('textField').value = 0;
+						}
+
+						// 등록된 신뢰도 값 셋팅
+						$($('#insert-confidence-input-'+confidence.serviceCode)[0].parentElement).data('textField').value = confidence.confidence;
+                       
+                        // 암호화 유무 세팅
+						if (confidence.encryptYn === "Y") {
+							document.getElementById('insert-encrypt-y-' + confidence.serviceCode).checked = true;
+							document.getElementById('insert-encrypt-n-' + confidence.serviceCode).checked = false;
+						} else {
+							document.getElementById('insert-encrypt-y-' + confidence.serviceCode).checked = false;
+							document.getElementById('insert-encrypt-n-' + confidence.serviceCode).checked = true;
+						}
+					});
+					
+					
+					$('.insert-btn').unbind('click').bind('click', function (e) {
+						const serviceCode = e.currentTarget.value;
+						var encrypt = "0";
+						if(document.getElementById('insert-encrypt-y-'+serviceCode).checked){
+							encrypt = "1";
+						}
+						var newObj = {
+							"serviceModelId": self.serviceModelId,
+							"serviceCode": serviceCode,
+							"confidence" : $($('#insert-confidence-input-'+serviceCode)[0].parentElement).data('textField').value,
+							"fileCount" : $($('#insert-fileStartCount-input-'+serviceCode)[0].parentElement).data('textField').value,
+							"encFlag" : encrypt
+						};
+                        self.onConfidenceControl('set',newObj);
+                    });
+                    $('.start-btn').unbind('click').bind('click', function (e) {
+						const serviceCode = e.currentTarget.value;
+					    const fileCount = $($('#insert-fileStartCount-input-'+serviceCode)[0].parentElement).data('textField').value;
+						
+						if(fileCount < 1) {
+							toastr.error("파일 저장 최대 개수를 1 이상 입력해주세요.");
+							return;
+						}
+						var encrypt = "0";
+						if(document.getElementById('insert-encrypt-y-'+serviceCode).checked){
+							encrypt = "1";
+						}
+
+						var newObj = {
+							"serviceModelId":self.serviceModelId,
+							"serviceCode": serviceCode,
+							"confidence" : $($('#insert-confidence-input-'+serviceCode)[0].parentElement).data('textField').value,
+							"fileCount" : fileCount,
+							"encFlag" : encrypt
+						};
+						
+                        self.onConfidenceControl('start',newObj);
+                    });
+                    $('.stop-btn').unbind('click').bind('click', function (e) {
+						const serviceCode = e.currentTarget.value;
+						var newObj = {
+							"serviceModelId":self.serviceModelId,
+							"serviceCode": serviceCode
+						};
+                        self.onConfidenceControl('stop',newObj);
+                    });
+                    
+				},
+				methods: {
+					initMaterialUx: function () {
+						const self = this;
+						
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							$(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0));
+						}
+						
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const el of textFields) {
+							$(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+						}
+						
+					},
+					getConfidenceValue : function (serviceCode) {
+
+						var self = this;
+
+						var newObj = {
+							"serviceCode" : serviceCode
+						};
+                        $.ajax({
+                            url: this.serviceUrlPrefix + "/api/dictation/confidence",
+                            method: "post",
+                            contentType: 'application/json; charset=UTF-8',
+                            dataType: "json",
+                            data: JSON.stringify(newObj)
+                        }).done(data => {
+							if(data.resultCode === "0000"){
+								
+								if(data.result.exeYn == 'Y'){
+									$('#insert-fileStartCount-input').attr("readonly",true);
+									$('#insert-btn').removeAttr("disabled");
+									$('#start-btn').attr("disabled",true);
+									$('#stop-btn').removeAttr("disabled");
+									$($('#insert-fileSaveCount-input')[0].parentElement).data('textField').value = data.result.fileSaveCount;
+		                        	$($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = data.result.fileStartCount;
+								} else {
+									$('#insert-fileStartCount-input').removeAttr("readonly");
+									$('#insert-btn').attr("disabled",true);
+									$('#start-btn').removeAttr("disabled");
+									$('#stop-btn').attr("disabled",true);
+									$($('#insert-fileSaveCount-input')[0].parentElement).data('textField').value = 0;
+		                        	$($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = 0;
+								}
+								
+								// 등록된 신뢰도 값 셋팅
+								$($('#insert-confidence-input')[0].parentElement).data('textField').value = data.result.confidence;
+		                        
+		                       
+		                        // 암호화 유무 세팅
+		                        if(data.result.encryptYn == 'Y'){
+									document.getElementById('insert-encrypt-n').checked = false;
+									document.getElementById('insert-encrypt-y').checked = true;
+								} else {
+									document.getElementById('insert-encrypt-y').checked = false;
+									document.getElementById('insert-encrypt-n').checked = true;
+								}
+							} else {
+								$($('#insert-confidence-input')[0].parentElement).data('textField').value = '';
+								$($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = '';
+								document.getElementById('insert-encrypt-n').checked = false;
+								document.getElementById('insert-encrypt-y').checked = true;
+								$($('#insert-fileStartCount-input')[0].parentElement).data('textField').value = 0;
+		                        $($('#insert-fileSaveCount-input')[0].parentElement).data('textField').value = 0;
+
+								$('#insert-btn').attr("disabled",true);
+								$('#start-btn').removeAttr("disabled");
+								$('#stop-btn').attr("disabled",true);
+								toastr.error(data.resultMsg);
+							}
+                        })
+					},
+					onConfidenceControl: function (requestType, newObj) {
+						var self = this;
+						if(requestType !== "stop" && !this.validate(newObj)){
+							return;
+						}
+						this.setLoadingBar(this.setConfidenceLoadingBar, true);
+                        $.ajax({
+                            url: this.serviceUrlPrefix + "/api/dictation/confidence/" + requestType,
+                            method: "post",
+                            contentType: 'application/json; charset=UTF-8',
+                            dataType: "json",
+                            data: JSON.stringify(newObj),
+                            success: function (data, textStatus, jqXHR) {
+								if(data.resultCode == '0000'){
+									let successMessage;
+									if(data.result == 'stop'){
+										$('#insert-fileStartCount-input-' + newObj.serviceCode).removeAttr("readonly");
+										$('#insert-btn-' + newObj.serviceCode).attr("disabled",true);
+										$('#start-btn-' + newObj.serviceCode).removeAttr("disabled");
+										$('#stop-btn-' + newObj.serviceCode).attr("disabled",true);
+										successMessage = self.message.SUCCESS_STOP;
+									} else if(data.result == 'start'){
+										$('#insert-fileStartCount-input-' + newObj.serviceCode).attr("readonly",true);
+										$('#insert-btn-' + newObj.serviceCode).removeAttr("disabled");
+										$('#start-btn-' + newObj.serviceCode).attr("disabled",true);
+										$('#stop-btn-' + newObj.serviceCode).removeAttr("disabled");
+										successMessage = self.message.SUCCESS_START;
+									} else if(data.result == 'set'){
+										successMessage = self.message.SUCCESS_SET;
+									}
+									toastr.success(successMessage);
+								} else {
+									if (data.resultCode === "4100") {
+										toastr.error("서비스 코드를 찾을 수 없습니다.");	
+									} else if (data.resultCode === "5000") {
+										toastr.error("통신오류가 발생하였습니다.");
+									}
+									
+								}
+                            },
+                            complete: function() {
+								self.setLoadingBar(self.setConfidenceLoadingBar, false);
+                              	
+							}
+                        })
+					},
+					validate: function(obj) {
+						const regex = new RegExp(/^(0(\.\d+)?|1(\.0+)?)$/);
+						
+						const checkInput = (value) => {
+      							return regex.test(value);
+    					};
+						
+						if (!checkInput(obj.confidence)) {
+							toastr.error("신뢰도 임계값은 0과 1사이의 수만 입력할 수 있습니다.")
+							return false;
+						}
+						return true;
+					},
+					setLoadingBar: function (loadingBarJqueryEl, option) {
+						if (option == true) {
+							loadingBarJqueryEl.show();
+							return;
+						}
+						loadingBarJqueryEl.hide();
+					}
+				}
+			});
+			
+			var encryptConfig = new Vue({
+				el: "#encryptConfig",
+				data: {
+					baseUrl: $("#smpServiceUriPrefix").val() + "/api/preference",
+					configValue : {
+						textEncrypt: "",
+						wavEncrypt: ""
+					},
+					initialValue: {}
+				},
+				created: function () {
+				},
+				mounted: function() {
+					this.initMaterialUx();
+				},
+				methods: {
+					initMaterialUx: function () {
+						// ripple material ux 적용
+						const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+						for (const el of elements) {
+							$(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+								isUnbounded: true
+							} : void 0));
+						}
+						
+						// input text material ux 적용
+						const textFields = document.querySelectorAll('.mdc-text-field');
+						for (const el of textFields) {
+							$(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+						}
+						
+					},
+					renderEncryptData: function (data) {
+						this.configValue = data;
+						this.initialValue = {...data};
+					},
+					checkManageBtnActive: function() {
+						if(_.isEqual(this.configValue, this.initialValue)) {
+							this.setModifyButtonDisabled(true);
+							return;
+						}
+						this.setModifyButtonDisabled(false);
+					},
+					rollbackEncryptConfig: function() {
+						if(!confirm("변경된 정보를 되돌리시겠습니까?")){
+							return;
+						}
+						this.configValue = {...this.initialValue};
+						this.setModifyButtonDisabled(true);
+					},
+					setModifyButtonDisabled: function(option) {
+						const $encryptConfigRollbackBtn = $('#encryptConfigRollbackBtn');
+						const $encryptConfigSaveBtn = $('#encryptConfigSaveBtn');
+							
+						if (option) {
+							$encryptConfigSaveBtn.prop('disabled', true);
+							$encryptConfigRollbackBtn.prop('disabled', true);
+						} else {
+							$encryptConfigSaveBtn.prop('disabled', false);
+							$encryptConfigRollbackBtn.prop('disabled', false);
+						}
+					},
+					saveEncryptConfig: function() {
+						
+						const self = this;
+						
+						if(!confirm("저장하시겠습니까?")){
+							return;
+						}
+						
+						$.ajax({
+							url: this.baseUrl + "/enc",
+							method: "POST",
+							dataType: "json",
+							contentType: "application/json",
+							data: JSON.stringify(this.configValue)
+						})
+						.done(function (response) {
+							if (response.resultCode === "0000") {
+								toastr.success("저장이 완료되었습니다");
+								self.initialValue = {...self.configValue};
+								self.checkManageBtnActive();
+								return;
+							}
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						})
+						.fail(function (error) {
+							// TODO: 예외처리
+							toastr.error("저장을 실패하였습니다");
+						});
+					},
+				}
+			});
+			
+	</script>
+</th:block>
+
+</html>

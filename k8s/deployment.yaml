@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smp-stt
+  labels:
+    app: smp-stt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smp-stt
+  template:
+    metadata:
+      labels:
+        app: smp-stt
+    spec:
+      containers:
+      - name: smp-stt
+        image: smp/stt
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8081

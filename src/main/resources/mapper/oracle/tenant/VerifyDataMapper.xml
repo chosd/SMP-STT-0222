@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.verify.data.mapper.VerifyDataMapper">
+
+	<resultMap id="verifyDataListResultMap" type="verifyDataListDto">
+        <id column="id" property="id"/>
+        <result column="ID" property="id"/>
+        <result column="SERVICE_MODEL_NAME" property="serviceModelName"/>
+        <result column="DATASET_NAME" property="datasetName"/>
+        <result column="DATASET_ID" property="datasetId"/>
+        <result column="WAV_FILE_NAME" property="wavFileName"/>
+        <result column="DICTATED_TEXT" property="dictatedText" javaType="java.lang.String" jdbcType="CLOB"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+        <result column="USE_YN" property="useYn"/>
+    </resultMap>
+    
+    <resultMap id="verifyDataResultMap" type="verifyDataDto">
+        <id column="id" property="id"/>
+        <result column="ID" property="id"/>
+        <result column="SERVICE_MODEL_NAME" property="serviceModelName"/>
+        <result column="DATASET_NAME" property="datasetName"/>
+        <result column="DATASET_ID" property="datasetId"/>
+        <result column="VERIFY_DATA_PATH" property="verifyDataPath"/>
+        <result column="WAV_FILE_NAME" property="wavFileName"/>
+        <result column="ANSWER_FILE_NAME" property="answerFileName"/>
+        <result column="DICTATED_TEXT" property="dictatedText" javaType="java.lang.String" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="count" parameterType="verifyDataSearchCondition" resultType="int">
+		/* VerifyDataMapper.count */
+        SELECT COUNT(DATA.ID)
+        FROM IAAP_STT_VERIFY_DATA DATA
+   		JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DATA.SERVICE_MODEL_ID)
+        WHERE DATA.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+            AND DATA.SERVICE_MODEL_ID = #{serviceModelId}
+        </if>
+        <choose>
+            <when test="regDtFrom != null">
+                AND DATA.REG_DT >= TO_DATE(#{regDtFrom} || ' ' || '00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND DATA.REG_DT >= TO_DATE('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="regDtTo != null">
+                <![CDATA[
+                AND DATA.REG_DT <= TO_DATE(#{regDtTo} || ' ' || '23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND DATA.REG_DT <= current_date
+                ]]>
+            </otherwise>
+        </choose>
+        <if test="datasetName != null and datasetName != ''">
+            AND DATA.DATASET_NAME LIKE '%' || #{datasetName} || '%'
+        </if>
+        <if test="dictatedText != null and dictatedText != ''">
+            AND DATA.DICTATED_TEXT LIKE '%' || #{dictatedText} || '%'
+        </if>
+        <if test="regId != null and regId != ''">
+            AND DATA.REG_ID LIKE '%' || #{regId} || '%'
+        </if>
+        <if test="description != null and description != ''">
+          AND DATA.DESCRIPTION LIKE '%' || #{description} || '%'
+        </if>
+    </select>
+
+    <select id="search" parameterType="verifyDataSearchCondition" resultMap="verifyDataListResultMap">
+		/* VerifyDataMapper.search */
+        SELECT *
+        FROM (
+        	SELECT A.*,
+        		ROWNUM AS RNUM,
+        		COUNT(*) OVER () AS TOTCNT
+        	FROM (
+        		SELECT
+			        DATA.ID,
+			        SERVICE_MODEL.SERVICE_MODEL_NAME,
+			        DATA.DATASET_NAME,
+			        DATA.WAV_FILE_NAME,
+			        DATA.DICTATED_TEXT,
+			        DATA.REG_ID,
+			        DATA.REG_DT
+			        FROM IAAP_STT_VERIFY_DATA DATA 
+			        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DATA.SERVICE_MODEL_ID)
+			        WHERE DATA.USE_YN = 'Y'
+			        <if test="serviceModelId != null">
+			            AND DATA.SERVICE_MODEL_ID = #{serviceModelId}
+			        </if>
+			        <choose>
+			            <when test="regDtFrom != null">
+			                AND DATA.REG_DT >= TO_DATE(#{regDtFrom} || ' ' || '00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+			            </when>
+			            <otherwise>
+			                AND DATA.REG_DT >= TO_DATE('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+			            </otherwise>
+			        </choose>
+			        <choose>
+			            <when test="regDtTo != null">
+			                <![CDATA[
+			                AND DATA.REG_DT <= TO_DATE(#{regDtTo} || ' ' || '23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+			                ]]>
+			            </when>
+			            <otherwise>
+			                <![CDATA[
+			                AND DATA.REG_DT <= current_date
+			                ]]>
+			            </otherwise>
+			        </choose>
+			        <if test="datasetName != null and datasetName != ''">
+			            AND DATA.DATASET_NAME LIKE '%' || #{datasetName} || '%'
+			        </if>
+			        <if test="dictatedText != null and dictatedText != ''">
+			            AND DATA.DICTATED_TEXT LIKE '%' || #{dictatedText} || '%'
+			        </if>
+			        <if test="regId != null and regId != ''">
+			            AND DATA.REG_ID LIKE '%' || #{regId} || '%'
+			        </if>
+              <if test="description != null and description != ''">
+                AND DATA.DESCRIPTION LIKE '%' || #{description} || '%'
+              </if>
+			        ORDER BY DATA.REG_DT DESC
+        	) A
+        )
+     <![CDATA[
+        	WHERE RNUM > #{start} AND RNUM < #{start}+1 + #{size}
+      ]]>
+    </select>
+
+    <select id="findById" resultMap="verifyDataResultMap">
+		/* VerifyDataMapper.findById */
+        SELECT
+            DATA.ID,
+            SERVICE_MODEL.SERVICE_MODEL_NAME,
+            DATA.SERVICE_MODEL_ID,
+            DATA.DATASET_NAME,
+            DATA.DATASET_ID,
+            DATA.ANSWER_FILE_NAME,
+            DATA.DESCRIPTION,
+            DATA.WAV_FILE_NAME,
+            DATA.BASE_PATH,
+            DATA.DETAIL_PATH,
+            DATA.VERIFY_DATA_PATH,
+            DATA.DICTATED_TEXT
+        FROM IAAP_STT_VERIFY_DATA DATA
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DATA.SERVICE_MODEL_ID)
+        WHERE DATA.USE_YN = 'Y'
+        AND DATA.ID = #{id}
+    </select>
+    
+    <select id="findByDatasetNameId" resultMap="verifyDataResultMap">
+		/* VerifyDataMapper.findByDatasetNameId */
+        SELECT
+            DATA.ID,
+            SERVICE_MODEL.SERVICE_MODEL_NAME,
+            DATA.DATASET_NAME,
+            DATA.WAV_FILE_NAME,
+            DATA.ANSWER_FILE_NAME,
+            DATA.VERIFY_DATA_PATH,
+            DATA.DICTATED_TEXT
+        FROM IAAP_STT_VERIFY_DATA DATA
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DATA.SERVICE_MODEL_ID)
+        WHERE DATA.USE_YN = 'Y'
+        	AND DATA.DATASET_ID = #{id}
+        	AND DATA.DATASET_NAME = #{name}
+    </select>
+
+    <select id="findByDatasetId" resultMap="verifyDataResultMap">
+		/* VerifyDataMapper.findByDatasetId */
+        SELECT
+            ID,
+            WAV_FILE_NAME,
+            ANSWER_FILE_NAME,
+            DICTATED_TEXT
+        FROM IAAP_STT_VERIFY_DATA
+        WHERE USE_YN = 'Y'
+        AND DATASET_ID = #{datasetId}
+    </select>
+    
+    <select id="findByDatasetName" resultMap="verifyDataResultMap">
+		/* VerifyDataMapper.findByDatasetName */
+        SELECT
+            ID,
+            WAV_FILE_NAME,
+            ANSWER_FILE_NAME,
+            DICTATED_TEXT
+        FROM IAAP_STT_VERIFY_DATA
+        WHERE USE_YN = 'Y'
+        AND DATASET_Name = #{datasetName}
+    </select>
+    
+    <select id="findDatasetGroup" resultType="verifyDataListDto">
+		/* VerifyDatasetMapper.findDatasetGroup */
+        SELECT 
+       		DATA.DATASET_ID,
+       		DATA.DATASET_NAME,
+        	SERVICE_MODEL.SERVICE_CODE SERVICE_MODEL_ID,
+        	SERVICE_MODEL.SERVICE_MODEL_NAME
+        FROM IAAP_STT_VERIFY_DATA DATA
+       	JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DATA.SERVICE_MODEL_ID)
+       	WHERE DATA.USE_YN = 'Y'
+       	GROUP BY DATA.DATASET_ID, DATA.DATASET_NAME, SERVICE_MODEL.SERVICE_CODE, SERVICE_MODEL.SERVICE_MODEL_NAME
+    </select>
+
+    <select id="findByDatasetIdAndWavFileName" resultMap="verifyDataResultMap">
+		/* VerifyDataMapper.findByDatasetIdAndWavFileName */
+        SELECT
+            DATA.ID,
+            (SELECT SERVICE_MODEL_NAME FROM IAAP_STT_SERVICE_MODEL WHERE SERVICE_CODE = #{serviceModelId}) SERVICE_MODEL_NAME,
+            DATA.DATASET_NAME,
+            DATA.WAV_FILE_NAME,
+            DATA.DICTATED_TEXT
+        FROM IAAP_STT_VERIFY_DATA DATA
+        WHERE DATA.USE_YN = 'Y'
+        	AND DATA.WAV_FILE_NAME = #{wavFileName}
+    </select>
+
+    <select id="countByDatasetIdAndWavFileName" resultType="int">
+		/* VerifyDataMapper.countByDatasetIdAndWavFileName */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_VERIFY_DATA
+        WHERE USE_YN = 'Y'
+        AND DATASET_NAME = #{datasetName}
+        AND WAV_FILE_NAME = #{wavFileName}
+    </select>
+    
+    <select id="countByName" resultType="int">
+		/* VerifyDataMapper.countByName */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_VERIFY_DATA
+        WHERE USE_YN = 'Y'
+        	AND DATASET_NAME = #{name}
+    </select>
+
+	<select id="countByPath" resultType="int">
+		/* VerifyDataMapper.countByPath */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_VERIFY_DATA
+        WHERE USE_YN = 'Y'
+        	AND DETAIL_PATH = #{path}
+        	AND SERVICE_MODEL_ID = #{code}
+    </select>
+
+    <insert id="save" parameterType="verifyDataSaveDto">
+		/* VerifyDataMapper.save */
+        INSERT INTO IAAP_STT_VERIFY_DATA
+        (
+            ID,
+            DATASET_ID,
+            DATASET_NAME,
+            SERVICE_MODEL_ID,
+            BASE_PATH,
+            DETAIL_PATH,
+            VERIFY_DATA_PATH,
+            WAV_FILE_NAME,
+            ANSWER_FILE_NAME,
+            DICTATED_TEXT,
+            DESCRIPTION,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP
+        ) VALUES
+        (
+            SEQ_IAAP_STT_VERIFY_DATA.NEXTVAL,
+            #{datasetId},
+            #{datasetName},
+            #{serviceModelId},
+            #{basePath},
+            #{detailPath},
+            #{verifyDataPath},
+            #{wavFileName},
+            #{answerFileName},
+            #{dictatedText},
+            #{description},
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp}
+        )
+    </insert>
+
+    <update id="update" parameterType="verifyDataUpdateDto">
+		/* VerifyDataMapper.update */
+        UPDATE IAAP_STT_VERIFY_DATA
+        SET
+            DICTATED_TEXT = #{dictatedText},
+            UPD_ID = #{updId},
+            UPD_IP = #{updIp},
+            UPD_DT = current_date
+        WHERE ID = #{id}
+    </update>
+
+    <update id="deleteBackup">
+		/* VerifyDataMapper.deleteBackup */
+        UPDATE IAAP_STT_VERIFY_DATA
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+    
+    <delete id="delete">
+		/* VerifyDataMapper.delete */
+        DELETE FROM IAAP_STT_VERIFY_DATA
+        WHERE ID = #{id}
+    </delete>
+
+    <update id="deleteByDatasetId">
+		/* VerifyDataMapper.deleteByDatasetId 검증데이터셋 화면 제거되면 미사용 */
+        UPDATE IAAP_STT_VERIFY_DATA
+        SET USE_YN = 'N'
+        WHERE DATASET_ID = #{datasetId}
+    </update>
+</mapper>

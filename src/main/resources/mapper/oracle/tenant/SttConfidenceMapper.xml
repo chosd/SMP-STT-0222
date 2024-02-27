@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.confidence.mapper.SttConfidenceMapper">
+    
+    <select id="confidenceChartData" parameterType="com.kt.smp.stt.confidence.domain.SttConfidenceSearchCondition" resultType="com.kt.smp.stt.confidence.domain.SttConfidenceVO">
+		<![CDATA[/*confidenceChartData*/]]>
+<!--        SELECT-->
+<!--        	<choose>-->
+<!--                <when test="searchUnit.name() == 'MONTH'">TO_CHAR(isl.START_AT, 'YY-MM')</when>-->
+<!--                <when test="searchUnit.name() == 'DAY'">TO_CHAR(isl.START_AT, 'YY-MM-DD')</when>-->
+<!--                <when test="searchUnit.name() == 'HOUR'">TO_CHAR(isl.START_AT, 'YY-MM-DD HH24')</when>-->
+<!--                <otherwise>TO_CHAR(isl.START_AT, 'YY-MM-DD HH24:MI:SS')</otherwise>-->
+<!--            </choose> AS START_AT,-->
+<!--			date_format(isl.START_AT, '%Y-%m-%d %T') as START_AT,-->
+<!--			issm.SERVICE_CODE,-->
+<!--			issm.SERVICE_MODEL_NAME,-->
+<!--			isl.SERVICE_MODEL_ID,-->
+<!--			COALESCE(AVG(isl.CER),0.0) AS AVG_CER,-->
+<!--		FROM-->
+<!--			IAAP_STT_LOG isl-->
+<!--			LEFT JOIN IAAP_STT_SERVICE_MODEL issm ON-->
+<!--			TO_CHAR(isl.SERVICE_MODEL_ID) = issm.SERVICE_CODE-->
+<!--		WHERE 1=1-->
+<!--			<if test="serviceCode != null and serviceCode != ''">-->
+<!--				AND isl.SERVICE_MODEL_ID = #{serviceModelId}-->
+<!--			</if>-->
+<!--			AND <![CDATA[-->
+<!--            isl.START_AT >= TO_DATE(#{from},'YY-MM-DD HH24:MI:SS')-->
+<!--            ]]>-->
+<!--        	AND <![CDATA[-->
+<!--            isl.START_AT <= TO_DATE(#{to},'YY-MM-DD HH24:MI:SS')-->
+<!--            ]]>-->
+<!--		GROUP BY-->
+<!--			SERVICE_MODEL_ID,-->
+<!--			SERVICE_CODE,-->
+<!--			SERVICE_MODEL_NAME,-->
+<!--			<choose>-->
+<!--	            <when test="searchUnit.name() == 'MONTH'">TO_CHAR(isl.START_AT, 'YY-MM')</when>-->
+<!--	            <when test="searchUnit.name() == 'DAY'">TO_CHAR(isl.START_AT, 'YY-MM-DD')</when>-->
+<!--	            <when test="searchUnit.name() == 'HOUR'">TO_CHAR(isl.START_AT, 'YY-MM-DD HH24')</when>-->
+<!--	            <otherwise>TO_CHAR(isl.START_AT, 'YY-MM-DD HH24:MI:SS')</otherwise>-->
+<!--	        </choose>-->
+<!--		ORDER BY START_AT-->
+			
+		SELECT
+        	<choose>
+                <when test="searchUnit.name() == 'MONTH'">TO_CHAR(isci.CALL_START_TIME, 'YY-MM')</when>
+                <when test="searchUnit.name() == 'DAY'">TO_CHAR(isci.CALL_START_TIME, 'YY-MM-DD')</when>
+                <when test="searchUnit.name() == 'HOUR'">TO_CHAR(isci.CALL_START_TIME, 'YY-MM-DD HH24')</when>
+                <otherwise>TO_CHAR(isci.CALL_START_TIME, 'YY-MM-DD HH24:MI:SS')</otherwise>
+            </choose> AS START_AT,
+			isci.SERVICE_CODE,
+			issm.SERVICE_MODEL_NAME,
+			issm.ID,
+			COALESCE(AVG(isri.CONFIDENCE),0.0) AS AVG_CER,
+			COUNT(1) as COUNT
+		FROM
+			IAAP_STT_CALL_INFO isci
+			LEFT JOIN IAAP_STT_RESULT_INFO isri ON
+			isci.APPLICATION_ID = isri.APPLICATION_ID 
+			LEFT JOIN IAAP_STT_SERVICE_MODEL issm ON
+			isci.SERVICE_CODE = issm.SERVICE_CODE
+		WHERE 1=1
+			<if test="serviceCode != null and serviceCode != ''">
+				AND issm.SERVICE_CODE = #{serviceCode}
+			</if>
+			AND <![CDATA[
+            isci.CALL_START_TIME >= TO_DATE(#{from},'YY-MM-DD HH24:MI:SS')
+            ]]>
+        	AND <![CDATA[
+            isci.CALL_START_TIME <= TO_DATE(#{to},'YY-MM-DD HH24:MI:SS')
+            ]]>
+		GROUP BY
+			issm.ID,
+			isci.SERVICE_CODE,
+			issm.SERVICE_MODEL_NAME,
+			<choose>
+	            <when test="searchUnit.name() == 'MONTH'">TO_CHAR(isci.CALL_START_TIME, 'YY-MM')</when>
+	            <when test="searchUnit.name() == 'DAY'">TO_CHAR(isci.CALL_START_TIME, 'YY-MM-DD')</when>
+	            <when test="searchUnit.name() == 'HOUR'">TO_CHAR(isci.CALL_START_TIME, 'YY-MM-DD HH24')</when>
+	            <otherwise>TO_CHAR(isci.CALL_START_TIME, 'YY-MM-DD HH24:MI:SS')</otherwise>
+	        </choose>
+		ORDER BY issm.ID
+    </select>
+</mapper>

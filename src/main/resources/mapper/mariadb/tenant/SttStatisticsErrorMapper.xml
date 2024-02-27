@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.statistics.mapper.SttStatisticsErrorMapper">
+
+    <resultMap id="statisticsErrorResultMap" type="com.kt.smp.stt.statistics.domain.SttStatisticsErrorVO">
+        <id column="RES_DATE_TIME" property="resDateTime"/>
+        <id column="SERVICE_CODE" property="serviceCode"/>
+        <id column="SCU_NO" property="scuNo"/>
+        <result column="RES_DATE_TIME" property="resDateTime"/>
+        <result column="SERVICE_CODE" property="serviceCode"/>
+        <result column="SCU_NO" property="scuNo"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+        <result column="USE_YN" property="useYn"/>
+    </resultMap>
+
+
+    <sql id="vo_fields">
+        SSE.RES_DATE_TIME
+        , SSE.SERVICE_CODE
+        , SSE.SCU_NO
+		, SSE.REG_DT
+		, SSE.REG_ID
+		, SSE.REG_IP
+		, SSE.UPD_DT
+		, SSE.UPD_ID
+		, SSE.UPD_IP
+        , SSE.USE_YN
+    </sql>
+
+    <!--  SELECT  -->
+
+    <select id="list" resultMap="statisticsErrorResultMap">
+        SELECT
+            <include refid="vo_fields"/>
+        FROM
+            IAAP_STT_STATISTICS_ERROR as SSE
+        WHERE
+            1 = 1
+        AND SSE.USE_YN = 'Y'
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(1)
+        FROM IAAP_STT_STATISTICS_ERROR as SSE
+        WHERE
+            1 = 1
+        AND SSE.USE_YN = 'Y'
+    </select>
+
+    <!--  INSERT  -->
+    <insert id="insert" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsErrorVO">
+        INSERT INTO IAAP_STT_STATISTICS_ERROR (res_date_time
+                                        , service_code
+                                        , scu_no
+                                        , reg_dt
+                                        , reg_id
+                                        , reg_ip
+                                        , upd_dt
+                                        , upd_id
+                                        , upd_ip
+                                        , use_yn)
+        VALUES(#{resDateTime}
+              , #{serviceCode}
+              , #{scuNo}
+              , NOW()
+              , #{regId}
+              , #{regIp}
+              , NOW()
+              , #{updId}
+              , #{updIp}
+              , 'Y');
+    </insert>
+</mapper>

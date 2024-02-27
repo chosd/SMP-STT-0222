@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.comm.directory.mapper.DirectoryMapper">
+
+    <select id="findAll" resultType="directoryListDto">
+        SELECT
+            ID,
+            NAME,
+            HOME_PATH
+            PATH,
+            PRIORITY,
+            IN_USE,
+            REG_DT
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+    </select>
+
+    <select id="findById" resultType="directoryDto">
+        SELECT
+            ID,
+            NAME,
+            HOME_PATH,
+            PATH,
+            PRIORITY,
+            IN_USE,
+            REG_DT
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+        AND ID = #{id}
+    </select>
+
+    <select id="findByGroupIdAndPriority" resultType="directoryDto">
+        SELECT
+            ID,
+            NAME,
+            HOME_PATH,
+            PATH,
+            PRIORITY,
+            IN_USE,
+            REG_DT
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+          AND GROUP_ID = #{groupId}
+          AND PRIORITY = #{priority}
+    </select>
+
+    <select id="findByGroupId" resultType="directoryListDto">
+        SELECT
+            ID,
+            NAME,
+            HOME_PATH,
+            PATH,
+            PRIORITY,
+            IN_USE,
+            REG_DT
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+        AND GROUP_ID = #{groupId}
+        ORDER BY PRIORITY ASC
+    </select>
+
+    <select id="findByName" resultType="directoryDto">
+        SELECT
+            ID,
+            NAME,
+            HOME_PATH,
+            PATH,
+            PRIORITY,
+            IN_USE,
+            REG_DT
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+          AND NAME = #{name}
+    </select>
+
+    <select id="countByGroupIdAndName" resultType="int">
+        SELECT COUNT(ID)
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+        AND GROUP_ID = #{groupId}
+        AND NAME = #{name}
+    </select>
+
+    <select id="countByGroupIdAndExcludedDirIdAndName" resultType="int">
+        SELECT COUNT(ID)
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+        AND GROUP_ID = #{groupId}
+        AND ID != #{excludedDirId}
+        AND NAME = #{name}
+    </select>
+
+    <select id="countByPath" resultType="int">
+        SELECT COUNT(ID)
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+        AND PATH = #{path}
+    </select>
+
+    <select id="countByExcludedDirIdAndPath" resultType="int">
+        SELECT COUNT(ID)
+        FROM IAAP_CM_DIRECTORY
+        WHERE USE_YN = 'Y'
+        AND ID != #{excludedDirId}
+        AND PATH = #{path}
+    </select>
+
+    <insert id="save" parameterType="directorySaveDto">
+        INSERT INTO IAAP_CM_DIRECTORY
+        (
+            ID,
+            NAME,
+            HOME_PATH,
+            PATH,
+            PRIORITY,
+            IN_USE,
+            GROUP_ID,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP
+        ) VALUES
+        (
+            NEXTVAL(SEQ_IAAP_CM_DIRECTORY),
+            #{name},
+            #{homePath},
+            #{path},
+            #{priority},
+            #{inUse},
+            #{groupId},
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp}
+        )
+    </insert>
+
+    <update id="updateInUse">
+        UPDATE IAAP_CM_DIRECTORY
+        SET IN_USE = #{inUse}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updateNameAndPath">
+        UPDATE IAAP_CM_DIRECTORY
+        SET
+            NAME = #{name},
+            PATH = #{path}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updatePriority">
+        UPDATE IAAP_CM_DIRECTORY
+        SET PRIORITY = #{priority}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE IAAP_CM_DIRECTORY
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+</mapper>

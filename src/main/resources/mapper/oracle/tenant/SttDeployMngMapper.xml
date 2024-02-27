@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.deploy.deploy.mapper.SttDeployMngMapper">
+
+    <resultMap id="deployResultMap" type="com.kt.smp.stt.deploy.deploy.domain.SttDeployMngVO">
+        <id column="id" property="id"/>
+        <result column="ID" property="id"/>
+        <result column="SERVICE_MODEL_ID" property="serviceModelId"/>
+        <result column="RESULT_MODEL_ID" property="resultModelId"/>
+        <result column="RESULT_MODEL_DESCRIPTION" property="resultModelDescription"/>
+        <result column="RESULT_MODEL_MODELTYPE" property="resultModelModeltype"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="CREATED_BY" property="createdBy"/>
+        <result column="REQUESTED_AT" property="requestedAt"/>
+        <result column="COMPLETED_AT" property="completedAt"/>
+        <result column="DURATION" property="duration"/>
+        <result column="RESULT_CODE" property="resultCode"/>
+        <result column="RESULT_MSG" property="resultMsg"/>
+        <result column="STATUS" property="status"/>
+        <result column="DEPLOY_LIST" property="deployList"
+                javaType="java.util.ArrayList" jdbcType="LONGVARCHAR"
+                typeHandler="com.kt.smp.stt.deploy.deploy.handler.SttDeployStatusTypeHandler"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+        <result column="USE_YN" property="useYn"/>
+        <result column="MODEL_TYPE" property="modelType"/>
+        <result column="DEPLOY_URL" property="deployUrl"/>
+    </resultMap>
+
+
+    <sql id="vo_fields">
+        DM.id
+        , DM.service_model_id
+        , DM.result_model_id
+        , DM.result_model_description
+        , DM.result_model_modeltype
+		, DM.description
+		, DM.created_by
+		, DM.requested_at
+        , DM.completed_at
+        , DM.duration
+        , DM.result_code
+        , DM.result_msg
+        , DM.status
+        , DM.deploy_list
+		, DM.REG_DT
+		, DM.REG_ID
+		, DM.REG_IP
+		, DM.UPD_DT
+		, DM.UPD_ID
+		, DM.UPD_IP
+        , DM.USE_YN
+        , MO.model_type
+        , DM.DEPLOY_URL
+    </sql>
+
+    <!--  SELECT  -->
+
+    <select id="list" parameterType="com.kt.smp.stt.deploy.deploy.domain.SttDeployMngSearchCondition" resultMap="deployResultMap">
+	/* SttDeployMngMapper.list */
+        SELECT
+            <include refid="vo_fields"/>
+        FROM
+             IAAP_STT_DEPLOY_MNG DM
+             left outer join IAAP_STT_DEPLOY_MODEL MO
+             	ON MO.RESULT_MODEL_ID = DM.RESULT_MODEL_ID
+        WHERE 1 = 1
+            AND DM.USE_YN = 'Y'
+            AND MO.USE_YN = 'Y'
+        <if test="serviceModelId != null"><![CDATA[
+            AND DM.SERVICE_MODEL_ID = #{serviceModelId}
+        ]]></if>
+        <if test="createdBy != null and createdBy != ''"><![CDATA[
+            AND DM.CREATED_BY LIKE #{createdBy} || '%'
+        ]]></if>
+        <if test="description != null and description != ''"><![CDATA[
+            AND DM.DESCRIPTION LIKE '%'|| #{description} || '%'
+        ]]></if>
+        <if test="status != null and status != ''"><![CDATA[
+            AND DM.STATUS = #{status}
+        ]]></if>
+        <choose>
+            <when test="from != null">
+                AND DM.REQUESTED_AT >= to_date(#{from, jdbcType=VARCHAR} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND DM.REQUESTED_AT >= to_date('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                AND DM.REQUESTED_AT &lt;= to_date(#{to, jdbcType=VARCHAR} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND DM.REQUESTED_AT &lt;= current_date
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="detail" parameterType="Long" resultMap="deployResultMap">
+	/* SttDeployMngMapper.detail */
+        SELECT
+            <include refid="vo_fields"/>
+        FROM
+             IAAP_STT_DEPLOY_MNG DM
+             left outer join IAAP_STT_DEPLOY_MODEL MO
+             	ON MO.RESULT_MODEL_ID = DM.RESULT_MODEL_ID
+        WHERE
+              DM.ID = #{deployId}
+        AND
+              DM.USE_YN = 'Y'
+        AND
+              MO.USE_YN = 'Y'      
+    </select>
+
+    <select id="detailLastOne" parameterType="string" resultMap="deployResultMap">
+	/* SttDeployMngMapper.detailLastOne */
+        SELECT * from (
+	        SELECT
+	            <include refid="vo_fields"/>
+	        FROM
+	            IAAP_STT_DEPLOY_MNG DM
+	            left outer join IAAP_STT_DEPLOY_MODEL MO
+             		ON MO.RESULT_MODEL_ID = DM.RESULT_MODEL_ID
+	        WHERE
+	            DM.SERVICE_MODEL_ID = #{serviceModelId}
+	        AND
+	            DM.USE_YN = 'Y'
+	        ORDER BY
+	            DM.REQUESTED_AT DESC
+        )
+        WHERE ROWNUM = 1
+    </select>
+
+    <select id="detailByResultModelId" parameterType="String" resultMap="deployResultMap">
+	/* SttDeployMngMapper.detailByResultModelId */
+	    SELECT a.* from (
+	        SELECT
+	            <include refid="vo_fields"/>
+	            , rownum AS rnum 
+	        FROM
+	            IAAP_STT_DEPLOY_MNG DM
+	            left outer join IAAP_STT_DEPLOY_MODEL MO
+             		ON MO.RESULT_MODEL_ID = DM.RESULT_MODEL_ID
+	        WHERE
+	            DM.RESULT_MODEL_ID = #{resultModelId}
+	        AND
+	            DM.USE_YN = 'Y'
+	        ORDER BY
+	            DM.REQUESTED_AT DESC
+	    ) a
+        WHERE a.rnum = 1
+    </select>
+
+    <select id="count" parameterType="com.kt.smp.stt.deploy.deploy.domain.SttDeployMngSearchCondition" resultType="int">
+	/* SttDeployMngMapper.count */
+        SELECT COUNT(1)
+            FROM IAAP_STT_DEPLOY_MNG DM
+        WHERE 1 = 1
+            AND DM.USE_YN = 'Y'
+        <if test="serviceModelId != null"><![CDATA[
+            AND DM.SERVICE_MODEL_ID = #{serviceModelId}
+        ]]></if>
+        <if test="createdBy != null and createdBy != ''"><![CDATA[
+            AND DM.CREATED_BY = #{createdBy}
+        ]]></if>
+        <if test="status != null and status != ''"><![CDATA[
+            AND DM.STATUS = #{status}
+        ]]></if>
+        <choose>
+            <when test="from != null">
+                AND DM.REQUESTED_AT >= to_date(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND DM.REQUESTED_AT >= '2022-01-01 00:00:00'
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                AND DM.REQUESTED_AT &lt;= to_date(#{to} || ' 23:59:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND DM.REQUESTED_AT &lt;= current_date
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="exists" parameterType="Long" resultType="int">
+	/* SttDeployMngMapper.exists */
+        SELECT case when 
+        	EXISTS(SELECT 1 FROM IAAP_STT_DEPLOY_MNG DM WHERE DM.ID = #{deployId} AND DM.USE_YN = 'Y')
+        	THEN 1 ELSE 0 END isExists 
+        FROM DUAL
+    </select>
+
+
+    <!--  INSERT  -->
+    <insert id="insert" parameterType="com.kt.smp.stt.deploy.deploy.domain.SttDeployMngVO">
+	/* SttDeployMngMapper.insert */
+        INSERT INTO IAAP_STT_DEPLOY_MNG (id
+            , service_model_id
+            , result_model_id
+            , result_model_description
+            , result_model_modeltype
+            , description
+            , created_by
+            , requested_at
+            , completed_at
+            , duration
+            , result_code
+            , result_msg
+            , status
+            , deploy_list
+            , reg_dt
+            , reg_id
+            , reg_ip
+            , upd_dt
+            , upd_id
+            , upd_ip
+            , use_yn
+            , deploy_url
+            , save_yn)
+        VALUES(SEQ_IAAP_STT_DEPLOY_MNG.NEXTVAL
+            , #{serviceModelId}
+            , #{resultModelId}
+            , #{resultModelDescription}
+            , #{resultModelModeltype}
+            , #{description}
+            , #{createdBy}
+            , current_date
+            , NULL
+            , NULL
+            , #{resultCode}
+            , #{resultMsg}
+            , #{status}
+            , #{deployList, typeHandler=com.kt.smp.stt.deploy.deploy.handler.SttDeployStatusTypeHandler}
+            , current_date
+            , #{regId}
+            , #{regIp}
+            , current_date
+            , #{updId}
+            , #{updIp}
+            , 'Y'
+            , #{deployUrl}
+            , 'N')
+    </insert>
+
+    <!--  UPDATE  -->
+    <update id="update" parameterType="com.kt.smp.stt.deploy.deploy.domain.SttDeployMngVO">
+	/* SttDeployMngMapper.update */
+        UPDATE
+            IAAP_STT_DEPLOY_MNG
+        SET
+            DESCRIPTION = #{description}
+            , UPD_DT = current_date
+            , UPD_ID = #{updId}
+            , UPD_IP = #{updIp}
+            <if test="requestedAt != null">
+                , REQUESTED_AT = current_date
+            </if>
+            <if test="resultCode != null">
+            , RESULT_CODE = #{resultCode}
+            </if>
+            <if test="resultMsg != null">
+            , RESULT_MSG = #{resultMsg}
+            </if>
+            <if test="status == 'COMPLETE' and status != null">
+            , COMPLETED_AT = current_date
+            </if>
+            <if test="duration != null">
+            , DURATION = (current_date - to_date(substr(#{requestedAt}, 0, 19), 'YYYY-MM-DD HH24:MI:SS')) * 24 * 60 * 60
+            </if>
+            <if test="status != null">
+            , STATUS = #{status}
+            </if>
+            <if test="deployList != null">
+            , DEPLOY_LIST = #{deployList, typeHandler=com.kt.smp.stt.deploy.deploy.handler.SttDeployStatusTypeHandler}
+            </if>
+        WHERE
+            ID = #{id}
+        AND
+            USE_YN = 'Y'
+    </update>
+
+    <update id="updateCallbackFields" parameterType="com.kt.smp.stt.deploy.deploy.domain.SttDeployMngVO">
+	/* SttDeployMngMapper.updateCallbackFields */
+        UPDATE
+            IAAP_STT_DEPLOY_MNG
+        SET
+            RESULT_CODE = null
+            , RESULT_MSG = null
+            , STATUS = null
+            , DEPLOY_LIST = null
+            , COMPLETED_AT = null
+            , DURATION = null
+        WHERE
+            ID = #{id}
+        AND
+            USE_YN = 'Y'
+    </update>
+
+</mapper>

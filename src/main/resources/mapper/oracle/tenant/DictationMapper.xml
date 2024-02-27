@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.dictation.mapper.DictationMapper">
+
+    <select id="count" parameterType="dictationSearchCondition" resultType="int">
+		/* DictationMapper.count */
+        SELECT COUNT(DICTATION.ID)
+        FROM IAAP_STT_DICTATION DICTATION
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DICTATION.SERVICE_MODEL_ID)
+        WHERE DICTATION.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+            AND DICTATION.SERVICE_MODEL_ID = #{serviceModelId}
+        </if>
+        <if test="usageType != null">
+            AND DICTATION.USAGE_TYPE = #{usageType}
+        </if>
+        <if test="wavFileName != null and wavFileName != ''">
+            AND DICTATION.WAV_FILE_PATH LIKE '%' || #{wavFileName} || '%'
+        </if>
+        <if test="dictatedText != null and dictatedText != ''">
+            AND DICTATION.DICTATED_TEXT LIKE '%' || #{dictatedText} || '%'
+        </if>
+        <if test="updId != null and updId != ''">
+            AND DICTATION.UPD_ID LIKE '%' || #{updId} || '%'
+        </if>
+        <choose>
+            <when test="regDtFrom != null and regDtFrom != ''">
+                AND DICTATION.REG_DT >= TO_DATE(#{regDtFrom} || ' ' || '00:00:00', 'YY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND DICTATION.REG_DT >= TO_DATE('2022-01-01 00:00:00','YY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="regDtTo != null and regDtTo != ''">
+                <![CDATA[
+                AND DICTATION.REG_DT <= TO_DATE(#{regDtTo} || ' ' || '23:59:59', 'YY-MM-DD HH24:MI:SS')
+                ]]>
+            </when>
+            <otherwise>
+                <![CDATA[
+                AND DICTATION.REG_DT <= current_date
+                ]]>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="search" parameterType="dictationSearchCondition" resultType="dictationListDto">
+		/* DictationMapper.search */
+		SELECT
+			ID,
+			WAV_FILE_PATH,
+			SERVICE_MODEL_NAME,
+			TRANSCRIPT,
+			DICTATED_TEXT,
+			USAGE_TYPE,
+			REG_ID,
+			REG_DT,
+			UPD_ID,
+			UPD_DT,
+			IS_PREEMPTED
+		FROM(
+			SELECT
+				ID,
+	            WAV_FILE_PATH,
+	            SERVICE_MODEL_NAME,
+	            TRANSCRIPT,
+	            DICTATED_TEXT,
+	            USAGE_TYPE,
+	            REG_ID,
+	            REG_DT,
+	            UPD_ID,
+	            UPD_DT,
+	            IS_PREEMPTED,
+	            ROWNUM AS RNUM
+			FROM (
+				SELECT
+	            DICTATION.ID,
+	            DICTATION.WAV_FILE_PATH,
+	            SERVICE_MODEL.SERVICE_MODEL_NAME,
+	            DICTATION.TRANSCRIPT,
+	            DICTATION.DICTATED_TEXT,
+	            DICTATION.USAGE_TYPE,
+	            DICTATION.REG_ID,
+	            DICTATION.REG_DT,
+	            DICTATION.UPD_ID,
+	            DICTATION.UPD_DT,
+	            DICTATION.IS_PREEMPTED
+		        FROM IAAP_STT_DICTATION DICTATION
+		        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DICTATION.SERVICE_MODEL_ID)
+		        WHERE DICTATION.USE_YN = 'Y'
+		        <if test="serviceModelId != null">
+		            AND DICTATION.SERVICE_MODEL_ID = #{serviceModelId}
+		        </if>
+		        <if test="usageType != null">
+		            AND DICTATION.USAGE_TYPE = #{usageType}
+		        </if>
+		        <if test="wavFileName != null and wavFileName != ''">
+		            AND DICTATION.WAV_FILE_PATH LIKE '%' || #{wavFileName} || '%'
+		        </if>
+		        <if test="dictatedText != null and dictatedText != ''">
+		            AND DICTATION.DICTATED_TEXT LIKE '%' || #{dictatedText} || '%'
+		        </if>
+		        <if test="updId != null and updId != ''">
+		            AND DICTATION.UPD_ID LIKE '%' || #{updId} || '%'
+		        </if>
+		        <choose>
+		            <when test="regDtFrom != null and regDtFrom != ''">
+		                AND DICTATION.REG_DT >= TO_DATE(#{regDtFrom} || ' ' || '00:00:00', 'YY-MM-DD HH24:MI:SS')
+		            </when>
+		            <otherwise>
+		                AND DICTATION.REG_DT >= TO_DATE('2022-01-01 00:00:00','YY-MM-DD HH24:MI:SS')
+		            </otherwise>
+		        </choose>
+		        <choose>
+		            <when test="regDtTo != null and regDtTo != ''">
+		                <![CDATA[
+		                AND DICTATION.REG_DT <= TO_DATE(#{regDtTo} || ' ' || '23:59:59','YY-MM-DD HH24:MI:SS')
+		                ]]>
+		            </when>
+		            <otherwise>
+		                <![CDATA[
+		                AND DICTATION.REG_DT <= current_date
+		                ]]>
+		            </otherwise>
+		        </choose>
+		        ORDER BY DICTATION.REG_DT DESC
+			)
+		)
+        WHERE 1=1
+        <![CDATA[
+        	AND RNUM > #{start} AND RNUM < #{start}+1 + #{size}
+        	]]>
+    </select>
+
+    <select id="findAll" resultType="dictationDto">
+		/* DictationMapper.findAll */
+        SELECT
+            ID
+        FROM IAAP_STT_DICTATION
+        WHERE USE_YN = 'Y'
+        ORDER BY REG_DT DESC
+    </select>
+
+    <select id="findById" resultType="dictationDto">
+		/* DictationMapper.findById */
+        SELECT
+            DICTATION.ID,
+            DICTATION.WAV_FILE_PATH,
+            SERVICE_MODEL.SERVICE_MODEL_NAME,
+            DICTATION.DIRECTION,
+            DICTATION.USAGE_TYPE,
+            DICTATION.TRANSCRIPT,
+            DICTATION.DICTATED_TEXT,
+            DICTATION.REG_ID,
+            DICTATION.REG_DT,
+            DICTATION.UPD_ID,
+            DICTATION.UPD_DT,
+            DICTATION.IS_PREEMPTED
+        FROM IAAP_STT_DICTATION DICTATION
+        JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DICTATION.SERVICE_MODEL_ID)
+        WHERE DICTATION.USE_YN = 'Y'
+        AND DICTATION.ID = #{id}
+    </select>
+    
+    <select id="getIdByWavFilePath" parameterType="String" resultType="int">
+		/* DictationMapper.getIdByWavFilePath */
+        SELECT
+            ID
+        FROM 
+	        IAAP_STT_DICTATION
+        WHERE
+        	WAV_FILE_PATH = #{wavFilePath}
+    </select>
+    
+    <select id="findIdBySttLogId" parameterType="int" resultType="int">
+		/* DictationMapper.findIdBySttLogId */
+        SELECT
+            ID
+        FROM 
+	        IAAP_STT_DICTATION
+        WHERE
+        	STT_LOG_ID = #{sttLogId}
+    </select>
+    
+    <select id="countByWavFilePath" resultType="int">
+		/* DictationMapper.countByWavFilePath */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_DICTATION
+        WHERE USE_YN = 'Y'
+        AND WAV_FILE_PATH = #{wavFilePath}
+    </select>
+    
+    <select id="countByDeprecatedWavFilePath" resultType="int">
+		/* DictationMapper.countByDeprecatedWavFilePath */
+        SELECT COUNT(ID)
+        FROM IAAP_STT_DICTATION
+        WHERE USE_YN = 'N'
+        AND WAV_FILE_PATH = #{wavFilePath}
+    </select>
+    
+    <select id="findUseYnBySttLogId" resultType="string">
+		/* DictationMapper.findUseYnBySttLogId */
+        SELECT USE_YN
+        FROM IAAP_STT_DICTATION
+        WHERE STT_LOG_ID = #{sttLogId}
+    </select>
+    
+    <select id="findByWavFilePath" resultType="dictationDto">
+		/* DictationMapper.findByWavFilePath */
+        SELECT
+            DICTATION.ID,
+            DICTATION.WAV_FILE_PATH,
+            SERVICE_MODEL.SERVICE_MODEL_NAME,
+            DICTATION.DIRECTION,
+            DICTATION.USAGE_TYPE,
+            DICTATION.TRANSCRIPT,
+            DICTATION.DICTATED_TEXT,
+            DICTATION.REG_ID,
+            DICTATION.REG_DT,
+            DICTATION.UPD_ID,
+            DICTATION.UPD_DT,
+            DICTATION.IS_PREEMPTED
+        FROM IAAP_STT_DICTATION DICTATION
+            JOIN IAAP_STT_SERVICE_MODEL SERVICE_MODEL ON SERVICE_MODEL.SERVICE_CODE = TO_CHAR(DICTATION.SERVICE_MODEL_ID)
+        WHERE DICTATION.USE_YN = 'Y'
+            AND DICTATION.WAV_FILE_PATH = #{wavFilePath}
+    </select>
+    
+    <insert id="save" parameterType="dictationSaveDto">
+		/* DictationMapper.save */
+        INSERT INTO IAAP_STT_DICTATION
+        (
+            ID,
+            STT_LOG_ID,
+            TRANSCRIPT,
+            WAV_FILE_PATH,
+            SERVICE_MODEL_ID,
+            DIRECTION,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP
+        ) VALUES
+        (
+            SEQ_IAAP_STT_DICTATION.NEXTVAL,
+            #{sttLogId},
+            #{transcript},
+            #{wavFilePath},
+            #{serviceModelId},
+            #{direction},
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp}
+            )
+    </insert>
+
+    <update id="update" parameterType="dictationUpdateDto">
+		/* DictationMapper.update */
+        UPDATE IAAP_STT_DICTATION
+        SET
+            USAGE_TYPE = #{usageType},
+            DICTATED_TEXT = #{dictatedText}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updateType">
+		/* DictationMapper.updateType */
+        UPDATE IAAP_STT_DICTATION
+        SET USAGE_TYPE = #{usageType}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updatePreempt">
+		/* DictationMapper.updatePreempt */
+        UPDATE IAAP_STT_DICTATION
+        SET IS_PREEMPTED = #{isPreempted}
+        WHERE ID = #{id}
+    </update>
+    
+    <update id="updateReUse" parameterType="dictationSaveDto">
+		/* DictationMapper.updateReUse */
+        UPDATE IAAP_STT_DICTATION
+        SET 
+        	USE_YN = 'Y'
+			, REG_DT = current_date
+	        , REG_ID = #{regId}
+	        , REG_IP = #{regIp}
+	        , UPD_DT = current_date
+	        , UPD_ID = #{updId}
+	        , UPD_IP = #{updIp}
+	        , TRANSCRIPT = #{transcript}
+	        , DICTATED_TEXT = NULL 
+        WHERE STT_LOG_ID = #{sttLogId}
+    </update>
+
+    <update id="delete">
+		/* DictationMapper.delete */
+        UPDATE IAAP_STT_DICTATION
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+
+	<select id="confidenceConfig" parameterType="com.kt.smp.stt.dictation.dto.ConfidenceConfigDto" resultType="com.kt.smp.stt.common.dto.SttConfigDto">
+		/* DictationMapper.confidenceConfig */
+        SELECT
+            isc.CODE_KEY 
+			, isc.CODE_VALUE
+        FROM
+            IAAP_STT_CONFIG isc
+        WHERE 1=1
+        	AND isc.DESCRIPTION = #{description}
+        	AND isc.USE_YN = 'Y'
+        	AND isc.CODE_KEY = #{serviceModelId}
+    	ORDER BY isc.REG_DT DESC
+    </select>
+    
+    <insert id="confidenceSave" parameterType="com.kt.smp.stt.confidence.dto.ConfidenceConfigInsertDTO">
+		/* DictationMapper.confidenceSave */
+		MERGE INTO
+			IAAP_STT_CONFIG ISC
+		USING (
+			<foreach collection="list" item="item" index="index" open="" close="" separator="union">
+				SELECT
+					#{item.codeKey} as codeKey
+					, #{item.codeValue} as codeValue
+					, #{item.description} as description
+					, #{item.regId} as regId
+				    , #{item.regIp} as regIp
+				    , #{item.updId} as updId
+				    , #{item.updIp} as updIp
+				    , #{item.useYn} as useYn
+				FROM
+					DUAL
+		 	</foreach>
+	 	) T1
+			ON (ISC.CODE_KEY = T1.codeKey AND ISC.DESCRIPTION = T1.description)
+		WHEN MATCHED THEN 
+			UPDATE SET
+				CODE_VALUE = T1.codeValue
+				, UPD_DT = current_date
+			    , UPD_ID = T1.updId
+			    , UPD_IP = T1.updIp
+		WHEN NOT MATCHED THEN
+			INSERT(
+				ID
+				, CODE_KEY
+				, CODE_VALUE
+				, DESCRIPTION
+				, REG_DT
+	            , REG_ID
+	            , REG_IP
+	            , UPD_DT
+	            , UPD_ID
+	            , UPD_IP
+	            , USE_YN
+			) VALUES(
+				SEQ_IAAP_STT_CONFIG.NEXTVAL
+				, T1.codeKey
+				, T1.codeValue
+				, T1.description
+				, current_date
+			    , T1.regId
+			    , T1.regIp
+			    , current_date
+			    , T1.updId
+			    , T1.updIp
+			    , T1.useYn
+			)
+	</insert>
+</mapper>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+	<head th:replace="fragments/config :: configFragment"></head>
+
+	<!-- <body class="nav-fixed bg-light" style="display:none"> -->
+	<body class="nav-fixed bg-light">
+		<th:block layout:fragment="html"></th:block>
+		<th:block layout:fragment="script"></th:block>
+	</body>
+</html>

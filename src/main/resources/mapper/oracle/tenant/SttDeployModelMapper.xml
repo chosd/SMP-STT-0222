@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.deploy.model.mapper.SttDeployModelMapper">
+
+    <resultMap id="modelResultMap" type="com.kt.smp.stt.deploy.model.domain.SttDeployModelVO">
+        <id column="id" property="id"/>
+        <result column="ID" property="id"/>
+        <result column="SERVICE_MODEL_ID" property="serviceModelId"/>
+        <result column="MODEL_PATH" property="modelPath"/>
+        <result column="MODEL_AUTH_KEY" property="modelAuthKey"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="UPLOADED_BY" property="uploadedBy"/>
+        <result column="UPLOADED_DATE" property="uploadedDate"/>
+        <result column="RESULT_MODEL_ID" property="resultModelId"/>
+        <result column="DATA_NUM" property="dataNum"/>
+        <result column="DATA_Time" property="dataTime"/>
+        <result column="MODEL_TYPE" property="modelType"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+        <result column="USE_YN" property="useYn"/>
+    </resultMap>
+
+
+    <sql id="vo_fields">
+        SDM.id
+        , SDM.service_model_id
+        , SDM.model_path
+        , SDM.model_auth_key
+		, SDM.description
+		, SDM.uploaded_by
+		, SDM.uploaded_date
+        , SDM.result_model_id
+        , SDM.data_num
+        , SDM.data_time
+        , SDM.model_type
+		, SDM.REG_DT
+		, SDM.REG_ID
+		, SDM.REG_IP
+		, SDM.UPD_DT
+		, SDM.UPD_ID
+		, SDM.UPD_IP
+        , SDM.USE_YN
+    </sql>
+
+    <!--  SELECT  -->
+
+    <select id="list" parameterType="com.kt.smp.stt.deploy.model.domain.SttDeployModelSearchCondition" resultMap="modelResultMap">
+		/* SttDeployModelMapper.list */
+        SELECT
+        <include refid="vo_fields"/>
+        FROM
+            IAAP_STT_DEPLOY_MODEL SDM
+        WHERE 1 = 1
+            AND SDM.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+			<![CDATA[
+            	AND SDM.service_model_id = #{serviceModelId}
+        	]]>
+        </if>
+        <if test="uploadedBy != null and uploadedBy != ''" >
+			<![CDATA[
+            	AND SDM.UPLOADED_BY LIKE '%' || #{uploadedBy} || '%'
+        	]]>
+        </if>
+        <if test="description != null and description != ''" >
+            <![CDATA[
+            	AND SDM.DESCRIPTION LIKE '%' || #{description} || '%'
+        	]]>
+        </if>
+        <choose>
+            <when test="from != null">
+                AND SDM.UPLOADED_DATE >= TO_DATE(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND SDM.UPLOADED_DATE >= TO_DATE('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                AND SDM.UPLOADED_DATE &lt;= TO_DATE(#{to} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND SDM.UPLOADED_DATE &lt;= current_date
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="detail" parameterType="Long" resultMap="modelResultMap">
+	/* SttDeployModelMapper.detail */
+        SELECT
+            <include refid="vo_fields"/>
+        FROM
+            IAAP_STT_DEPLOY_MODEL SDM
+        WHERE
+            SDM.ID = #{modelId}
+        AND
+            SDM.USE_YN = 'Y'
+    </select>
+
+    <select id="detailByResultModelId" parameterType="String" resultMap="modelResultMap">
+	/* SttDeployModelMapper.detailByResultModelId */
+	    SELECT a.* FROM (
+	        SELECT
+	            <include refid="vo_fields"/>
+	            , rownum as RNUM
+	        FROM
+	            IAAP_STT_DEPLOY_MODEL SDM
+	        WHERE
+	            SDM.RESULT_MODEL_ID = #{resultModelId}
+	        AND
+	            SDM.USE_YN = 'Y'
+        )a WHERE a.RNUM = 1
+    </select>
+
+    <select id="count" parameterType="com.kt.smp.stt.deploy.model.domain.SttDeployModelSearchCondition" resultType="int">
+	/* SttDeployModelMapper.count */
+        SELECT COUNT(1)
+        FROM
+             IAAP_STT_DEPLOY_MODEL SDM
+        WHERE 1 = 1
+            AND SDM.USE_YN = 'Y'
+        <if test="serviceModelId != null">
+			<![CDATA[
+            	AND SDM.service_model_id = #{serviceModelId}
+        	]]>
+        </if>
+        <if test="uploadedBy != null and uploadedBy != ''" >
+			<![CDATA[
+            	AND SDM.UPLOADED_BY = #{uploadedBy}
+        	]]>
+        </if>
+        <choose>
+            <when test="from != null">
+                AND SDM.UPLOADED_DATE >= TO_DATE(#{from} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND SDM.UPLOADED_DATE >= TO_DATE('2022-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="to != null">
+                AND SDM.UPLOADED_DATE &lt;= TO_DATE(#{to} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+            </when>
+            <otherwise>
+                AND SDM.UPLOADED_DATE &lt;= current_date
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="exists" parameterType="Long" resultType="int">
+	/* SttDeployModelMapper.exists */
+        SELECT COUNT(*) FROM DUAL 
+        WHERE EXISTS
+        	(SELECT 1 FROM IAAP_STT_DEPLOY_MODEL SDM WHERE SDM.ID = #{modelId} AND SDM.USE_YN = 'Y')
+    </select>
+    
+    <select id="getModelPath" resultType="String">
+	/* SttDeployModelMapper.getModelPath */
+        SELECT
+            SDM.MODEL_PATH
+        FROM
+            IAAP_STT_DEPLOY_MODEL SDM
+        WHERE
+            SDM.result_model_id = #{resultModelId}
+        AND
+            SDM.USE_YN = 'Y'
+    </select>
+
+    <!--  INSERT  -->
+    <insert id="insert" parameterType="com.kt.smp.stt.deploy.model.domain.SttDeployModelVO">
+	/* SttDeployModelMapper.insert */
+        INSERT INTO IAAP_STT_DEPLOY_MODEL(id
+            , service_model_id
+            , model_path
+            , model_auth_key
+            , description
+            , uploaded_by
+            , uploaded_date
+            , result_model_id
+            , data_num
+            , data_time
+            , model_type
+            , reg_dt
+            , reg_id
+            , reg_ip
+            , upd_dt
+            , upd_id
+            , upd_ip
+            , use_yn)
+        VALUES(
+        	SEQ_IAAP_STT_DEPLOY_MODEL.NEXTVAL
+            , #{serviceModelId}
+            , #{modelPath}
+            , #{modelAuthKey}
+            , #{description}
+            , #{uploadedBy}
+            , current_date
+            , #{resultModelId}
+            , #{dataNum}
+            , #{dataTime}
+            , #{modelType}
+            , current_date
+            , #{regId}
+            , #{regIp}
+            , current_date
+            , #{updId}
+            , #{updIp}
+            , 'Y')
+    </insert>
+
+    <!--  UPDATE  -->
+    <update id="update" parameterType="com.kt.smp.stt.deploy.model.domain.SttDeployModelVO">
+	/* SttDeployModelMapper.update */
+        UPDATE
+            IAAP_STT_DEPLOY_MODEL
+        SET
+            DESCRIPTION = #{description}
+            <if test="serviceModelId != null">
+                , SERVICE_MODEL_ID = #{serviceModelId}
+            </if>
+            <if test="resultModelId != null">
+                , RESULT_MODEL_ID = #{resultModelId}
+            </if>
+            <if test="dataNum != null">
+                , DATA_NUM = #{dataNum}
+            </if>
+            <if test="modelPath != null">
+                , MODEL_PATH = #{modelPath}
+            </if>
+            <if test="modelAuthKey != null">
+                , MODEL_AUTH_KEY = #{modelAuthKey}
+            </if>
+          , UPLOADED_DATE = current_date
+          , UPD_DT = current_date
+          , UPD_ID = #{updId}
+          , UPD_IP = #{updIp}
+        WHERE
+            RESULT_MODEL_ID = #{resultModelId}
+        AND
+            USE_YN = 'Y'
+    </update>
+
+    <!-- DELETE -->
+    <delete id="delete" parameterType="Long">
+	/* SttDeployModelMapper.delete */
+        UPDATE
+            IAAP_STT_DEPLOY_MODEL
+        SET
+            USE_YN = 'N'
+        WHERE
+            ID IN
+        <foreach collection="modelIdList" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <select id="countDuplicateModelId" parameterType="String" resultType="int">
+		/* SttDeployModelMapper.countDuplicateModelId */
+        SELECT 
+        	COUNT(1)
+        FROM IAAP_STT_DEPLOY_MODEL
+        WHERE RESULT_MODEL_ID = TRIM(#{resultModelId})  AND USE_YN='Y'
+    </select>
+
+</mapper>

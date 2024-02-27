@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.statistics.mapper.SttSystemStatusMapper">
+
+    <resultMap id="systemStatusResultMap" type="com.kt.smp.stt.monitoring.dto.SystemStatusSearchResult">
+        <result column="SERVER_ID" property="serverName"/>
+        <result column="CPU_USED" property="cpuUsed"/>
+        <result column="MAX_MEMORY_SIZE" property="maxMemorySize"/>
+        <result column="FREE_MEMORY_SIZE" property="freeMemorySize"/>
+        <result column="MAX_APP_STORAGE_SIZE" property="maxAppStorageSize"/>
+        <result column="FREE_APP_STORAGE_SIZE" property="freeAppStrorageSize"/>
+		<result column="BPS" property="bps"/>
+		<result column="PPS" property="pps"/>
+		<result column="LAST_CHECK_TIME" property="last_check_time"/>   
+    </resultMap>
+    
+	<sql id="selectBody">
+		RS.ID AS id
+		, RS.SERVER_ID AS serverName
+		, RS.CPU_USED AS cpuUsed
+		, RS.MAX_MEMORY_SIZE AS maxMemorySize
+		, RS.FREE_MEMORY_SIZE AS freeMemorySize
+		, RS.MAX_APP_STORAGE_SIZE AS maxAppStorageSize
+		, RS.FREE_APP_STORAGE_SIZE AS freeAppStorageSize
+		, RS.BPS AS bps
+		, RS.PPS AS pps
+		, DATE_FORMAT(RS.LAST_CHECK_TIME, "%Y%m%d%H%i%s") AS lastCheckTime
+	</sql>
+	
+	<sql id="req_list_where">
+        <if test="startSearchDate != null and !startSearchDate.equals('')">
+            AND RS.LAST_CHECK_TIME >= STR_TO_DATE(#{startSearchDate}, '%Y-%m-%d %H:%i')
+        </if>
+        <if test="endSearchDate != null and !endSearchDate.equals('')">
+            AND STR_TO_DATE(#{endSearchDate}, '%Y-%m-%d %H:%i') >= RS.LAST_CHECK_TIME
+        </if>
+    </sql>
+    <!-- INSERT -->
+    <select id="exists" parameterType="com.kt.smp.stt.statistics.domain.SttServerInfoVO"
+    	resultType="int">
+	/* SttSystemStatusMapper.exists */
+		SELECT count(*) FROM IAAP_STT_SYSTEM_STATUS 
+		WHERE SERVER_ID = #{serverName} 
+			and LAST_CHECK_TIME = STR_TO_DATE(SUBSTRING(#{lastCheckTime},1,14), '%Y%m%d%H%i%s')
+	</select>
+
+    <insert id="insert" parameterType="com.kt.smp.stt.statistics.domain.SttServerInfoVO">
+		/* SttSystemStatusMapper.insert */
+		<selectKey keyProperty="id" resultType="Long" order="BEFORE">
+            SELECT NEXTVAL(SEQ_IAAP_STT_SYSTEM_STATUS)
+        </selectKey>
+        INSERT INTO IAAP_STT_SYSTEM_STATUS (
+        	ID, SERVER_ID, CPU_USED
+        	, MAX_MEMORY_SIZE, FREE_MEMORY_SIZE, MAX_APP_STORAGE_SIZE
+        	, FREE_APP_STORAGE_SIZE
+        	, BPS, PPS, LAST_CHECK_TIME
+        	, REG_DT, REG_ID, REG_IP
+        )
+        VALUES (
+	        #{id}, #{serverName}, #{cpuUsed}
+	        , #{maxMemorySize}, #{freeMemorySize}, #{maxAppStorageSize}
+	        , #{freeAppStorageSize}
+	        , #{bps}, #{pps}, STR_TO_DATE(SUBSTRING(#{lastCheckTime},1,14), '%Y%m%d%H%i%s')
+	        , CURRENT_TIMESTAMP, #{regId}, #{regIp}
+        )
+
+    </insert>	
+    
+    <insert id="insertSystemStatusStatHour">
+	/* SttSystemStatusMapper.insertSystemStatusStatHour */
+		INSERT INTO IAAP_STT_SYSTEM_STATUS_STATH
+			(DATE_HOUR, SERVER_ID, CPU_MX, CPU_MN, CPU_AV
+			, MEM_TT, MEM_MX, MEM_MN, MEM_AV, STR_TT, STR_MX, STR_MN, STR_AV
+			, LOG_TT, LOG_MX, LOG_MN, LOG_AV, BPS_MX, BPS_MN, BPS_AV
+			, PPS_MX, PPS_MN, PPS_AV)
+		SELECT a.timeHour, a.SERVER_ID, a.cpuMx, a.cpuMn, a.cpuAv
+			, a.memTt, a.memMx, a.memMn, a.memAv, a.strTt, a.strMx, a.strMn, a.strAv
+			, a.logTt, a.logMx, a.logMn, a.logAv, a.bpsMx, a.bpsMn, a.bpsAv
+			, a.ppsMx, a.ppsMn, a.ppsAv
+		FROM (
+			SELECT a.timeHour, a.SERVER_ID -- , count(0) cnt
+				, max(CPU_USED) cpuMx, min(CPU_USED) cpuMn, round(avg(CPU_USED)) cpuAv
+				, max(MAX_MEMORY_SIZE) memTt
+				, max(FREE_MEMORY_SIZE) memMx, min(FREE_MEMORY_SIZE) memMn, round(avg(FREE_MEMORY_SIZE)) memAv
+				, max(MAX_APP_STORAGE_SIZE) strTt
+				, max(FREE_APP_STORAGE_SIZE) strMx, min(FREE_APP_STORAGE_SIZE) strMn, round(avg(FREE_APP_STORAGE_SIZE)) strAv
+				, max(MAX_LOG_STORAGE_SIZE) logTt
+				, max(FREE_LOG_STORAGE_SIZE) logMx, min(FREE_LOG_STORAGE_SIZE) logMn, round(avg(FREE_LOG_STORAGE_SIZE)) logAv
+				, max(BPS) bpsMx, min(BPS) bpsMn, round(avg(BPS)) bpsAv
+				, max(PPS) ppsMx, min(PPS) ppsMn, round(avg(PPS)) ppsAv
+			FROM (
+				SELECT
+					DATE_FORMAT(LAST_CHECK_TIME, "%Y%m%d%H") timeHour
+					, SERVER_ID, CPU_USED, MAX_MEMORY_SIZE, FREE_MEMORY_SIZE
+					, MAX_APP_STORAGE_SIZE, FREE_APP_STORAGE_SIZE
+					, MAX_LOG_STORAGE_SIZE, FREE_LOG_STORAGE_SIZE
+					, BPS, PPS
+				FROM IAAP_STT_SYSTEM_STATUS s
+				WHERE LAST_CHECK_TIME  &gt;=  DATE_SUB(now(), interval 24 hour)
+					AND LAST_CHECK_TIME  &lt;  DATE_SUB(now(), interval 1 hour)
+			) a
+			GROUP BY a.timeHour, a.SERVER_ID
+			ORDER BY a.timeHour, a.SERVER_ID
+		) a
+		LEFT OUTER JOIN IAAP_STT_SYSTEM_STATUS_STATH h
+			on h.DATE_HOUR = a.timeHour and h.SERVER_ID = a.SERVER_ID
+		WHERE h.DATE_HOUR is null
+	</insert>
+	
+ 	<select id="listPage" parameterType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchRequestDto"
+			resultType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchResult">
+	/* SttSystemStatusMapper.listPage */
+		SELECT
+			ID AS id
+			, SERVER_ID AS serverName
+			, CPU_USED AS cpuUsed
+			, MAX_MEMORY_SIZE AS maxMemorySize
+			, FREE_MEMORY_SIZE AS freeMemorySize
+			, MAX_APP_STORAGE_SIZE AS maxAppStorageSize
+			, FREE_APP_STORAGE_SIZE AS freeAppStorageSize
+			, BPS AS bps
+			, PPS AS pps
+			, DATE_FORMAT(RS.LAST_CHECK_TIME, "%Y-%m-%d %H:%i:%s") AS lastCheckTime
+		FROM IAAP_STT_SYSTEM_STATUS AS RS
+		WHERE 1=1
+		<if test="startSearchDate != null and !startSearchDate.equals('')">
+			AND LAST_CHECK_TIME >= STR_TO_DATE(#{startSearchDate}, '%Y-%m-%d %H:%i')
+		</if>
+		<if test="endSearchDate != null and !endSearchDate.equals('')">
+			AND STR_TO_DATE(#{endSearchDate}, '%Y-%m-%d %H:%i') >= LAST_CHECK_TIME	
+		</if>
+		<if test="orderType == 'DESC'">
+			ORDER BY LAST_CHECK_TIME DESC
+		</if>
+		<if test="orderType == 'ASC'">
+			ORDER BY LAST_CHECK_TIME ASC
+		</if>
+        # pageing 설정
+        <if test="!doNotPaging">LIMIT #{offset}, #{pageSize} </if>
+	</select>
+        <!--  INSERT  -->
+        
+	<select id="listByDate"	parameterType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchRequestDto" resultType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchResult">
+	/* SttSystemStatusMapper.listByDate */
+		SELECT SERVER_ID AS serverName
+			, ROUND(AVG(CPU_AV)) AS CPU_USED
+			, ROUND(AVG(MEM_TT)) AS MAX_MEMORY_SIZE
+			, ROUND((AVG(MEM_TT) - AVG(MEM_AV))) AS FREE_MEMORY_SIZE
+			, ROUND(AVG(STR_TT)) AS MAX_APP_STORAGE_SIZE
+			, ROUND((AVG(STR_TT) - AVG(STR_AV))) AS FREE_APP_STORAGE_SIZE
+			, ROUND(AVG(BPS_AV)) AS BPS
+			, ROUND(AVG(PPS_AV)) AS PPS
+		<choose>
+		<when test="searchUnit.toString() == 'HOUR'">
+			, DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d %H') as LAST_CHECK_TIME
+		</when>
+		<when test="searchUnit.toString() == 'DAY'">
+			, DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d') as LAST_CHECK_TIME
+		</when>
+		<when test="searchUnit.toString() == 'MONTH'">
+			, DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m') as LAST_CHECK_TIME
+		</when>	
+		</choose>
+		FROM IAAP_STT_SYSTEM_STATUS_STATH 
+		WHERE 1=1
+		<if test="startSearchDate != null and !startSearchDate.equals('')">
+			AND DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d %H') >= STR_TO_DATE(#{startSearchDate}, '%Y-%m-%d %H')
+		</if>
+		<if test="endSearchDate != null and !endSearchDate.equals('')">
+			AND STR_TO_DATE(#{endSearchDate}, '%Y-%m-%d %H:%i') >= DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d %H')	
+		</if>
+		<choose>
+		<when test="searchUnit.toString() == 'HOUR'">
+			GROUP BY DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d %H'), '%Y%m%d %H'), SERVER_ID 
+		</when>
+		<when test="searchUnit.toString() == 'DAY'">
+			GROUP BY DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'), '%Y%m%d'), SERVER_ID 
+		</when>
+		<when test="searchUnit.toString() == 'MONTH'">
+			GROUP BY DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'), '%Y%m'), SERVER_ID 
+		</when>	
+		</choose>
+		<if test="orderType == 'DESC'">
+			ORDER BY LAST_CHECK_TIME DESC
+		</if>
+		<if test="orderType == 'ASC'">
+			ORDER BY LAST_CHECK_TIME ASC
+		</if>
+		<if test="!doNotPaging">LIMIT #{offset}, #{pageSize} </if>
+	</select>
+    
+	<select id="getLastData" resultType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchResult">
+	/* SttSystemStatusMapper.getLastData */
+		SELECT
+			<include refid="selectBody"/>
+		FROM IAAP_STT_SYSTEM_STATUS AS RS
+		JOIN
+			(
+				SELECT
+					SERVER_ID
+					, MAX(LAST_CHECK_TIME) AS LAST_CHECK_TIME
+				FROM
+					IAAP_STT_SYSTEM_STATUS
+				GROUP BY SERVER_ID
+			) AS T
+		ON
+			RS.SERVER_ID = T.SERVER_ID
+		AND
+			RS.LAST_CHECK_TIME = T.LAST_CHECK_TIME
+		WHERE RS.LAST_CHECK_TIME >= DATE_SUB(NOW(), INTERVAL 1 MINUTE)
+	</select>
+	
+	<select id="count" parameterType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchRequestDto"
+			resultType="Integer">
+	/* SttSystemStatusMapper.count */
+		SELECT COUNT(1)
+		FROM ( SELECT * 
+			FROM IAAP_STT_SYSTEM_STATUS RS
+			WHERE 1=1
+			<include refid="req_list_where"/>
+		) a
+	</select>
+	
+	<select id= "countByDate" parameterType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchRequestDto"
+			resultType="Integer">
+	/* SttSystemStatusMapper.countByDate */
+		SELECT COUNT(1)
+		FROM ( SELECT 
+				<if test="searchUnit.toString() == 'HOUR'">
+					DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d %H') as LAST_CHECK_TIME
+				</if>
+				<if test="searchUnit.toString() == 'DAY'">
+					DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d') as LAST_CHECK_TIME
+				</if>
+				<if test="searchUnit.toString() == 'MONTH'">
+					DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m') as LAST_CHECK_TIME
+				</if>
+			FROM IAAP_STT_SYSTEM_STATUS_STATH
+			WHERE 1=1
+		        <if test="startSearchDate != null and !startSearchDate.equals('')">
+		            AND DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d %H') >= STR_TO_DATE(#{startSearchDate}, '%Y-%m-%d %H')
+		        </if>
+		        <if test="endSearchDate != null and !endSearchDate.equals('')">
+		            AND STR_TO_DATE(#{endSearchDate}, '%Y-%m-%d %H') >= DATE_FORMAT(STR_TO_DATE(DATE_HOUR, '%Y%m%d%H'),'%Y-%m-%d %H')
+		        </if>
+		        	GROUP BY LAST_CHECK_TIME
+			) a
+	</select>
+	
+	<select id="getRealtimeChart" resultType="com.kt.smp.stt.monitoring.dto.SystemStatusSearchResult">
+		/* SystemStatusMapper.getRealtimeChart */
+		SELECT
+			RS.ID AS id
+			, RS.SERVER_ID AS serverName
+			, RS.CPU_USED AS cpuUsed
+			, RS.MAX_MEMORY_SIZE AS maxMemorySize
+			, RS.FREE_MEMORY_SIZE AS freeMemorySize
+			, RS.MAX_APP_STORAGE_SIZE AS maxAppStorageSize
+			, RS.FREE_APP_STORAGE_SIZE AS freeAppStorageSize
+			, RS.BPS AS bps
+			, RS.PPS AS pps
+			, DATE_FORMAT(RS.LAST_CHECK_TIME, "%Y-%m-%d %H:%i:%s") AS lastCheckTime
+		FROM IAAP_STT_SYSTEM_STATUS AS RS
+		WHERE RS.LAST_CHECK_TIME >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+	</select>
+	
+ 
+</mapper>

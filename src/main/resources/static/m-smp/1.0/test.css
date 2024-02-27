@@ -1,0 +1,5 @@
+/*2022/08/09 : carcd에서 ripple이 네모모양으로 되서 inherit 에서 100%로 변경 */
+.mdc-card__primary-action.mdc-ripple-upgraded--background-focused::after,
+.mdc-card__primary-action:not(.mdc-ripple-upgraded):focus::after {
+    border-radius: 100%;
+}

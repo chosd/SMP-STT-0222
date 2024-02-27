@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<aside th:fragment="leftMenuFragment" class="mdc-drawer" style="width: 250px;">
+	<div class="mdc-drawer__header">
+		<h3 class="mdc-drawer__title">
+			<img src="/smp/assets/img/favicon.ico" style="width:15px">
+			Base Service Template
+		</h3>
+		<h6 class="mdc-drawer__subtitle">Master SMP design</h6>
+	</div>
+	<div id="menuList" class="mdc-drawer__content menu-list custom-scrollbar">
+		<template v-for="(menu, idx) in menuLinks">
+			<h6 class="mdc-list-group__subheader"> {{menu.name}}</h6>
+			<div v-for="(page, idx) in menu.pages" class="menu-item">
+				<a class="menu-link" href="javascript:void(0)" tabindex="-1"
+				   v-if="page.html"
+				   :class="{'d-none': !_.isEmpty(page.parent_url)}"
+				   :href="page.url_pattern"
+				   :data-parent="page.parent_url"
+				   :data-html="page.html"
+				   @click="movePage($event.target.href)">
+					<i class="material-icons mdc-list-item__graphic" aria-hidden="true">{{page.icon}}</i>
+					<span class="menu-name">{{page.name}}</span>
+				</a>
+				<a class="menu-link" href="javascript:void(0)" tabindex="-1"
+				   v-if="page.html == void 0"
+				   :href="page.url_pattern"
+				   target="_blank">
+					<i class="material-icons mdc-list-item__graphic" aria-hidden="true">{{page.icon}}</i>
+					<span class="menu-name">{{page.name}}</span>
+				</a>
+			</div>
+		</template>
+	</div>
+</aside>
+</html>

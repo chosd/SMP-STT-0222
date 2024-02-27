@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/basic">
+<th:block layout:fragment="html">
+    <div id="app" class="h-100">
+        <div class="drawer-frame-root mdc-drawer--permanent w-100 h-100">
+            <aside th:replace="fragments/leftMenu :: leftMenuFragment"></aside>
+
+            <div class="drawer-frame-app-content">
+                <header class="smp-header-title mdc-top-app-bar">
+                    <div class="mdc-top-app-bar__row">
+                        <section
+                            class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                            <span class="mdc-top-app-bar__title"></span>
+                        </section>
+                    </div>
+                </header>
+                <div class="drawer-main-content p-0">
+                    <div class="mdc-top-app-bar--fixed-adjust"></div>
+                    <div id="indexLoadingBar" role="progressbar"
+                         class="mdc-linear-progress mdc-linear-progress--indeterminate" style="opacity: 0;">
+                        <div class="mdc-linear-progress__buffering-dots"></div>
+                        <div class="mdc-linear-progress__buffer"></div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                            <span class="mdc-linear-progress__bar-inner"></span>
+                        </div>
+                    </div>
+                    <div id="drawer-main-content-viewer" class="page-contents fixed-header"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        (function () {
+
+            var smpServiceUriPrefix = "[[${smpServiceUriPrefix}]]";
+
+            var LABEL = {
+                message: {
+                    // 공통
+                    API_ERROR_TITLE: "실패",
+                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+                    MOVE_PAGE_ERROR: "존재하지 않는 화면입니다.",
+                }
+            };
+
+            new Vue({
+                el: "#app",
+                data: {
+
+                    menuLinks: [
+                        {
+                            name: "학습 관리", pages: [
+                                {
+                                    name: "LM 학습데이터",
+                                    icon: "dataset",
+                                    url_pattern: smpServiceUriPrefix + "/trainData",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/trainData"
+                                },
+                                {
+								    name: "AM 학습데이터",
+								    icon: "dataset",
+								    url_pattern: smpServiceUriPrefix + "/answerTrainData",
+								    parent_url: null,
+								    html: smpServiceUriPrefix + "/html/answerTrainData"
+								},
+                                {
+                                    name: "학습요청",
+                                    icon: "login",
+                                    url_pattern: smpServiceUriPrefix + "/train",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/train"
+                                }
+                            ]
+                        },
+                        {
+                            name: "배포관리", pages: [
+                                {
+                                    name: "배포모델",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/deployModel",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/deployModel"
+                                },
+                                {
+                                    name: "배포요청",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/deploy",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/deploy"
+                                }
+                            ]
+                        },
+                        {
+                            name: "검증관리", pages: [
+                                /*{
+                                    name: "검증데이터셋",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/verify/dataset",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/verify/dataset"
+                                },*/
+                                {
+                                    name: "검증데이터",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/verify/data",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/verify/data"
+                                },
+                                {
+                                    name: "검증데이터 상세",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/verify/data/[a-zA-Z0-9]+",
+                                    parent_url: smpServiceUriPrefix + "/verify/data",
+                                    html: smpServiceUriPrefix + "/html/verify/data/detail"
+                                },
+                                {
+                                    name: "검증요청",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/verify/history",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/verify/history"
+                                }
+                            ]
+                        },
+                        {
+                            name: "테스트", pages: [
+                                {
+                                    name: "단건테스트",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/test",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/test"
+                                }
+                            ]
+                        },
+                        /*{
+                            name: "재처리", pages: [
+                                {
+                                    name: "재처리",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/reprocess",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/reprocess"
+                                }
+                            ]
+                        },*/
+                        {
+                            name: "운영 관리", pages: [
+                            	{
+                                    name: "인식률 차트",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/recognition",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/recognition"
+                                },
+                                {
+                                    name: "STT통계",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/statistics",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/statistics"
+                                },
+                                {
+                                    name: "상담 내역 청취",
+                                    icon: "headset",
+                                    url_pattern: smpServiceUriPrefix + "/callinfo",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/callinfo"
+                                },
+                                {
+                                    name: "상담 내역 청취 상세",
+                                    icon: "headset",
+                                    url_pattern: smpServiceUriPrefix + "/callinfo/[a-zA-Z0-9._]+",
+                                    parent_url: smpServiceUriPrefix + "/callinfo",
+                                    html: smpServiceUriPrefix + "/html/callinfo/detail"
+                                },
+								/* {
+                                    name: "실시간 채널정보",
+                                    icon: "visibility",
+                                    url_pattern: smpServiceUriPrefix + "/channel",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/channel"
+                                }, */
+                                {
+                                    name: "실시간 세션정보",
+                                    icon: "visibility",
+                                    url_pattern: smpServiceUriPrefix + "/session",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/session"
+                                },
+                                {
+                                    name: "STT결과",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/log",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/log"
+                                },
+                                {
+                                    name: "STT 결과 상세",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/log/[a-zA-Z0-9._\-]+",
+                                    parent_url: smpServiceUriPrefix + "/log",
+                                    html: smpServiceUriPrefix + "/html/log/detail"
+                                },
+                                {
+                                    name: "전사데이터",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/dictation",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/dictation"
+                                },
+                                {
+                                    name: "전사데이터 상세",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/dictation/[a-zA-Z0-9]+",
+                                    parent_url: smpServiceUriPrefix + "/dictation",
+                                    html: smpServiceUriPrefix + "/html/dictation/detail"
+                                },
+                                {
+                                    name: "신뢰도 차트",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/confidence",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/confidence"
+                                },
+                                {
+									name: "HW 리소스 정보",
+									icon: "bar_chart",
+									url_pattern: smpServiceUriPrefix + "/mntrHwResource",
+									parent_url: null,
+									html: smpServiceUriPrefix + "/html/mntrHwResource"
+								},
+								{
+									name: "장애이력 조회",
+									icon: "bar_chart",
+									url_pattern: smpServiceUriPrefix + "/error",
+									parent_url: null,
+									html: smpServiceUriPrefix + "/html/error"
+								}
+                            ]
+                        },
+                        {
+                            name: "공통 관리", pages: [
+                                {
+                                    name: "서비스 모델",
+                                    icon: "library_books",
+                                    url_pattern: smpServiceUriPrefix + "/serviceModel",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/serviceModel"
+                                },
+                                {
+                                    name: "서비스 설정",
+                                    icon: "settings",
+                                    url_pattern: smpServiceUriPrefix + "/config",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/config"
+                                },
+                                {
+                                    name: "환경 설정",
+                                    icon: "settings",
+                                    url_pattern: smpServiceUriPrefix + "/preference",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/preference"
+                                },
+                                /*{
+                                    name: "디렉토리 그룹",
+                                    icon: "list",
+                                    url_pattern: smpServiceUriPrefix + "/directory/group",
+                                    parent_url: null,
+                                    html: smpServiceUriPrefix + "/html/directory/group"
+                                },*/
+                                {
+                                    name: "디렉토리 그룹 상세",
+                                    icon: "assignment",
+                                    url_pattern: smpServiceUriPrefix + "/directory/group/[a-zA-Z0-9]+",
+                                    parent_url: smpServiceUriPrefix + "/directory/group",
+                                    html: smpServiceUriPrefix + "/html/directory/group/detail"
+                                }
+                            ]
+                        },
+                        /*
+                        {name:"Login", pages: [
+                                {name:"Login", icon: "login", url_pattern: smpServiceUriPrefix+"/smp/login", parent_url: null, html: smpServiceUriPrefix+"/smp/html/login"}
+                            ]},
+                        {name:"시스템 관리자 관리", pages: [
+                                {name:"시스템 관리자 목록", icon: "list", url_pattern: smpServiceUriPrefix+"/smp/system/adminManage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/adminManage"}
+                            ]},
+                        {name:"시스템 인증 설정", pages: [
+                                {name:"시스템 인증 목록", icon: "list", url_pattern: smpServiceUriPrefix+"/smp/system/certificationConfig", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/certificationConfig"},
+                                {name:"시스템 인증 상세", icon: "view_compact", url_pattern: smpServiceUriPrefix+"/smp/system/certificationConfig/detail", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/certificationConfig/detail"}
+                            ]},
+                        {name:"서비스 연동 관리", pages: [
+                                {name:"서비스 연동 목록", icon: "list", url_pattern: smpServiceUriPrefix+ "/smp/system/serviceInterworkingManage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/serviceInterworkingManage"},
+                            ]},
+                        {name:"사이트 관리", pages: [
+                                {name:"사이트 목록", icon: "list", url_pattern: smpServiceUriPrefix+ "/smp/system/siteManage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/siteManage"},
+                                {name:"사이트 상세", icon: "assignment", url_pattern: smpServiceUriPrefix+ "/smp/system/siteManage/detail/site", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/siteManage/detail/site"},
+                                {name:"다중 참조 사이트 상세", icon: "assignment", url_pattern: smpServiceUriPrefix+"/smp/system/siteManage/detail/multirefsite", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/siteManage/detail/multirefsite"},
+                                {name:"다중 참조 사이트 상세 샘플", icon: "assignment", url_pattern: smpServiceUriPrefix+"/smp/system/siteManage/detail/[a-zA-Z0-9]+", parent_url: smpServiceUriPrefix+ "/smp/system/siteManage", html: smpServiceUriPrefix+"/smp/html/system/siteManage/detail/site"},
+                                // window.index.movePage('http://localhost:8085/m-smp/1.0/smp/system/siteManage/detail/test') 으로 상세페이지 이동
+                            ]},
+                        {name:"운영 이력 조회", pages: [
+                                {name:"운영 이력 목록", icon: "list", url_pattern: smpServiceUriPrefix+"/smp/system/operationHistory", parent_url: null, html: smpServiceUriPrefix+"/smp/html/system/operationHistory"},
+                            ]},
+                        {name:"공통 데이터 관리", pages: [
+                                {name:"공통 텍스트 데이터 목록", icon: "list", url_pattern: smpServiceUriPrefix+"/smp/site/commonTextDataManage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/site/commonTextDataManage"},
+                                {name:"공통 음원 데이터 목록", icon: "list", url_pattern: smpServiceUriPrefix+"/smp/site/commonSoundDataManage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/site/commonSoundDataManage"},
+                            ]},
+                        {name:"프로젝트 관리", pages: [
+                                {name:"프로젝트 권한 관리", icon: "view_compact", url_pattern: smpServiceUriPrefix+"/smp/site/projectAuthManage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/site/projectAuthManage"},
+                                {name:"프로젝트 관리", icon: "view_compact", url_pattern: smpServiceUriPrefix+"/smp/site/projectManage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/site/projectManage"},
+                                {name:"프로젝트 화면 구성 관리", icon: "view_compact", url_pattern: smpServiceUriPrefix+"/smp/site/projectViewConfig", parent_url: null, html: smpServiceUriPrefix+"/smp/html/site/projectViewConfig"},
+                            ]},
+                        {name:"프로젝트 메뉴", pages: [
+                                {name:"대시보드", icon: "dashboard", url_pattern: smpServiceUriPrefix+"/smp/project/dashboard", parent_url: null, html: smpServiceUriPrefix+"/smp/html/project/dashboard"},
+                                {name:"개인정보 조회 & 변경", icon: "account_circle", url_pattern: smpServiceUriPrefix+"/smp/project/mypage", parent_url: null, html: smpServiceUriPrefix+"/smp/html/project/mypage"},
+                            ]},
+                        {name:"DEV", pages: [
+                                {name:"Swagger", icon: "play_arrow", url_pattern: smpServiceUriPrefix+"/dev/swagger"},
+                            ]},
+                        {name:"Google Material UI/UX", pages: [
+                                {name:"Component", icon: "apps", url_pattern: smpServiceUriPrefix+"/dev/components"},
+                                {name:"Icons", icon: "info", url_pattern: "https://fonts.google.com/icons?selected=Material+Icons"},
+                            ]},
+                        */
+                    ],
+                },
+                created: function () {
+                    // spa 초기화
+                    window.spa.initialize('#drawer-main-content-viewer');
+                    window.index = this;
+
+                    $.ajaxSettings.headers = {
+                        'x-smp-site-code': 'test-site-code',
+                        'x-smp-project-code': 'test-project-code',
+                        'x-smp-user-id': 'kildong.hong@kt.com',
+                        'x-smp-user-name': 'hongkildong',
+                    }
+                },
+                mounted: function () {
+                    var self = this;
+                    var $menuLinks = $("#menuList a");
+                    var $loadingBar = $('#indexLoadingBar');
+
+                    // 초기 url에 따른 화면 처리
+                    self.movePage(location.pathname == '/' ? ($("#menuList a")[0]||{}).href : location.href.split("?")[0]);
+
+                    window.onpopstate = function(event) {
+                        self.movePage(location.href.split("?")[0]);
+                    };
+                },
+                methods: {
+                    /**
+                     * 특정 페이지 요청에 따른 처리
+                     */
+                    movePage: function (url) {
+                        var $loadingBar = this.getLoadingBar();
+                        var viewFunc = function (serviceUrl, htmlUrl) {
+                            $loadingBar.css('opacity', 1);
+                            if (_.isEqual(location.href.split("?")[0], serviceUrl)) {
+                                window.spa.view(htmlUrl, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    }
+                                    $loadingBar.css('opacity', 0);
+                                });
+                            } else {
+                                window.spa.move(serviceUrl, htmlUrl, function (isError, data) {
+                                    if (isError) {
+                                        toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                                    }
+                                    $loadingBar.css('opacity', 0);
+                                });
+                            }
+                        }
+
+                        // 이동할 화면이 없다면 화면을 clear하고 종료
+                        if(_.isEmpty(url)) {
+                            window.spa.move(null);
+                            return false;
+                        }
+
+                        var $menuLinks = $("#menuList a");
+                        var menus = {};
+                        var menuNames = {};
+                        var htmlUrl;
+                        var urlPattern;
+                        var serviceUrl;
+                        var parentUrl;
+
+                        $menuLinks.each(function (idx, el) {
+                            var href = location.origin + $(el).attr('href');
+                            if (!_.isEmpty(href)) {
+                                menus[href] = el;
+                                menuNames[href] = [el.dataset.home, el.dataset.name];
+                            }
+                        });
+
+                        // 이동할 화면 정보를 찾는다.
+                        _.each(menus, function(el, serviceUrlPattern){
+                            var exec = RegExp(serviceUrlPattern).exec(url);
+                            if (exec && exec[0] == url) {
+                                urlPattern = serviceUrlPattern;
+                                htmlUrl = el.dataset.html;
+                                serviceUrl = url;
+
+                                if(!_.isEmpty(el.dataset.parent)) {
+                                    parentUrl = location.origin + el.dataset.parent;
+                                }
+                                return false;		// break;
+                            }
+                        });
+
+                        if (!_.isEmpty(htmlUrl)) {
+                            // 화면 이동
+                            viewFunc(serviceUrl, htmlUrl);
+
+                            // 메뉴 row select 처리
+                            $menuLinks.removeClass('mdc-list-item--activated');
+                            $(menus[parentUrl || serviceUrl]).addClass('mdc-list-item--activated');
+                        } else {
+                            toastr.error(LABEL.message.MOVE_PAGE_ERROR, LABEL.message.API_ERROR_TITLE);
+                        }
+                    },
+
+                    /**
+                     * index에서 사용하는 LoadingBar를 하위 페이지에서 사용할 수 있도록 제공
+                     */
+                    getLoadingBar: function () {
+                        return $('#indexLoadingBar');
+                    },
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>

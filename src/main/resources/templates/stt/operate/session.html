@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="layouts/nolayout">
+	<head>
+		<style>
+			:root {
+				--content-bg: #fafafa;
+				--cl-gray-02: rgba(0, 0, 0, 0.02);
+				--cl-gray-32: rgba(0, 0, 0, 0.32);
+				--line-gray-12: 1px solid rgba(0, 0, 0, 0.12);
+				--line-gray-32: 1px solid rgba(0, 0, 0, 0.32);
+			}
+			#tooltip {
+				position: relative;
+				left: 15px;
+				top: 15px;
+				background-color: #333;
+				color: #fff;
+				padding: 5px;
+				border-radius: 3px;
+				z-index: 999;
+				white-space: nowrap;
+				display: inline-block;
+			}
+		
+			.hidden {
+				display: none !important;
+			}
+			
+			/*.mdc-deprecated-list-item[aria-disabled="true"] {
+			  color: #ccc; 
+			  pointer-events: none;
+			}
+			*/
+		</style>
+	</head>
+	<th:block layout:fragment="html">
+	<div class="contentRoot">
+		<div class="content-header">
+			<h2>실시간 세션정보</h2>
+			<div class="button-group">
+				<div class="mdc-select mdc-select--outlined mdc-select--no-label" id="sort-condition-1">
+					<div class="mdc-select__anchor h-40px">
+						<div class="mdc-notched-outline">
+							<span class="mdc-notched-outline__leading"></span>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label">정렬조건1</label>
+							</div>
+							<span class="mdc-notched-outline__trailing"></span>
+						</div>
+						<span class="mdc-select__selected-text-container overflow-hidden">
+					<span class="mdc-select__selected-text"></span>
+				</span>
+						<span class="mdc-select__dropdown-icon icon-vertical-center"></span>
+					</div>
+
+					<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+						<ul class="mdc-deprecated-list">
+							<li v-for="sortCondition in sortConditionList" class="mdc-deprecated-list-item"
+								:data-value="sortCondition.key"
+								@click="searchCondition.sortCondition.firstCondition = sortCondition.key"
+								:class="{'mdc-deprecated-list-item--selected': searchCondition.sortCondition.firstCondition == sortCondition.key} "
+								:aria-selected="searchCondition.sortCondition.firstCondition == sortCondition.key ? 'true' : 'false'"
+								:aria-disabled="Object.values(searchCondition.sortCondition).includes(sortCondition.key) && sortCondition.key != 'NONE' ? 'true' : 'false'"
+								>
+								<span class="mdc-deprecated-list-item__ripple"></span>
+								<span class="mdc-deprecated-list-item__text">{{ sortCondition.value }}</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="mdc-select mdc-select--outlined mdc-select--no-label" id="sort-condition-2">
+					<div class="mdc-select__anchor h-40px">
+						<div class="mdc-notched-outline">
+							<span class="mdc-notched-outline__leading"></span>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label">정렬조건2</label>
+							</div>
+							<span class="mdc-notched-outline__trailing"></span>
+						</div>
+						<span class="mdc-select__selected-text-container overflow-hidden">
+					<span class="mdc-select__selected-text"></span>
+				</span>
+						<span class="mdc-select__dropdown-icon icon-vertical-center"></span>
+					</div>
+
+					<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+						<ul class="mdc-deprecated-list">
+							<li v-for="sortCondition in sortConditionList" class="mdc-deprecated-list-item "
+								:data-value="sortCondition.key"
+								@click="searchCondition.sortCondition.secondCondition = sortCondition.key"
+								:class="{'mdc-deprecated-list-item--selected': searchCondition.sortCondition.secondCondition == sortCondition.key} "
+								:aria-selected="searchCondition.sortCondition.secondCondition == sortCondition.key ? 'true' : 'false'"
+								:aria-disabled="Object.values(searchCondition.sortCondition).includes(sortCondition.key) && sortCondition.key != 'NONE' ? 'true' : 'false'"
+								>
+								<span class="mdc-deprecated-list-item__ripple"></span>
+								<span class="mdc-deprecated-list-item__text">{{ sortCondition.value }}</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="mdc-select mdc-select--outlined mdc-select--no-label" id="timeSet-mdc-select">
+					<div class="mdc-select__anchor h-40px">
+						<div class="mdc-notched-outline">
+							<span class="mdc-notched-outline__leading"></span>
+							<div class="mdc-notched-outline__notch">
+								<label class="mdc-floating-label">주기</label>
+							</div>
+							<span class="mdc-notched-outline__trailing"></span>
+						</div>
+						<span class="mdc-select__selected-text-container overflow-hidden">
+					<span class="mdc-select__selected-text"></span>
+				</span>
+						<span class="mdc-select__dropdown-icon icon-vertical-center"></span>
+					</div>
+
+					<div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+						<ul class="mdc-deprecated-list">
+							<li v-for="ts in timeSets" class="mdc-deprecated-list-item"
+								:data-value="ts.key"
+								@click="searchCondition.timeSet = ts.key"
+								:class="{'mdc-deprecated-list-item--selected': searchCondition.timeSet == ts.key} "
+								:aria-selected="searchCondition.timeSet == ts.key ? 'true' : 'false'">
+								<span class="mdc-deprecated-list-item__ripple"></span>
+								<span class="mdc-deprecated-list-item__text">{{ ts.value }}</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<!-- << 주기 선택 -->
+
+				<!-- << PLAY/STOP -->
+				<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded s_active"
+						@click="fnStartSessionInfo"
+						id="btnStart">
+					<span class="mdc-button__ripple"></span>
+					<span class="mdc-button__label">PLAY</span>
+				</button>
+				<button class="mdc-button mdc-button--outlined mdc-ripple-upgraded s_active"
+						@click="fnStopSessionInfo"
+						id="btnStop">
+					<span class="mdc-button__ripple"></span>
+					<span class="mdc-button__label">STOP</span>
+				</button>
+				<!-- << PLAY/STOP -->
+			</div>
+		</div>
+
+		<!-- contents_wrap -->
+		<div class="content-body">
+			<div class="card">
+				<div class="card-body">
+					<div class="main_content">
+						<table class="cnt_hd_box03 tbl_noline tbl_legend">
+							<tbody>
+							<tr class="tbl_legend right">
+								<td class="td_btn_wrap">
+									<div class="status_wrap">
+										<p>지연: {{ delay }}초 이상</p>
+										<span class="status_delay">지연</span>
+										<span class="status_connecting">연결중</span>
+										<span class="status_stop" style="color:black !important">호중지</span>
+										<span class="status_none">연결없음</span>
+									</div>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+						<div id="sessionInfoAjax" style="margin-bottom: 20px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- contents_wrap -->
+	</div>
+
+	<input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+	<input type="hidden" readonly id="sessionSortConditionList" th:value="${sessionSortConditionList}">
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript">
+
+		function mouse_over(e){
+			$(e).children('div').removeClass('hidden');
+		}
+		
+		function mouse_out(e){
+			$(e).children('div').addClass('hidden');
+		}
+		var app2 = new Vue({
+			el	:".main_content",
+			data: {
+				delay:"0"
+				}
+		})
+        var app1 = new Vue({
+            el: ".contentRoot",
+            data: {
+                searchCondition: {
+                    timeSet: "",
+                    sortCondition: {
+						firstCondition: "NONE",
+						secondCondition: "NONE"					
+					}
+				},
+				timeSets: [],
+                /*serviceCodeMap: {
+                    2: "콜봇",
+                    3: "준실시간",
+                    4: "챗봇"
+                },*/
+				serviceCodeMap: {},
+                resultCodeMap: {
+                    9999: "기타 알 수 없는 서버 오류가 발생했습니다.",
+                    9990: "STT 엔진과의 통신이 원활하지 않습니다. 다시 시도해주세요.",
+                    8900: "해당 서비스 모델의 채널정보를 찾을 수 없습니다.",
+                    8910: "채널정보 parsing 오류가 발생했습니다.",
+                    8920: "채널정보 조회 관련 비동기 처리 오류가 발생했습니다.",
+                },
+                timeoutId: 0,
+                delay: "0",
+                sortConditionList: JSON.parse($('#sessionSortConditionList').val()),
+            },
+            computed: {},
+            created: function () {
+                
+                // Base url 받아오기
+                const baseUrl = $('#smpServiceUriPrefix').val();
+                this.baseUrl = baseUrl;
+
+                // 데이터 구분 목록 받아오기
+                var self = this;
+
+				this.initTimeSet(() => {
+
+                    // 주기 mdc-select 초기화
+					self.$nextTick(function () {
+						const $select = $("#timeSet-mdc-select")[0];
+						$($select).data('instance').destroy();
+
+						const newMdcSelect = new mdc.select.MDCSelect($select);
+						$($select).data('instance', newMdcSelect);
+                        
+                        // 주기 mdc-select 기본 값
+                        $($select).data('instance').value = "30";
+					})
+				})
+				
+				this.initServiceModelMap();
+				
+                this.getSessionInfo();
+                this.fnStartSessionInfo();
+				
+            },
+            mounted: function () {
+                this.initMaterialUx();
+            },
+            methods: {
+                initMaterialUx: function () {
+                    // ripple material ux 적용
+                    const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                    for (const el of elements) {
+                        el.class
+                        mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                            isUnbounded: true
+                        } : void 0);
+                    }
+
+                    // select material ux 적용
+                    const selects = document.querySelectorAll('.mdc-select');
+                    for (const el of selects) {
+                        const select = mdc.select.MDCSelect.attachTo(el);
+                        $(el).data('instance', select); //
+                    }
+                },
+
+                // 팝업 데이터 초기화
+                initTimeSet: function (callback) {
+                    this.timeSets = [
+                        {key: 5, value: "5초"},
+                        {key: 10, value: "10초"},
+                        {key: 30, value: "30초"}
+                    ];
+                    callback();
+                },
+				
+				// 서비스 모델 map 초기화
+                initServiceModelMap: function () {
+                    $.ajax({
+                        url: this.baseUrl + "/trainData/api/serviceModelList",
+                        method: "get",
+                        contentType: 'application/json; charset=UTF-8',
+                        dataType: "json"
+                    }).done(data => {
+                        var resultMap = {};
+                        if (data && data.result && data.result.length > 0) {
+                            var result = data.result;
+                            result.forEach(r => {
+                                resultMap[r.serviceCode] = r.serviceModelName;
+                            })
+                        }
+                        this.serviceCodeMap = resultMap;
+                    });
+                },
+
+                getSessionInfo: function () {
+
+                    this.fnAbleStopBtn();
+
+                    var self = this;
+
+                    $.ajax({
+                        url: this.baseUrl + "/session/api/list",
+                        method: "get",
+                        data: this.searchCondition.sortCondition,
+                        dataType: "html",
+                        success: function (data) {
+                            $("#sessionInfoAjax").html('');
+                            var html = '';
+                            
+                            if (data) {
+                                var json = JSON.parse(data);
+                                if (json.resultCode == '0000') { // 성공일 때,
+                                	app2.delay = json.result.delay;
+                                    for (var i = 0; i < json.result.serverInfo.length; i++) {
+                                        var serverInfo = json.result.serverInfo[i];
+
+                                        html += '<div class="content_main sru_container"">';
+                                        html += '<div class="sru_wrap grid_2" style="min-height: 50px; margin-top: 0">';
+                                        html += '<div class="sru_tit"><p>' + serverInfo.serverName + '<br></p></div>';
+                                        html += '<div class="sru_channel_info_container">';
+
+                                        if (serverInfo.serverSessionInfo != null) {
+                                            if (serverInfo.serverSessionInfo.length == 0) {
+                                                html = '<div class="sru_channel_info_no_data">데이터가 존재하지 않습니다.</div>';
+                                            } else {
+                                                for (var j = 0; j < serverInfo.serverSessionInfo.length; j++) {
+													
+                                                    var serviceModel = serverInfo.serverSessionInfo[j];
+                                                    html += '<div class="sru_callbot sru_service_model_container">';
+                                                    html += '<div class="sru_tit"><p>' + (self.convertServiceCodeLabel(serviceModel.serviceCode)) + '<br>(' + serviceModel.sessionMaxCnt + ')</p></div>';
+                                                    html += '<div class="sru_channel_info">';
+                                                    if (serviceModel.sessionInfo != null) {
+                                                        for (var h = 0; h < serviceModel.sessionInfo.length; h++) {
+                                                            var status = serviceModel.sessionInfo[h];
+                                                            if (status.status == 'ready') {
+																//html += '<div onmouseover="mouse_over(this)" onmouseout=mouse_out(this) class="status_none"></div>';
+                                                                html += '<div onmouseover="mouse_over(this)" onmouseout=mouse_out(this) class="status_none session_status">';
+                                                                html += '<div id="tooltip" class="hidden">'+'status: '+status.status+'</div>';
+                                                                html += '</div>';
+                                                            } else if (status.status == 'delay') {
+                                                                //html += '<div class="status_delay"></div>';
+                                                                html += '<div onmouseover="mouse_over(this)" onmouseout=mouse_out(this) class="status_delay session_status">';
+                                                                html += '<div id="tooltip" class="hidden"><div>'+'callKey: '+status.callKey+'</div><div>통화 시작시간: '+ self.convertMillisecToTime(status.sessionStartTime)+'</div><div>콜 유지 시간: '+self.convertMillisecToUseTime(status.sessionHoldingTime)+'</div><div>상담사ID: '+status.deviceId+'</div><div>Epd지연시간: '+(status.responseTime / 1000)+'</div></div>';
+                                                                //html += '<div id="tooltip" class="hidden">'+'callKey: '+status.callKey+'\n통화 시작시간: '+ self.convertMillisecToTime(status.sessionStartTime)+'\n콜 유지 시간: '+self.convertMillisecToUseTime(status.sessionStartTime)+'\n상담사ID: '+status.deviceId+'\nEpd지연시간: '+(status.responseTime / 1000)+'</div>';
+                                                                html += '</div>';
+                                                            } else if (status.status == 'inuse') {
+                                                                //html += '<div class="status_connecting"></div>';
+                                                                html += '<div onmouseover="mouse_over(this)" onmouseout=mouse_out(this) class="status_connecting session_status">';
+                                                                html += '<div id="tooltip" class="hidden"><div>callKey: '+status.callKey+'</div><div>통화 시작시간: '+ self.convertMillisecToTime(status.sessionStartTime)+'</div><div>콜 유지 시간: '+self.convertMillisecToUseTime(status.sessionHoldingTime)+'</div><div>상담사ID: '+status.deviceId+'</div><div>Epd지연시간: '+(status.responseTime / 1000)+'</div></div>';
+                                                                //html += '<div id="tooltip" class="hidden">'+'callKey: '+status.callKey+'\n통화 시작시간: '+ self.convertMillisecToTime(status.sessionStartTime)+'\n콜 유지 시간: '+self.convertMillisecToUseTime(status.sessionStartTime)+'\n상담사ID: '+status.deviceId+'\nEpd지연시간: '+(status.responseTime / 1000)+'</div>';
+                                                                html += '</div>';
+                                                            } else if (status.status == 'stop') {
+                                                                //html += '<div class="status_connecting"></div>';
+                                                                html += '<div onmouseover="mouse_over(this)" onmouseout=mouse_out(this) class="status_stop session_status">';
+                                                                html += '<div id="tooltip" class="hidden"><div>callKey: '+status.callKey+'</div><div>통화 시작시간: '+ self.convertMillisecToTime(status.sessionStartTime)+'</div><div>콜 유지 시간: '+self.convertMillisecToUseTime(status.sessionHoldingTime)+'</div><div>상담사ID: '+status.deviceId+'</div><div>Epd지연시간: '+(status.responseTime / 1000)+'</div></div>';
+                                                                //html += '<div id="tooltip" class="hidden">'+'callKey: '+status.callKey+'\n통화 시작시간: '+ self.convertMillisecToTime(status.sessionStartTime)+'\n콜 유지 시간: '+self.convertMillisecToUseTime(status.sessionStartTime)+'\n상담사ID: '+status.deviceId+'\nEpd지연시간: '+(status.responseTime / 1000)+'</div>';
+                                                                html += '</div>';
+                                                            }
+                                                        }
+                                                    }
+                                                    html += '</div>';
+                                                    html += '</div>';
+                                                }
+                                            }
+
+                                        } else {
+                                            html += '<div class="sru_callbot sru_service_model_container"">';
+                                            html += '<div class="sru_tit"><p>' + 'N/A' + '<br></p></div>';
+                                            html += '<div class="sru_channel_info">';
+                                        }
+                                        html += '</div>';
+                                        html += '</div>';
+                                        html += '</div>';
+                                    }
+                                } else { // error code
+                                	app2.delay = json.result;
+                                    html = '<div class="sru_channel_info_no_data">' + self.convertResultCodeMessage(json.resultCode) + '</div>';
+                                    self.fnStopSessionInfo();
+                                }
+
+                                $("#sessionInfoAjax").html(html);
+                            }
+
+                        },
+                        error: function (xhr, status, error) { // 서버와의 통신 오류
+                            $("#sessionInfoAjax").html('')
+                            var html = '<div class="sru_channel_info_no_data">서버와의 통신이 원활하지 않습니다. 다시 시도해 주십시오.</div>';
+                            $("#sessionInfoAjax").append(html);
+                            self.fnStopSessionInfo();
+                        }
+                    });
+                },
+                fnStartSessionInfo: function () {
+                    if (this.timeoutId) {
+                        clearTimeout(this.timeoutId);
+                    }
+                    this.getSessionInfo();
+					
+                    this.timeoutId = setInterval(this.getSessionInfo, (this.searchCondition.timeSet ? this.searchCondition.timeSet : 30)  * 1000);
+                },
+                fnStopSessionInfo: function () {
+                    this.fnEnableStopBtn();
+                    clearTimeout(this.timeoutId);
+                    this.timeoutId = null;
+                },
+                fnAbleStopBtn: function () {
+					$('#btnStop').prop('disabled', false)
+                },
+                fnEnableStopBtn: function () {
+					$('#btnStop').prop('disabled', true)
+                },
+                convertServiceCodeLabel: function (serviceCode) {
+                    var result = "알 수 없음";
+                    if (serviceCode) {
+                        if (this.serviceCodeMap.hasOwnProperty(serviceCode)) {
+                            return this.serviceCodeMap[serviceCode];
+                        }
+                    }
+                    return result
+                },
+                convertResultCodeMessage: function (resultCode) {
+                    var result = "알 수 없는 오류가 발생하였습니다.";
+                    if (resultCode) {
+                        if (this.resultCodeMap.hasOwnProperty(resultCode)) {
+                            return this.resultCodeMap[resultCode];
+                        }
+                    }
+                    return result
+                },
+                convertMillisecToTime: function(milliseconds) {
+					var date = new Date(milliseconds)
+					var year = date.getFullYear();
+					var month = String(date.getMonth()+1).padStart(2, '0');
+					var day = String(date.getDate()).padStart(2, '0');
+					var hours = String(date.getHours()).padStart(2, '0');
+					var minutes = String(date.getMinutes()).padStart(2, '0');
+					var seconds = String(date.getSeconds()).padStart(2, '0');
+					
+					var dateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+					return dateTime;
+				},
+				convertMillisecToUseTime: function(duration) {
+					let seconds = String(Math.floor((duration / 1000) % 60)).padStart(2, '0');
+					let minutes = String(Math.floor((duration / (1000 * 60)) % 60)).padStart(2, '0');
+					let hours = String(Math.floor((duration / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+					
+					return hours + ":" + minutes + ":" + seconds;
+				}
+            }
+        });
+	</script>
+</th:block>
+</html>

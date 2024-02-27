@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>장애이력 조회</h2>
+        </div>
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header pb-4">
+                    <div class="form-row md-size multiline-align-top">
+                        <div class="flex-auto flex-ratio-two">
+                            <div class="form-row h-100">
+                                <div id="searchRegDtFromInput" class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <i class="material-icons mdc-text-field__icon">event</i>
+                                    <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label" >등록일(from)</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                                <div id="searchRegDtToInput" class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--with-leading-icon w-100">
+                                    <i class="material-icons mdc-text-field__icon">event</i>
+                                    <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text"/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label" >등록일(to)</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mdc-text-field-helper-line">
+                                <p class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent mdc-text-field-helper-text--validation-msg">
+                                    등록일이 없는 경우는 전체 기간을 뜻합니다.
+                                </p>
+                            </div>
+                        </div>
+                        <div id="searchTypeSelector" class="mdc-select mdc-select--outlined mdc-select--no-label">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">구분</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                        <span class="mdc-select__selected-text"></span>
+                                    </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+		                        <ul class="mdc-deprecated-list">
+		                            <li class="mdc-deprecated-list-item" data-value=" " @click="searchCondition.type = ''"
+		                                :class="{'mdc-deprecated-list-item--selected': searchCondition.type==''}"
+		                                :aria-selected="searchCondition.type=='' ? 'true' : 'false'">
+		                                <span class="mdc-deprecated-list-item__ripple"></span>
+		                                <span class="mdc-deprecated-list-item__text">전체</span>
+		                            </li>
+		                            <li v-for="item in typeList" class="mdc-deprecated-list-item"
+		                                :data-value="item.type"
+		                                @click="searchCondition.type = item.type"
+		                                :class="{'mdc-deprecated-list-item--selected': searchCondition.type == item.type} "
+		                                :aria-selected="searchCondition.type == item.type ? 'true' : 'false'">
+		
+		                                <span class="mdc-deprecated-list-item__ripple"></span>
+		                                <span class="mdc-deprecated-list-item__text">{{ item.type }}</span>
+		                            </li>
+		                        </ul>
+		                    </div>
+                        </div>
+                        <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="doSearch">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">search</i>
+                            <span class="mdc-button__label">검색</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-controls form-row md-size">
+                        <div class="table-result-info flex-auto">
+                            <h4>검색결과 : {{totalCount}}</span>건</h4>
+                        </div>
+                        <div class="mdc-select mdc-select--outlined mdc-select--no-label">
+                            <div class="mdc-select__anchor">
+                                <div class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <div class="mdc-notched-outline__notch">
+                                        <label class="mdc-floating-label">레코드 수</label>
+                                    </div>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </div>
+                                <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                                <span class="mdc-select__dropdown-icon"></span>
+                            </div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-deprecated-list">
+                                    <li v-for="ps in pageSizes" class="mdc-deprecated-list-item"
+                                        :data-value="ps"
+                                        @click="searchCondition.pageSize = ps; currentPage = 1; _search();"
+                                        :class="{'mdc-deprecated-list-item--selected': searchCondition.pageSize == ps} "
+                                        :aria-selected="searchCondition.pageSize == ps ? true : false">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">{{ ps }}개</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <div class="mdc-data-table-wrapper">
+		                    <!-- loading bar -->
+		                    <div v-show="searching" role="progressbar"
+		                         class="mdc-linear-progress mdc-linear-progress--indeterminate">
+		                        <div class="mdc-linear-progress__buffering-dots"></div>
+		                        <div class="mdc-linear-progress__buffer"></div>
+		                        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+		                            <span class="mdc-linear-progress__bar-inner"></span>
+		                        </div>
+		                        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+		                            <span class="mdc-linear-progress__bar-inner"></span>
+		                        </div>
+		                    </div>
+                            <div class="mdc-data-table">
+                                <div class="mdc-data-table__table-container">
+                                    <table class="mdc-data-table__table">
+                                        <thead>
+			                                <tr class="mdc-data-table__header-row">
+			                                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">No.
+			                                    </th>
+			                                    <th class="mdc-data-table__header-cell text-center" role="columnheader "scope="col">장애 일시
+			                                    </th>
+			                                    <th class="mdc-data-table__header-cell text-center" role="columnheader "scope="col">장애 구분
+			                                    </th>
+			                                    <th class="mdc-data-table__header-cell text-center" role="columnheader "scope="col">장애 기능
+			                                    </th>
+			                                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">장애 코드
+			                                    </th>
+			                                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">장애내용
+			                                    </th>
+			                                    <th class="mdc-data-table__header-cell text-center" role="columnheader" scope="col">기타
+			                                    </th>
+			                                </tr>
+		                                </thead>
+                                        <tbody class="mdc-data-table__content" v-if="0 == errorList.length">
+                                        <tr class="mdc-data-table__row is-non-clickable" aria-selected="false">
+                                            <td class="text-center" colspan="13">검색 결과가 없습니다.</td>
+                                        </tr>
+                                        </tbody>
+                                        <tbody class="mdc-data-table__content" v-if="0 < errorList.length">
+                                        <tr v-for="(item, idx) in errorList" :data-id="item.id"
+                                            class="verify-history-info-row mdc-data-table__row is-non-clickable" aria-selected="false">
+                                            <td class="mdc-data-table__cell text-center">{{ pageInfo.total - ( (currentPage - 1) * searchCondition.pageSize + idx) }}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.errorTime}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.type}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.endpoint}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.code}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.contents}}</td>
+                                            <td class="mdc-data-table__cell text-center">{{item.etc}}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                     <!-- pagination -->
+                    <div class="table-pagination mdc-data-table__pagination">
+                        <div class="mdc-data-table__pagination-trailing mdc-chip-set mdc-chip-set--choice">
+                            <div class="mdc-data-table__pagination-navigation">
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-first-page="true" @click="gotoPage(1)">
+                                    <div class="mdc-button__icon">first_page</div>
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-prev-page="true" @click="gotoPage(currentPage - 1)">
+                                    <div class="mdc-button__icon">chevron_left</div>
+                                </button>
+
+                                <button v-for="(paging, index) in pages"
+                                        class="mdc-chip mdc-data-table__pagination-button fs-6 bg-transparent"
+                                        :class="{ 'mdc-chip--selected' : paging == currentPage }"
+                                        @click="gotoPage(paging)">
+                                    {{ paging }}
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-next-page="true" @click="gotoPage(currentPage + 1)">
+                                    <div class="mdc-button__icon">chevron_right</div>
+                                </button>
+                                <button class="mdc-icon-button material-icons mdc-data-table__pagination-button fs-6"
+                                        data-last-page="true" @click="gotoPage(pageInfo.pages)">
+                                    <div class="mdc-button__icon">last_page</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+    <input type="hidden" readonly id="defaultPageSize" th:value="${defaultPageSize}">
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript">
+        (function () {
+
+            const DEFAULT_PAGE_START = 0;
+            const DEFAULT_PAGE_SIZE = $("#defaultPageSize").val();
+            const PAGING_BTN_SIZE = 5;
+            const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+            const LABEL = {
+                message: {
+                    // 공통
+                    API_ERROR_TITLE: "실패",
+                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다."
+                }
+            };
+            new Vue({
+                el: ".contentRoot",
+                data: {
+                    LABEL: LABEL,
+                    moment: moment,
+                    fn: fn,
+                    serviceUrlPrefix: serviceUrlPrefix,
+                    typeList: JSON.parse("[[${typeList}]]".replaceAll('&quot;', "\"")),
+
+                    //검색조건
+                    type:"",
+                    regFrom: "",
+                    regDtTo: "",
+                    start: DEFAULT_PAGE_START,
+                    size: DEFAULT_PAGE_SIZE,
+                    pageSizes: [10, 20, 30, 40, 50],
+                    searchCondition: {
+	                    type: "",
+	                    from: "",
+	                    to: "",
+	                    pageSize: DEFAULT_PAGE_SIZE
+	                },
+					searching: false,
+                    // 검색 결과
+                    totalCount: 0,
+                    currentPageNum: 0,
+                    lastPageNum: 0,
+                    itemFromNum: 0,
+                    itemToNum: 0,
+                    errorList: [],
+                    pagingNumbers: [],
+                    currentPage: 1,
+					pageInfo: {
+			           pages: 1,
+			           total: 1
+			        },
+                    // etc
+                    initSearched: false,		// 초기 검색이 제공되었는지 여부
+                },
+                computed: {
+					pages: function () {
+			            const list = [];
+			            for (let index = this.startPage; index <= this.endPage; index += 1) {
+			              list.push(index);
+			            }
+			            return list;
+			          },
+			          startPage() {
+			            return parseInt((this.currentPage - 1) / 5) * 5 + 1;
+			          },
+			          endPage() {
+			            var lastPage = parseInt((this.currentPage - 1) / 5 + 1) * 5;
+			            return lastPage <= this.pageInfo.pages ? lastPage : this.pageInfo.pages;
+			          }
+				},
+                created: function () {
+                    var self = this;
+                    this.initPage(location.search.slice(1));
+                    this.$nextTick(function () {
+                        self.doRefresh();
+                    });
+                },
+                mounted: function () {
+                    var self = this;
+
+                    // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+                        console.log("page move out");
+                        var $searchRegDtFromInput = $('#searchRegDtFromInput');
+                        var $searchRegDtToInput = $('#searchRegDtToInput');
+                        $searchRegDtFromInput.data('datepicker').destroy();
+                        $searchRegDtToInput.data('datepicker').destroy();
+                    });
+
+                    this.initMaterialUx();
+                },
+                methods: {
+
+                    /**
+                     * 초기 url을 기준으로 화면 내용 설정
+                     */
+                    initPage: function (queryString) {
+                        var params = Qs.parse(queryString);
+                        this.regDtFrom = params.regDtFrom || "";
+                        this.regDtTo = params.regDtTo || "";
+                        this.start = parseInt(params.start || DEFAULT_PAGE_START);
+                        this.size = parseInt(params.size || DEFAULT_PAGE_SIZE);
+
+                        this.searchCondition = {
+                            type: "",
+		                    from: "",
+		                    to: "",
+		                    pageSize: this.searchCondition.pageSize
+                        };
+
+                        // selector 초기값 설정
+                        $('#searchServiceModelSelector').attr('data-value', this.serviceModelId);
+                        $('#searchVerifyStatusSelector').attr('data-value', this.status);
+                        $('#searchTypeSelector').attr('data-value', this.type);
+                    },
+
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            el.class
+                            mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0);
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+
+                        // select material ux 적용
+                       const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            const select = mdc.select.MDCSelect.attachTo(el);
+                            $(el).data('instance', select); //
+                        }
+                        
+                        this.initDatepicker();
+                    },
+
+                    /**
+                     * 검색 버튼클릭 시 처리
+                     */
+                    doSearch: function () {
+                        let self = this;
+
+                        this._pushHistory(this.searchCondition);
+                        this._search();
+                    },
+			        _setSearchResultsPageInfo: function (data) {
+						
+			            this.pageInfo.pages = data.pages;
+			            this.pageInfo.total = data.total;
+			            this.currentPage = data.pageNum;
+			        },
+                    /**
+                     * 현재 검색 목록을 refresh한다.
+                     */
+                    doRefresh: function () {
+                        let self = this;
+                        this._search();
+                    },
+					// 페이지네이션
+		           gotoPage: function (pageNum) {
+					   let self = this;
+
+					   let validPageNum = pageNum;
+					   if (pageNum < 1) {
+						   validPageNum = 1;
+					   } else if (pageNum > this.pageInfo.pages) {
+						   validPageNum = this.pageInfo.pages;
+					   }
+					   this.currentPage = validPageNum;
+					   this._search();
+		           },
+                    /**
+                     * 검색결과를 화면에 연결된 변수들에 저장
+                     */
+                    renderDatas: function (totalCount, list) {
+
+                        $("input[type=checkbox]").prop('checked', false);
+
+                        var self = this;
+
+                        this.totalCount = totalCount;
+						
+                        this.errorList = list || [];
+
+                    },
+                    initDatepicker: function() {
+
+                        var self = this;
+                        var $searchRegDtFromInput = $('#searchRegDtFromInput');
+                        var $searchRegDtToInput = $('#searchRegDtToInput');
+
+                        // MaterialDatepicker 설정
+                        var datepickerOption = {
+                            lang: "en",		// ko 는 없음....
+                            orientation: "portrait",
+                            color: document.defaultView.getComputedStyle(document.documentElement).getPropertyValue("--mdc-theme-primary"),
+                            closeAfterClick: false,
+                            //date: null,
+                            outputFormat: 'YYYY-MM-DD',
+                            topHeaderFormat: 'YYYY MM',
+                            headerFormat: 'Do',
+                        };
+
+                        if ($searchRegDtFromInput.data('datepicker') != null) {
+                            $searchRegDtFromInput.data('datepicker').destroy();
+                        }
+                        
+                        $searchRegDtFromInput.data('datepicker', new MaterialDatepicker($searchRegDtFromInput.data('textField').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+								if (!$searchRegDtFromInput.data('textField')) {
+									return;
+								}
+                                if (_.isEmpty($searchRegDtFromInput.data('textField').value)) {
+                                    self.searchCondition.from = null
+                                } else {
+                                    self.searchCondition.from = moment(date).format("YYYY-MM-DD");
+                                }
+                            }
+                        })));
+
+                        if ($searchRegDtToInput.data('datepicker') != null) {
+                            $searchRegDtToInput.data('datepicker').destroy();
+                        }
+
+                        $searchRegDtToInput.data('datepicker', new MaterialDatepicker($searchRegDtToInput.data('textField').input, $.extend({}, datepickerOption, {
+                            onChange: function (date) {
+								if (!$searchRegDtToInput.data('textField')) {
+									return;
+								}
+                                if (_.isEmpty($searchRegDtToInput.data('textField').value)) {
+                                    self.searchCondition.to = null
+                                } else {
+                                    self.searchCondition.to = moment(date).format("YYYY-MM-DD");
+                                }
+                            }
+                        })));
+
+                        $searchRegDtFromInput.data('textField').value = this.regDtFrom ? moment(this.regDtFrom).format("YYYY-MM-DD") : '';
+                        $searchRegDtToInput.data('textField').value = this.regDtTo ? moment(this.regDtTo).format("YYYY-MM-DD") : '';
+
+                    },
+                    /**
+                     * 현재 검색 조건에 대한 history를 push한다.
+                     */
+                    _pushHistory: function (condition) {
+                        if (!this.initSearched) {
+                            this.initSearched = true;
+                            // 맨 처음 page의 경우 history를 변경하여 back 시 이전 페이지로 돌아가도록 한다.
+                            history.replaceState(null, null, "?" + $.param(condition));
+                        } else {
+                            history.pushState(null, null, "?" + $.param(condition));
+                        }
+                    },
+
+                    /**
+                     * 검색 API 호출
+                     */
+                    _search: function() {
+                        var queryString = this._makeSearchConditionQueryString();
+                        const self = this;
+                        self.setSearching(true);
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/error/api/list?" + queryString,
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+								const result = response.result;
+								self._setSearchResultsPageInfo(result);
+                                self.renderDatas(response.result.total, response.result.result)
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE, LABEL.message.API_ERROR_TITLE);
+                            },
+                            complete: function () {
+                                self.setSearching(false);
+                            }
+                        });
+                    },
+                    _makeSearchConditionQueryString: function () {
+                        var searchConditions = {...this.searchCondition}
+                        // 날짜, 시간 변경
+                        var type = searchConditions.type;
+						
+						searchConditions['pageNum'] = this.currentPage;
+						
+                        this.deleteNullOrDefaultFields(searchConditions);
+
+                        var queryString = Qs.stringify(searchConditions);
+                        return queryString;
+                    },
+                    // 검색
+                    _convertDatetime: function (searchCondition, isStart) {
+                        var searchUnit = searchCondition['searchUnit'];
+
+                        var sDate = searchCondition.from;
+                        var eDate = searchCondition.to;
+                        var sTime = searchCondition.startSearchTime;
+                        var eTime = searchCondition.endSearchTime;
+
+                        var finalDate = isStart ? sDate : eDate;
+                        var finalTime = isStart ? sTime : eTime;
+
+                        if (searchUnit == "MONTH") {
+                            var targetDate = "";
+                            if (isStart) {
+                                var sDateObject = new Date(sDate);
+                                targetDate = new Date(sDateObject.getFullYear(), sDateObject.getMonth(), 1);
+                                finalTime = "00:00";
+                            } else {
+                                var eDateObject = new Date(eDate);
+                                targetDate = new Date(eDateObject.getFullYear(), eDateObject.getMonth() + 1, 0);
+                                finalTime = "23:59";
+                            }
+                            finalDate = moment(targetDate).format("YYYY-MM-DD");
+                        }
+
+                        if (searchUnit == "HOUR") {
+                            if (isStart) {
+                                finalTime = sTime.split(":")[0] + ":00";
+                            } else {
+                                finalTime = eTime.split(":")[0] + ":59";
+                            }
+                        }
+
+                        return finalDate + " " + finalTime;
+                    },
+                    deleteNullOrDefaultFields: function (obj) {
+                        for (var key of Object.keys(obj)) {
+                            if (obj[key] == null || obj[key] == undefined) {
+                                delete obj[key];
+                            }
+                            if (typeof obj[key] == "number" && obj[key] == 0) {
+                                delete obj[key];
+                            }
+                            if (typeof obj[key] == "string" && obj[key] == '') {
+                                delete obj[key];
+                            }
+                        }
+                    },
+                    setSearching: function(searching) {
+						this.searching = searching;
+					}
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>

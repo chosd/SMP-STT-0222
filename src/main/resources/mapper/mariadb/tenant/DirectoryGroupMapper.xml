@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.comm.directory.mapper.DirectoryGroupMapper">
+
+    <select id="count" parameterType="directoryGroupSearchCondition" resultType="int">
+        SELECT COUNT(ID)
+        FROM IAAP_CM_DIRECTORY_GROUP
+        WHERE USE_YN = 'Y'
+        <if test="gubunType != null and gubunType != ''">
+            	AND PATH_GUBUN = #{gubunType}
+		</if>
+        <if test="name != null and name != ''">
+            AND NAME LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="id != null">
+            AND ID = #{id}
+        </if>
+    </select>
+
+    <select id="search" parameterType="directoryGroupSearchCondition" resultType="directoryGroupListDto">
+        SELECT
+	        DIR_GROUP.ID,
+	        DIR_GROUP.NAME,
+	        DIR_GROUP.DESCRIPTION,
+	        DIR_GROUP.HOME_PATH path,
+		    DIR_GROUP.PATH_GUBUN gubun,
+	        DIR_GROUP.REG_DT
+        FROM IAAP_CM_DIRECTORY_GROUP DIR_GROUP
+        WHERE DIR_GROUP.USE_YN = 'Y'
+        <if test="gubunType != null and gubunType != ''">
+            	AND PATH_GUBUN = #{gubunType}
+		</if>
+        <if test="name != null and name != ''">
+            AND DIR_GROUP.NAME LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="id != null">
+            AND DIR_GROUP.ID = #{id}
+        </if>
+        ORDER BY DIR_GROUP.REG_DT DESC
+        LIMIT #{size}
+        OFFSET #{start};
+    </select>
+
+    <select id="countByName" resultType="int">
+        SELECT COUNT(ID)
+        FROM IAAP_CM_DIRECTORY_GROUP
+        WHERE USE_YN = 'Y'
+        AND NAME = #{name}
+    </select>
+
+	<select id="countByDefaultPath" resultType="int">
+        SELECT COUNT(ID)
+        FROM IAAP_CM_DIRECTORY_GROUP
+        WHERE USE_YN = 'Y'
+        AND HOME_PATH = #{path}
+    </select>
+
+    <select id="findById" resultType="directoryGroupDto">
+        SELECT
+            ID,
+            NAME,
+            DESCRIPTION,
+            REG_DT
+        FROM IAAP_CM_DIRECTORY_GROUP
+        WHERE USE_YN = 'Y'
+        AND ID = #{id}
+    </select>
+
+    <insert id="save" parameterType="directoryGroupSaveDto">
+        INSERT INTO IAAP_CM_DIRECTORY_GROUP
+        (
+            ID,
+            NAME,
+            DESCRIPTION,
+            PATH_GUBUN,
+            HOME_PATH,
+            REG_ID,
+            REG_IP,
+            UPD_ID,
+            UPD_IP
+        ) VALUES
+        (
+            NEXTVAL(SEQ_IAAP_CM_DIRECTORY_GROUP),
+            #{name},
+            #{description},
+            #{gubun},
+            #{path},
+            #{regId},
+            #{regIp},
+            #{updId},
+            #{updIp}
+        )
+    </insert>
+
+    <update id="update" parameterType="directoryGroupUpdateDto">
+        UPDATE IAAP_CM_DIRECTORY_GROUP
+        SET
+            NAME = #{name},
+            DESCRIPTION = #{description},
+            UPD_ID = #{updId},
+            UPD_IP = #{updIp}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE IAAP_CM_DIRECTORY_GROUP
+        SET USE_YN = 'N'
+        WHERE ID = #{id}
+    </update>
+</mapper>

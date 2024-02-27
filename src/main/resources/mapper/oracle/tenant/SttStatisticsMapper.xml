@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.statistics.mapper.SttStatisticsMapper">
+
+    <resultMap id="statisticsResultMap" type="com.kt.smp.stt.statistics.domain.SttStatisticsVO">
+        <id column="RES_DATE_TIME" property="resDateTime"/>
+        <id column="SERVICE_CODE" property="serviceCode"/>
+        <id column="SERVER_NAME" property="serverName"/>
+        <result column="RES_DATE_TIME" property="resDateTime"/>
+        <result column="SUPPORT_SVC_LIST" property="supportSvcList"
+                javaType="java.util.ArrayList" jdbcType="LONGVARCHAR"
+                typeHandler="com.kt.smp.stt.statistics.handler.SttStatisticsHandler"/>
+        <result column="COMPLETE_SVC_LIST" property="completeSvcList"
+                javaType="java.util.ArrayList" jdbcType="LONGVARCHAR"
+                typeHandler="com.kt.smp.stt.statistics.handler.SttStatisticsHandler"/>
+        <result column="SERVICE_CODE" property="serviceCode"/>
+        <result column="REQUEST_COUNT" property="requestCount"/>
+        <result column="COMPLETE_COUNT" property="completeCount"/>
+        <result column="FAIL_COUNT" property="failCount"/>
+        <result column="BUSY_CALL_COUNT" property="busyCallCount"/>
+        <result column="SERVER_NAME" property="serverName"/>
+        <result column="TOTAL_SERVER_CNT" property="totalServerCnt"/>
+        <result column="COMPLETE_SERVER_CNT" property="completeServerCnt"/>
+        <result column="REG_DT" property="regDt"/>
+        <result column="REG_ID" property="regId"/>
+        <result column="REG_IP" property="regIp"/>
+        <result column="UPD_DT" property="updDt"/>
+        <result column="UPD_ID" property="updId"/>
+        <result column="UPD_IP" property="updIp"/>
+        <result column="USE_YN" property="useYn"/>
+    </resultMap>
+
+
+    <sql id="vo_fields">
+        SS.RES_DATE_TIME
+        , SS.SUPPORT_SVC_LIST
+        , SS.COMPLETE_SVC_LIST
+        , SS.SERVICE_CODE
+        , SS.REQUEST_COUNT
+        , SS.COMPLETE_COUNT
+        , SS.FAIL_COUNT
+        , SS.BUSY_CALL_COUNT
+        , SS.SERVER_NAME
+		, SS.REG_DT
+		, SS.REG_ID
+		, SS.REG_IP
+		, SS.UPD_DT
+		, SS.UPD_ID
+		, SS.UPD_IP
+        , SS.USE_YN
+    </sql>
+
+    <!--  SELECT  -->
+
+    <select id="list" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsSearchCondition" resultMap="statisticsResultMap">
+		/* SttStatisticsMapper.list */
+		WITH A AS (
+			<choose>
+	            <when test="searchUnit.name() == 'DAY'">
+					SELECT TO_DATE(#{from},'YYYY-MM-DD') + LEVEL - 1 AS REG_DT
+					FROM dual 
+					CONNECT BY LEVEL <![CDATA[<=]]> (TO_DATE(#{to},'YYYY-MM-DD')-TO_DATE(#{from},'YYYY-MM-DD')+1)
+				</when>
+	            <when test="searchUnit.name() == 'HOUR'">
+					SELECT
+						TO_CHAR(TO_DATE(#{from}, 'YYYY-MM-DD HH24:MI') + (LEVEL - 1) / 24, 'YYYY-MM-DD HH24') AS REG_DT
+					FROM
+						dual
+					CONNECT BY
+						LEVEL / 24 <![CDATA[<=]]> TO_DATE(#{to}, 'YYYY-MM-DD HH24:MI:SS') - TO_DATE(#{from}, 'YYYY-MM-DD HH24:MI:SS')
+				</when>
+	            <otherwise>
+					SELECT
+						TO_DATE(#{from}, 'YYYY-MM-DD HH24:MI:SS') + (LEVEL - 1) / (24 * 60)  AS REG_DT
+					FROM
+						dual
+					CONNECT BY
+						TO_DATE(#{from}, 'YYYY-MM-DD HH24:MI:SS') + (LEVEL - 1) / (24 * 60) <![CDATA[<=]]> TO_DATE(#{to}, 'YYYY-MM-DD HH24:MI:SS')
+				</otherwise>
+	        </choose>
+		),
+		B AS (
+			SELECT
+			    SUM(REQUEST_COUNT) AS REQUEST_COUNT,
+			    SUM(COMPLETE_COUNT) AS COMPLETE_COUNT,
+			    SUM(FAIL_COUNT) AS FAIL_COUNT,
+			    SUM(BUSY_CALL_COUNT) AS BUSY_CALL_COUNT,
+			    <choose>
+	                <when test="searchUnit.name() == 'DAY'">TO_DATE(TO_CHAR(REG_DT, 'YYYY-MM-DD'), 'YYYY-MM-DD')</when>
+	                <when test="searchUnit.name() == 'HOUR'">TO_CHAR(REG_DT, 'YYYY-MM-DD HH24')</when>
+	                <otherwise>TO_DATE(TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS')</otherwise>
+	            </choose> AS REG_DT,
+	            SERVICE_CODE
+			FROM
+			    IAAP_STT_STATISTICS
+			WHERE
+			1 = 1
+				AND USE_YN = 'Y'
+				<if test="serviceCode != null"><![CDATA[
+					 AND SERVICE_CODE = #{serviceCode}
+				]]></if>
+			    <choose>
+		            <when test="from != null">
+		                AND REG_DT >= TO_DATE(#{from}
+		              	<if test="searchUnit.name() == 'DAY'">
+							|| ' 00:00:00'
+						</if>
+		                ,'YYYY-MM-DD HH24:MI:SS')
+		            </when>
+		            <otherwise>
+		                AND REG_DT >= TO_DATE('2022-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS')
+		            </otherwise>
+	        	</choose>
+			    <choose>
+		            <when test="to != null">
+		                AND REG_DT <![CDATA[<=]]> TO_DATE(#{to}
+		                <if test="searchUnit.name() == 'DAY'">
+							|| ' 23:59:59'
+						</if>
+		                ,'YYYY-MM-DD HH24:MI:SS')
+		            </when>
+		        </choose>
+			GROUP BY
+				SERVICE_CODE,
+	        <choose>
+	            <when test="searchUnit.name() == 'DAY'">TO_DATE(TO_CHAR(REG_DT, 'YYYY-MM-DD'), 'YYYY-MM-DD')</when>
+	            <when test="searchUnit.name() == 'HOUR'">TO_CHAR(REG_DT, 'YYYY-MM-DD HH24')</when>
+	            <otherwise>TO_DATE(TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS')</otherwise>
+	        </choose>
+		)
+		SELECT 
+			A.REG_DT
+			, COALESCE(B.REQUEST_COUNT, 0) AS REQUEST_COUNT
+			, COALESCE(B.COMPLETE_COUNT, 0) AS COMPLETE_COUNT
+			, COALESCE(B.FAIL_COUNT, 0) AS FAIL_COUNT
+			, COALESCE(B.BUSY_CALL_COUNT, 0) AS BUSY_CALL_COUNT
+			, B.SERVICE_CODE
+			FROM A 
+			LEFT JOIN B
+			ON  A.REG_DT = B.REG_DT
+		order by
+			A.REG_DT DESC
+    </select>
+    
+    <select id="getListAll" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsSearchCondition" resultMap="statisticsResultMap">
+		/* SttStatisticsMapper.getListAll */
+		SELECT
+	            SUM(REQUEST_COUNT) AS REQUEST_COUNT,
+	            SUM(COMPLETE_COUNT) AS COMPLETE_COUNT,
+	            SUM(FAIL_COUNT) AS FAIL_COUNT,
+	            SUM(BUSY_CALL_COUNT) AS BUSY_CALL_COUNT,
+	            <choose>
+	                <when test="searchUnit.name() == 'MONTH'">TO_CHAR(REG_DT, 'YYYY-MM')</when>
+	                <when test="searchUnit.name() == 'DAY'">TO_CHAR(REG_DT, 'YYYY-MM-DD')</when>
+	                <when test="searchUnit.name() == 'HOUR'">TO_CHAR(REG_DT, 'YYYY-MM-DD HH24')</when>
+	                <otherwise>TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS')</otherwise>
+	            </choose> AS REG_DT,
+	            SERVICE_CODE
+	        FROM
+	            IAAP_STT_STATISTICS
+	        WHERE
+	        1 = 1
+	        AND USE_YN = 'Y'
+	        <if test="serviceCode != null"><![CDATA[
+	            AND SERVICE_CODE = #{serviceCode}
+	        ]]></if>
+	        <choose>
+	            <when test="from != null">
+	                AND REG_DT >= TO_DATE(#{from}
+	                <if test="searchUnit.name() == 'DAY'">
+						|| ' 00:00:00'
+					</if>
+	                ,'YYYY-MM-DD HH24:MI:SS')
+	            </when>
+	            <otherwise>
+	                AND REG_DT >= TO_DATE('2022-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS')
+	            </otherwise>
+	        </choose>
+	        <choose>
+	            <when test="to != null">
+	                AND REG_DT <![CDATA[<=]]> TO_DATE(#{to}
+	                <if test="searchUnit.name() == 'DAY'">
+						|| ' 23:59:59'
+					</if>
+	                ,'YYYY-MM-DD HH24:MI:SS')
+	            </when>
+	        </choose>
+	        GROUP BY
+	        SERVICE_CODE,
+	        <choose>
+	            <when test="searchUnit.name() == 'MONTH'">TO_CHAR(REG_DT, 'YYYY-MM')</when>
+	            <when test="searchUnit.name() == 'DAY'">TO_CHAR(REG_DT, 'YYYY-MM-DD')</when>
+	            <when test="searchUnit.name() == 'HOUR'">TO_CHAR(REG_DT, 'YYYY-MM-DD HH24')</when>
+	            <otherwise>TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS')</otherwise>
+	        </choose>
+	        ORDER BY
+				REG_DT DESC
+    </select>
+    
+    <select id="getListAllByMinute" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsSearchCondition" resultMap="statisticsResultMap">
+		/* SttStatisticsMapper.getListAllByMinute */
+		SELECT
+	            REQUEST_COUNT
+	            , COMPLETE_COUNT
+	            , FAIL_COUNT
+	            , BUSY_CALL_COUNT
+	            , TO_CHAR(REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+	            , SERVICE_CODE
+	        FROM
+	            IAAP_STT_STATISTICS
+	        WHERE
+	        1 = 1
+	        AND USE_YN = 'Y'
+	        <if test="serviceCode != null"><![CDATA[
+	            AND SERVICE_CODE = #{serviceCode}
+	        ]]></if>
+	        <choose>
+	            <when test="from != null">
+	                AND REG_DT >= TO_DATE(#{from},'YYYY-MM-DD HH24:MI:SS')
+	            </when>
+	            <otherwise>
+	                AND REG_DT >= TO_DATE('2022-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS')
+	            </otherwise>
+	        </choose>
+	        <choose>
+	            <when test="to != null">
+	                <![CDATA[
+	                AND REG_DT <= TO_DATE(#{to},'YYYY-MM-DD HH24:MI:SS')
+	                ]]>
+	            </when>
+	        </choose>
+	        ORDER BY
+				REG_DT DESC
+    </select>
+
+    <select id="listBusyCallCount" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsSearchCondition" resultMap="statisticsResultMap">
+		/* SttStatisticsMapper.listBusyCallCount */
+		select 
+			REG_DT,
+			COALESCE (SERVICE_CODE, #{serviceCode}) as SERVICE_CODE,
+			COALESCE (BUSY_CALL_COUNT,0) as BUSY_CALL_COUNT
+		from (
+			SELECT
+	            iss.REG_DT,
+	            SERVICE_CODE,
+	            BUSY_CALL_COUNT
+	        FROM
+	            IAAP_STT_STATISTICS iss
+	        INNER JOIN
+	            (
+	                SELECT MAX(REG_DT) AS REG_DT
+	                FROM IAAP_STT_STATISTICS
+	                WHERE
+	                    1 = 1
+	                <choose>
+	                    <when test="from != null">
+	                        AND REG_DT >= TO_DATE(#{from},'YY-MM-DD HH24:MI:SS')
+	                    </when>
+	                    <otherwise>
+	                        AND REG_DT >= TO_DATE('2022-01-01 00:00:00','YY-MM-DD HH24:MI:SS')
+	                    </otherwise>
+	                </choose>
+	                <choose>
+	                    <when test="to != null">
+	                        <![CDATA[
+	                        AND REG_DT <= TO_DATE(#{to},'YY-MM-DD HH24:MI:SS')
+	                        ]]>
+	                    </when>
+	                </choose>
+	                GROUP BY
+	                <choose>
+	                    <when test="searchUnit.name() == 'MONTH'">TO_CHAR(REG_DT, 'YY-MM')</when>
+			            <when test="searchUnit.name() == 'DAY'">TO_CHAR(REG_DT, 'YY-MM-DD')</when>
+			            <when test="searchUnit.name() == 'HOUR'">TO_CHAR(REG_DT, 'YY-MM-DD HH24')</when>
+			            <otherwise>TO_CHAR(REG_DT, 'YY-MM-DD HH24:MI:SS')</otherwise>
+	                </choose>
+	            ) A
+	        ON
+	            iss.REG_DT = A.REG_DT
+	        WHERE
+	            1 = 1
+	            AND USE_YN = 'Y'
+	            <if test="serviceCode != null"><![CDATA[
+	                AND SERVICE_CODE = #{serviceCode}
+	            ]]></if>
+	        GROUP BY
+	            SERVICE_CODE,
+				iss.REG_DT,
+				BUSY_CALL_COUNT
+		)
+    </select>
+
+    <select id="detail" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsDetailSearchConditionDto" resultMap="statisticsResultMap">
+		/* SttStatisticsMapper.detail */
+		SELECT SERVER_NAME, 
+			SUM(REQUEST_COUNT) AS REQUEST_COUNT , 
+		    SUM(COMPLETE_COUNT) AS COMPLETE_COUNT,
+		    SUM(FAIL_COUNT) AS FAIL_COUNT,	
+		    SUM(BUSY_CALL_COUNT) AS BUSY_CALL_COUNT
+		FROM(
+			SELECT SERVER_NAME, REQUEST_COUNT, COMPLETE_COUNT, FAIL_COUNT, BUSY_CALL_COUNT
+			FROM IAAP_STT_STATISTICS
+			WHERE SERVICE_CODE = #{serviceCode}
+        	AND SERVER_NAME = #{serverName}
+        	AND USE_YN = 'Y'			
+			AND RES_DATE_TIME <![CDATA[>=]]> #{from}
+			AND RES_DATE_TIME <![CDATA[<=]]> #{to}
+		) 
+		GROUP BY SERVER_NAME
+    </select>
+
+    <select id="count" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsSearchCondition" resultType="long">
+		/* SttStatisticsMapper.count */
+        SELECT COUNT(1)
+        FROM
+        (
+            SELECT
+                   USE_YN
+            FROM
+                IAAP_STT_STATISTICS
+            WHERE
+            1 = 1
+            AND USE_YN = 'Y'
+            <if test="serviceCode != null"><![CDATA[
+                AND SERVICE_CODE = #{serviceCode}
+            ]]></if>
+            <choose>
+                <when test="from != null">
+                    AND REG_DT >= TO_DATE(#{from},'YY-MM-DD HH24:MI:SS')
+                </when>
+                <otherwise>
+                    AND REG_DT >= TO_DATE('2022-01-01 00:00:00','YY-MM-DD HH24:MI:SS')
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="to != null">
+                    <![CDATA[
+                    AND REG_DT <= TO_DATE(#{to},'YY-MM-DD HH24:MI:SS')
+                    ]]>
+                </when>
+            </choose>
+            GROUP BY
+            	USE_YN,
+		        <choose>
+		            <when test="searchUnit.name() == 'MONTH'">TO_CHAR(REG_DT, 'YY-MM')</when>
+		            <when test="searchUnit.name() == 'DAY'">TO_CHAR(REG_DT, 'YY-MM-DD')</when>
+		            <when test="searchUnit.name() == 'HOUR'">TO_CHAR(REG_DT, 'YY-MM-DD HH24')</when>
+		            <otherwise>TO_CHAR(REG_DT, 'YY-MM-DD HH24:MI:SS')</otherwise>
+		        </choose>
+        )
+    </select>
+	
+	<select id="getMostNumerousServiceCode" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsSearchCondition" resultType="String">
+		 /* SttStatisticsMapper.getMostNumerousServiceCode */
+		SELECT *
+		FROM (
+			SELECT 
+				SERVICE_CODE
+			FROM
+				IAAP_STT_STATISTICS
+			WHERE 
+				1=1
+	 		    <choose>
+			        <when test="from != null">
+			        	AND REG_DT >= TO_DATE(#{from},'YY-MM-DD HH24:MI:SS')
+			        </when>
+			        <otherwise>
+			               AND REG_DT >= TO_DATE('2022-01-01 00:00:00','YY-MM-DD HH24:MI:SS')
+			        </otherwise>
+			    </choose>
+			    <choose>
+			       <when test="to != null">
+			           <![CDATA[
+			           AND REG_DT <= TO_DATE(#{to},'YY-MM-DD HH24:MI:SS')
+			           ]]>
+			       </when>
+			    </choose>
+				AND USE_YN = 'Y'
+			GROUP BY SERVICE_CODE,
+ 				<choose>
+		            <when test="searchUnit.name() == 'MONTH'">TO_CHAR(REG_DT, 'YY-MM')</when>
+		            <when test="searchUnit.name() == 'DAY'">TO_CHAR(REG_DT, 'YY-MM-DD')</when>
+		            <when test="searchUnit.name() == 'HOUR'">TO_CHAR(REG_DT, 'YY-MM-DD HH24')</when>
+		            <otherwise>TO_CHAR(REG_DT, 'YY-MM-DD HH24:MI:SS')</otherwise>
+		        </choose>
+			ORDER BY COUNT(SERVICE_CODE) DESC
+		) A
+		WHERE ROWNUM = 1
+	</select>
+	
+    <select id="exists" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsDetailSearchConditionDto" resultType="int">
+		/* SttStatisticsMapper.exists */
+        SELECT case when 
+        	EXISTS ( SELECT 1 FROM IAAP_STT_STATISTICS
+            WHERE
+                SERVICE_CODE = #{serviceCode} AND RES_DATE_TIME = #{resDateTime}
+            AND REG_DT = TO_TIMESTAMP(#{regDt},'YY-MM-DD HH24:MI:SS.FF') AND
+                SERVER_NAME = #{serverName} AND USE_YN = 'Y' )
+        THEN 1 ELSE 0 END isExists FROM DUAL
+    </select>
+    	
+    <select id="existsServiceCode" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsSearchCondition" resultType="int">
+		/* SttStatisticsMapper.existsServiceCode */
+        SELECT case when 
+        	EXISTS ( SELECT 1 FROM IAAP_STT_STATISTICS
+            WHERE
+                SERVICE_CODE = #{serviceCode}
+                AND USE_YN = 'Y'
+            <choose>
+		        <when test="from != null">
+		            AND REG_DT >= TO_DATE(#{from},'YY-MM-DD HH24:MI:SS')
+		        </when>
+		        <otherwise>
+		           AND REG_DT >= TO_DATE('2022-01-01 00:00:00','YY-MM-DD HH24:MI:SS')
+		        </otherwise>
+			</choose>
+			<choose>
+			      <when test="to != null">
+			          <![CDATA[
+			            AND REG_DT <= TO_DATE(#{to},'YY-MM-DD HH24:MI:SS')
+					   ]]>
+			       </when>
+		    </choose>
+		   )
+        THEN 1 ELSE 0 END isExists FROM DUAL
+	</select>
+
+    <!--  INSERT  -->
+    <insert id="insert" parameterType="com.kt.smp.stt.statistics.domain.SttStatisticsVO">
+		/* SttStatisticsMapper.insert */
+        INSERT INTO IAAP_STT_STATISTICS (res_date_time
+                                        , support_svc_list
+                                        , complete_svc_list
+                                        , service_code
+                                        , request_count
+                                        , complete_count
+                                        , fail_count
+                                        , busy_call_count
+                                        , server_name
+                                        , total_server_cnt
+                                        , complete_server_cnt
+                                        , reg_dt
+                                        , reg_id
+                                        , reg_ip
+                                        , upd_dt
+                                        , upd_id
+                                        , upd_ip
+                                        , use_yn)
+        VALUES(#{resDateTime}
+              , #{supportSvcList, typeHandler=com.kt.smp.stt.statistics.handler.SttStatisticsHandler}
+              , #{completeSvcList, typeHandler=com.kt.smp.stt.statistics.handler.SttStatisticsHandler}
+              , #{serviceCode}
+              , #{requestCount}
+              , #{completeCount}
+              , #{failCount}
+              , #{busyCallCount}
+              , #{serverName}
+              , #{totalServerCnt}
+              , #{completeServerCnt}
+              , TO_TIMESTAMP(#{regDt},'YY-MM-DD HH24:MI:SS.FF')
+              , #{regId}
+              , #{regIp}
+              , TO_TIMESTAMP(#{updDt},'YY-MM-DD HH24:MI:SS.FF')
+              , #{updId}
+              , #{updIp}
+              , 'Y')
+    </insert>
+</mapper>

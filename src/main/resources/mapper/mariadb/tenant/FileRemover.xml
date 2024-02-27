@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.smp.stt.remover.mapper.FileRemoverMapper">
+	<select id="findRemoveAmDataDirectoryList" resultType="com.kt.smp.stt.remover.dto.RemoveAmDataDirectoryDto" parameterType="int">
+		SELECT
+		    CONCAT(AM_DATA_PATH, ANS_FILE) AS ansFilePath,
+		    CONCAT(AM_DATA_PATH, VOICE_FILE) AS voiceFilePath
+		FROM
+		    IAAP_STT_TRAIN_AM_DATA
+		WHERE 
+		    DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d')
+	</select>
+	
+	<select id="findRemoveCallInfoDirectoryList" resultType="string" parameterType="int">
+		SELECT
+			WAV_FILE_PATH
+		FROM
+			IAAP_STT_CALL_INFO isci 
+		WHERE
+			DATE_FORMAT(CALL_START_TIME, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d')
+	</select>
+	
+	<select id="findRemoveDeployModelDirectoryList" resultType="string" parameterType="int">
+		SELECT
+			MODEL_PATH
+		FROM
+			IAAP_STT_DEPLOY_MODEL isdm  
+		WHERE
+			DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d')
+	</select>
+	
+	<select id="findRemoveVerifyDataDirectoryList" resultType="string" parameterType="int">
+		SELECT
+			VERIFY_DATA_PATH 
+		FROM
+			IAAP_STT_VERIFY_DATA isvd  
+		WHERE 
+			DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d')
+	</select>
+	
+	<update id="removeFileRelatedData">
+			SELECT 1;
+			<if test="datasToRemove.contains('REMOVER_DATA_AM_TRAIN_DATA')">
+				UPDATE IAAP_STT_TRAIN_AM_DATA SET USE_YN = 'N' WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_LM_TRAIN_DATA')">
+				UPDATE IAAP_STT_TRAIN_DATA SET USE_YN = 'N' WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_TRAIN_MNG')">
+				UPDATE IAAP_STT_TRAIN_MNG SET USE_YN = 'N' WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_VERIFY_DATA')">
+				UPDATE IAAP_STT_VERIFY_DATA SET USE_YN = 'N' WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_VERIFY_MNG')">
+				UPDATE IAAP_STT_VERIFY_HISTORY SET USE_YN = 'N' WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_DEPLOY_MODEL')">
+				UPDATE IAAP_STT_DEPLOY_MODEL SET USE_YN = 'N' WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_DEPLOY_MNG')">
+				UPDATE IAAP_STT_DEPLOY_MNG SET USE_YN = 'N' WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_TEST')">
+				DELETE FROM IAAP_STT_TEST_DATA WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_CALLINFO')">
+				DELETE FROM IAAP_STT_CALL_INFO WHERE DATE_FORMAT(CALL_START_TIME, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+				DELETE FROM IAAP_STT_RESULT_INFO WHERE DATE_FORMAT(EPD_START_TIME, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_STT_RESULT')">
+				UPDATE IAAP_STT_LOG SET USE_YN = 'N' WHERE DATE_FORMAT(START_AT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_HW_RESOURCE')">
+			   DELETE FROM IAAP_STT_SYSTEM_STATUS_STATH WHERE STR_TO_DATE(DATE_HOUR, '%Y%m%d%H') <![CDATA[<=]]> CURRENT_DATE - INTERVAL #{removerStandard} DAY;
+				DELETE FROM IAAP_STT_SYSTEM_STATUS WHERE DATE_FORMAT(LAST_CHECK_TIME, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+			<if test="datasToRemove.contains('REMOVER_DATA_STATISTICS')">
+				DELETE FROM IAAP_STT_STATISTICS WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+				DELETE FROM IAAP_STT_STATISTICS_ERROR WHERE DATE_FORMAT(REG_DT, '%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(CURRENT_DATE - INTERVAL #{removerStandard} DAY, '%Y-%m-%d');
+			</if>
+	</update>
+	
+</mapper>

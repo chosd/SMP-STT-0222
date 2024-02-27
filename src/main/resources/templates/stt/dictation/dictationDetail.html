@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/nolayout">
+<th:block layout:fragment="html">
+    <link th:href='${smpServiceUriPrefix + "/css/audio.css"}' rel="stylesheet" />
+    <div class="contentRoot">
+        <div class="content-header">
+            <h2>전사데이터 상세</h2>
+            <div class="button-group">
+                <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded mdc-theme--default" @click="goList">
+                    <span class="mdc-button__ripple"></span>
+                    <i class="material-icons mdc-button__icon">keyboard_backspace</i>
+                    <span class="mdc-button__label">목록으로</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">
+                    <div class="form-row md-size">
+                        <div class="flex-auto">
+                            <h4>전사데이터 정보</h4>
+                        </div>
+                        <button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="updateDictation">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">save</i>
+                            <span class="mdc-button__label">저장</span>
+                        </button>
+                        <button
+                            class="mdc-button mdc-button--unelevated mdc-ripple-upgraded mdc-theme--on-error mdc-theme--error-bg"
+                            @click="deleteDictation">
+                            <span class="mdc-button__ripple"></span>
+                            <i class="material-icons mdc-button__icon">delete</i>
+                            <span class="mdc-button__label">삭제</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body custom-scrollbar content-item-row-stack">
+                    <div class="form-row-stack">
+                        <div class="form-row">
+                            <div class="flex-auto flex-ratio-two">
+                                <div id="wavFileNameInput"
+                                     class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                                    <input type="text" class="mdc-text-field__input"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text"
+                                           readonly/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">음원파일명</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto">
+                                <div id="serviceModelNameInput"
+                                     class="mdc-text-field text-field mdc-text-field--outlined w-100">
+                                    <input type="text" class="mdc-text-field__input"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">채널구분</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto">
+                                <div id="directionInput"
+                                     class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+                                    <input type="text" class="mdc-text-field__input"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">TXRX</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row" style="display: none;" >
+                            <div class="flex-auto flex-ratio-two">
+                                <div id="usageTypeSelector"
+                                     class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+                                    <div class="mdc-select__anchor">
+                                        <div class="mdc-notched-outline">
+                                            <span class="mdc-notched-outline__leading"></span>
+                                            <div class="mdc-notched-outline__notch">
+                                                <label class="mdc-floating-label">데이터구분</label>
+                                            </div>
+                                            <span class="mdc-notched-outline__trailing"></span>
+                                        </div>
+                                        <span class="mdc-select__selected-text-container overflow-hidden">
+                                            <span class="mdc-select__selected-text"></span>
+                                        </span>
+                                        <span class="mdc-select__dropdown-icon"></span>
+                                    </div>
+                                    <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                        <ul class="mdc-deprecated-list">
+                                            <li class="mdc-deprecated-list-item" data-value="NONE" aria-selected="true">
+                                                <span class="mdc-deprecated-list-item__ripple"></span>
+                                                <span class="mdc-deprecated-list-item__text">선택안함</span>
+                                            </li>
+                                            <li class="mdc-deprecated-list-item" data-value="AM_TRAIN_DATA"
+                                                aria-selected="true">
+                                                <span class="mdc-deprecated-list-item__ripple"></span>
+                                                <span class="mdc-deprecated-list-item__text">AM학습데이터</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto">
+                                <div id="regIdInput" class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+                                    <input type="text" class="mdc-text-field__input"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">등록자</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-auto">
+                                <div id="updIdInput" class="mdc-text-field text-field mdc-text-field--outlined w-100 ">
+                                    <input type="text" class="mdc-text-field__input"
+                                           aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">수정자</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-item form-row h-auto" style="display: none;">
+                        <div id="emptyUsageDiv" class="flex-auto"></div>
+                        <div id="verifyDataUsageDiv" class="w-50">
+                            <ul class="mdc-list" role="group" aria-label="List with checkbox items">
+                                <template v-for="(item, idx) in verifyDatasetList">
+                                    <li class="mdc-list-item" role="checkbox" aria-checked="false">
+                                        <span class="mdc-list-item__ripple"></span>
+                                        <span class="mdc-list-item__graphic">
+                                            <div class="mdc-checkbox">
+                                                <input type="checkbox"
+                                                       class="mdc-checkbox__native-control chk-verify-dataset"
+                                                       :value="item.id"/>
+                                                <div class="mdc-checkbox__background">
+                                                    <svg class="mdc-checkbox__checkmark"
+                                                         viewBox="0 0 24 24">
+                                                    <path class="mdc-checkbox__checkmark-path"
+                                                          fill="none"
+                                                          d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                                                    </svg>
+                                                    <div class="mdc-checkbox__mixedmark"></div>
+                                                </div>
+                                            </div>
+                                        </span>
+                                        <label class="mdc-list-item__text" :for="item.id">{{item.name}}</label>
+                                    </li>
+                                    <li role="separator" class="mdc-list-divider"></li>
+                                </template>
+                            </ul>
+                        </div>
+                        <div id="amTrainDataUsageDiv" class="form-row w-50" >
+                            <div id="amTrainDataDirectorySelector"
+                                 class="mdc-select mdc-select--outlined mdc-select--no-label w-100">
+                                <div class="mdc-select__anchor">
+                                    <div class="mdc-notched-outline">
+                                        <span class="mdc-notched-outline__leading"></span>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label">저장위치</label>
+                                        </div>
+                                        <span class="mdc-notched-outline__trailing"></span>
+                                    </div>
+                                    <span class="mdc-select__selected-text-container overflow-hidden">
+                                    <span class="mdc-select__selected-text"></span>
+                                </span>
+                                    <span class="mdc-select__dropdown-icon"></span>
+                                </div>
+                                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                    <ul class="mdc-deprecated-list">
+                                        <li class="mdc-deprecated-list-item" data-value="NONE">
+                                            <span class="mdc-deprecated-list-item__ripple"></span>
+                                            <span class="mdc-deprecated-list-item__text">선택</span>
+                                        </li>
+                                        <li v-for="(item, idx) in directoryList" class="mdc-deprecated-list-item"
+                                            :data-value="item.id">
+                                            <span class="mdc-deprecated-list-item__ripple"></span>
+                                            <span class="mdc-deprecated-list-item__text">{{item.name}}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-item" id="content-bottom">
+                        <div class="content-title">
+                            <h4 class="flex-auto">전사데이터 작성</h4>
+                            <div class="button-group">
+                                <button id="goPrevBtn"
+                                        class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+                                    <span class="mdc-button__ripple"></span>
+                                    <i class="material-icons mdc-button__icon">arrow_back</i>
+                                    <span class="mdc-button__label">이전</span>
+                                </button>
+                                <button id="goNextBtn"
+                                        class="mdc-button mdc-button--unelevated mdc-ripple-upgraded">
+                                    <span class="mdc-button__ripple"></span>
+                                    <span class="mdc-button__label">다음</span>
+                                    <i class="material-icons mdc-button__icon">arrow_forward</i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-row-stack">
+                            <div class="form-row">
+                                <div id="transcriptInput" class="mdc-text-field text-field mdc-text-field--outlined flex-auto">
+                                    <input type="text" class="mdc-text-field__input" aria-describedby="text-field-outlined-shape-one-helper-text" readonly/>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label" >STT결과</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row multiline-align-top">
+                                <div id="dictatedTextInput"
+                                     class="mdc-text-field text-field mdc-text-field--fullwidth mdc-text-field--no-label mdc-text-field--textarea mdc-text-field--label-floating h-auto">
+<!--                                     class="mdc-text-field text-field mdc-text-field&#45;&#45;outlined mdc-text-field&#45;&#45;fullwidth mdc-text-field&#45;&#45;no-labe h-auto">-->
+                                    <textarea class="mdc-text-field__input is-vertical-resize"></textarea>
+                                    <div class="mdc-notched-outline mdc-notched-outline--upgraded">
+                                        <div class="mdc-notched-outline__leading"></div>
+                                        <div class="mdc-notched-outline__notch">
+                                            <label class="mdc-floating-label" >전사데이터</label>
+                                        </div>
+                                        <div class="mdc-notched-outline__trailing">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+	<div class="media-area flex-auto">
+		<div id="waveForm" style="margin-bottom: 10px;"></div>
+		<div class="sound-info">
+			<div class="ftl">
+				<span class="time">
+					<i id="time-current" class="txt-green">00:00</i>
+					/
+					<i id="time-total">00:00</i>
+				</span>
+				<span>
+					<img th:src='${smpServiceUriPrefix + "/img/icon-volume.png"}' atl="볼륨" />
+				</span>
+				<input id="audioVolume" type="range" min="0" max="1" value="0.5" step="0.1" />
+			</div>
+			<div class="ftr">
+				<div>
+					<div>
+						<a href="javascript:void(0);" class="playBackRate" data-value="0.5">x0.5</a>
+						<a href="javascript:void(0);" class="playBackRate playBackRateOn" data-value="1">x1.0</a>
+						<a href="javascript:void(0);" class="playBackRate" data-value="1.5">x1.5</a>
+						<a href="javascript:void(0);" class="playBackRate" data-value="2">x2.0</a>
+						<a href="javascript:void(0);" id="audioStop"><img width="53"
+								th:src='${smpServiceUriPrefix + "/img/icon-pause.png"}' alt="일시정지" /></a>
+						<a href="javascript:void(0);" id="audioPlay"><img width="53"
+								th:src='${smpServiceUriPrefix + "/img/icon-play.png"}' alt="재생" /></a>
+						<a href="javascript:void(0);" id="audioPlayLoop" class="playLoop">반복재생</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <input type="hidden" readonly id="smpServiceUriPrefix" th:value="${smpServiceUriPrefix}">
+    <input type="hidden" readonly id="projectCode" th:value="${projectCode}">
+</th:block>
+<th:block layout:fragment="script">
+    <script type="text/javascript" th:src='${smpServiceUriPrefix + "/js/wavesurferV2.js"}'></script>
+    <script type="text/javascript">
+        (function () {
+
+            const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
+            const projectCode = $("#projectCode").val();
+
+            const LABEL = {
+                message: {
+                    // 공통
+                    API_ERROR_TITLE: "실패",
+                    API_ERROR_MESSAGE: "일시적인 오류가 발생하였습니다. 잠시 후 다시 요청해 주세요.<br/><br/>지속적으로 동일한 문제가 발생하는 경우 관리자에게 문의하시기 바랍니다.",
+                    NOT_EXIST_DICTATION_ID: "존재하지 않는 전사데이터 입니다.",
+                    DELETE_DICTATION_CONFIRM: "전사데이터를 삭제하시겠습니까?",
+                    
+                    // wavesurfer
+					NOT_EXIST_AUDIO_FILE: "음원 파일이 존재하지 않습니다.",
+                }
+            };
+
+            const KEYCODE = {
+                "LEFT": 37,
+                "DOWN": 40,
+                "RIGHT": 39,
+                "ENTER": 13
+            };
+
+            const wavesurfer = WaveSurfer.create({
+                container: "#waveForm",
+                backgroundColor: 'white',
+                height: 60,
+                waveColor: '#14BBB3',
+                normalize: true,
+                xhr: {
+                    requestHeaders: [
+                        {
+                            key: 'x-smp-project-code',
+                            value: projectCode
+                        }
+                    ]
+                }
+            });
+
+            var vueInstance = new Vue({
+                el: ".contentRoot",
+                data: {
+                    LABEL: LABEL,
+                    moment: moment,
+                    fn: fn,
+                    wavesurfer: wavesurfer,
+                    playLoop: false,
+                    serviceUrlPrefix: serviceUrlPrefix,
+                    dictationId: null,
+                    wavFileName: "",
+
+                    verifyDatasetList: JSON.parse("[[${verifyDatasetList}]]".replaceAll('&quot;', "\"")),
+                    directoryList: JSON.parse("[[${directoryList}]]".replaceAll('&quot;', "\"")),
+                },
+                created: function () {
+                    this.initPage(location.href);
+                },
+                mounted: function () {
+					$(document).keyup(this.setKeyup);
+                    var self = this;
+                    // 페이지 이동시 처리
+                    $('#drawer-main-content-viewer').one('page.move', function () {
+                        $("#audioStop").click();	// 화면 바뀔 때 오디오를 꺼줍니다.
+                        $(document).unbind("keyup", self.setKeyup);
+                    });
+
+                    if (_.isEmpty(this.dictationId)) {
+                        toastr.error(LABEL.message.NOT_EXIST_DICTATION_ID, LABEL.message.API_ERROR_TITLE);
+                    } else {
+                        this.getDictation(this.dictationId);
+                    }
+                    
+                    $("#content-bottom").prepend($(".media-area"));
+
+                    this.initWavesurfer();
+                },
+                methods: {
+					setKeyup: function(ev) {
+						var goPrevBtn = $("#goPrevBtn");
+		                var goNextBtn = $("#goNextBtn");
+		                var transcriptInput = $("#transcriptInput");
+		                var dictatedTextInput = $("#dictatedTextInput");
+		
+		                if (ev.keyCode === KEYCODE.LEFT) {
+		
+		                    if (!goPrevBtn.prop('disabled')) {
+		                        goPrevBtn.click();
+		                    }
+		                    return;
+		                }
+		
+		                if (ev.keyCode === KEYCODE.RIGHT) {
+		
+		                    if (!goNextBtn.prop('disabled')) {
+		                        goNextBtn.click();
+		                    }
+		                    return;
+		                }
+		
+		                if (ev.keyCode === KEYCODE.DOWN) {
+		                    dictatedTextInput.data('textField').value = transcriptInput.data('textField').value;
+		                }
+		
+		                if (ev.keyCode === KEYCODE.ENTER) {
+							const locationArr = location.href.split("/"); 
+							if (locationArr[locationArr.length - 1] == "dictation") {
+								return;
+							}
+		                    vueInstance.updateDictation();
+		                }
+					},
+                    /**
+                     * 초기 url을 기준으로 화면 내용 설정
+                     */
+                    initPage: function (href) {
+                        var self = this;
+                        // 현 URL에서 groupId를 추출함
+                        this.dictationId = href.slice(href.lastIndexOf('/')+1);
+                    },
+
+                    /**
+                     * 구글 Material component 초기화
+                     */
+                    initMaterialUx: function () {
+
+                        // ripple material ux 적용
+                        const elements = document.querySelectorAll('.mdc-ripple-upgraded');
+                        for (const el of elements) {
+                            $(el).data('ripple', mdc.ripple.MDCRipple.attachTo(el, el.classList.contains('mdc-ripple-upgraded--unbounded') ? {
+                                isUnbounded: true
+                            } : void 0));
+                        }
+
+                        // input text material ux 적용
+                        const textFields = document.querySelectorAll('.mdc-text-field');
+                        for (const el of textFields) {
+                            $(el).data('textField', mdc.textField.MDCTextField.attachTo(el));
+                        }
+
+                        const selects = document.querySelectorAll('.mdc-select');
+                        for (const el of selects) {
+                            var $select = mdc.select.MDCSelect.attachTo(el);
+                            var $el = $(el);
+                            var value = $el.attr('data-value');
+                            // 초기값 설정
+                            _.isEmpty(value) ? $select.setSelectedIndex(0) : $select.setValue(value);
+                            $el.data('select', $select);
+                        }
+                    },
+                    initWavesurfer: function() {
+
+                        var self = this;
+                        this.wavesurfer.on('ready', function() {
+                            $("#time-current").text(self.toHHMMSS(self.wavesurfer.getCurrentTime()));
+                            $("#time-total").text(self.toHHMMSS(self.wavesurfer.getDuration()));
+                        });
+
+                        this.wavesurfer.on('audioprocess', function() {
+                            $("#time-current").text(self.toHHMMSS(self.wavesurfer.getCurrentTime()));
+                        });
+
+                        this.wavesurfer.on('finish', function() {
+                            self.wavesurfer.seekTo(0);
+                            if(self.playLoop) {
+                                self.wavesurfer.play();
+                            }
+                        });
+
+                        this.wavesurfer.on('seek', function(progress) {
+                            this.wavesurfer.unbind('seek')
+                            var progressInSecond = self.wavesurfer.getDuration() * progress;
+                            self.wavesurfer.skip(progressInSecond);
+                        });
+
+                        $("#audioPlay").click(function() {
+                            self.wavesurfer.play();
+                        });
+
+                        $("#audioStop").click(function() {
+                            self.wavesurfer.pause();
+                        });
+
+                        $("#audioVolume").on('input', function() {
+                            self.wavesurfer.setVolume($("#audioVolume").val());
+                        });
+
+                        $("#audioPlayLoop").click(function() {
+                            self.playLoop = !self.playLoop;
+
+                            if(self.playLoop) {
+                                $("#audioPlayLoop").addClass("playLoopOn");
+                            }
+                            else {
+                                $("#audioPlayLoop").removeClass("playLoopOn");
+                            }
+                        });
+
+                        $(".playBackRate").click(function(event) {
+                            var rate = event.target.getAttribute("data-value");
+                            $(".playBackRate").removeClass('playBackRateOn');
+                            event.target.classList.add('playBackRateOn');
+                            self.wavesurfer.setPlaybackRate(rate);
+                        });
+
+                    },
+                    loadWavFile: async function() {
+                        var url = this.serviceUrlPrefix + "/api/dictation/" + this.dictationId + "/wav";
+                        try {
+							await this.wavesurfer.load(url);	
+						} catch(e) {
+							this.wavesurfer.empty();
+                            toastr.error(LABEL.message.NOT_EXIST_AUDIO_FILE, LABEL.message.API_ERROR_TITLE);
+						}
+                        
+                    },
+                    toHHMMSS: function(param) {
+                        var sec_num = parseInt(param, 10);
+                        var hours   = Math.floor(sec_num / 3600);
+                        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+                        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+                        if (hours   < 10) {hours   = "0"+hours;}
+                        if (minutes < 10) {minutes = "0"+minutes;}
+                        if (seconds < 10) {seconds = "0"+seconds;}
+                        return hours+':'+minutes+':'+seconds;
+                    },
+                    getDictation: function(dictationId) {
+
+                        var self = this;
+                        $.ajax({
+                            method: "GET",
+                            url: this.serviceUrlPrefix + "/api/dictation/" + dictationId,
+                            dataType: "json",
+                            success: function (response, textStatus, jqXHR) {
+                                if (response.code === 200) {
+
+                                    self.$nextTick(function() {
+                                        self.initMaterialUx();
+                                        self.renderDatas(response.object);
+                                    });
+                                    
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    },
+
+                    preempt: function() {
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/dictation/" + this.dictationId + "/preempt",
+                            dataType: "json"
+                        });
+                    },
+
+                    freePreempt: function() {
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/dictation/" + this.dictationId + "/preempt/free",
+                            dataType: "json"
+                        });
+                    },
+
+                    /**
+					* 입력된 정보를 기준으로 화면에 데이터를 출력한다.
+					* NOTE :: Google Material Input을 자연스럽게 사용하기 위해서 직접 찾아서 데이터를 제공
+					*/
+                    renderDatas: function (dictation) {
+
+                        var self = this;
+                        var $wavFileNameInput = $('#wavFileNameInput');
+                        var $serviceModelNameInput = $("#serviceModelNameInput");
+                        var $directionInput = $("#directionInput");
+                        var $usageTypeSelector = $("#usageTypeSelector");
+                        var $regIdInput = $("#regIdInput");
+                        var $updIdInput = $("#updIdInput");
+                        var $transcriptInput = $("#transcriptInput");
+                        var $dictatedTextInput = $("#dictatedTextInput");
+						
+                        //초기값 설정
+                        $wavFileNameInput.data('textField').value = dictation.wavFileName;
+                        $serviceModelNameInput.data('textField').value = dictation.serviceModelName;
+                        $directionInput.data('textField').value = dictation.direction;
+                        $usageTypeSelector.data('select').value = dictation.usageType;
+                        $regIdInput.data('textField').value = dictation.regId;
+                        $updIdInput.data('textField').value = dictation.updId;
+                        $transcriptInput.data('textField').value = dictation.transcript;
+                        if ( dictation.dictatedText ) {
+							$dictatedTextInput.data('textField').value = dictation.dictatedText;	
+						}
+
+                        $usageTypeSelector.data('select').unlisten('MDCSelect:change');
+                        $usageTypeSelector.data('select').listen('MDCSelect:change', function (event) {
+                            self.changeUsage();
+                        });
+
+                        this.dictationId = dictation.id;
+						this.loadWavFile();
+                        this.initPrevNextBtn(dictation);
+                        this.initUsage(dictation);
+						
+                    },
+                    initPrevNextBtn: function(dictation) {
+
+                        var self = this;
+                        var $goPrevBtn = $("#goPrevBtn");
+                        var $goNextBtn = $("#goNextBtn");
+
+                        if (dictation.prevId) {
+                            $goPrevBtn.prop('disabled', false);
+                        } else {
+                            $goPrevBtn.prop('disabled', true);
+                        }
+
+                        if (dictation.nextId) {
+                            $goNextBtn.prop('disabled', false);
+                        } else {
+                            $goNextBtn.prop('disabled', true);
+                        }
+
+                        $goPrevBtn.unbind('click').bind('click', function() {
+                            self.getDictation(dictation.prevId);
+                        });
+
+                        $goNextBtn.unbind('click').bind('click', function() {
+                            self.getDictation(dictation.nextId);
+                        });
+                    },
+
+                    initUsage: function(dictation) {
+
+                        var $verifyDataUsageDiv = $("#verifyDataUsageDiv");
+                        var $amTrainDataUsageDiv = $("#amTrainDataUsageDiv");
+                        var $emptyUsageDiv = $("#emptyUsageDiv");
+                        var $amTrainDataDirectorySelector = $("#amTrainDataDirectorySelector");
+
+                        if(dictation.usageType === 'NONE') {
+                            $verifyDataUsageDiv.hide();
+                            $amTrainDataUsageDiv.hide();
+                            $emptyUsageDiv.show();
+                            return;
+                        }
+
+                        if (dictation.usageType === 'VERIFY_DATA') {
+                            $emptyUsageDiv.hide();
+                            $amTrainDataUsageDiv.hide();
+                            //$verifyDataUsageDiv.show();
+
+                            var checkboxList = $('input.chk-verify-dataset');
+
+                            for (var checkbox of checkboxList) {
+
+                                var datasetId = $(checkbox).val();
+
+                                for(var id of dictation.verifyDatasetIdList) {
+
+                                    if ($.trim(datasetId) === $.trim(id)) {
+                                        $(checkbox).prop('checked', true);
+                                    }
+                                }
+                            }
+
+                            return;
+                        }
+
+                        if (dictation.usageType === 'AM_TRAIN_DATA') {
+                            $emptyUsageDiv.hide();
+                            $verifyDataUsageDiv.hide();
+                            $amTrainDataUsageDiv.show();
+                            $amTrainDataDirectorySelector.data('select').value = $.trim(dictation.amTrainDataDirectoryId);
+                        }
+                    },
+
+                    changeUsage: function() {
+
+                        var usageType = $("#usageTypeSelector").data('select').value;
+                        var $verifyDataUsageDiv = $("#verifyDataUsageDiv");
+                        var $amTrainDataUsageDiv = $("#amTrainDataUsageDiv");
+                        var $emptyUsageDiv = $("#emptyUsageDiv");
+
+                        if (usageType === 'NONE') {
+                            $verifyDataUsageDiv.hide();
+                            $amTrainDataUsageDiv.hide();
+                            $emptyUsageDiv.show();
+                            return;
+                        }
+
+                        if (usageType === 'VERIFY_DATA') {
+                            $emptyUsageDiv.hide();
+                            $amTrainDataUsageDiv.hide();
+                            $verifyDataUsageDiv.show();
+                            return;
+                        }
+
+                        if (usageType === 'AM_TRAIN_DATA') {
+                            $emptyUsageDiv.hide();
+                            $verifyDataUsageDiv.hide();
+                            $amTrainDataUsageDiv.show();
+                        }
+
+                    },
+
+                    /**
+                     * 리스트 화면으로 돌아간다.
+                     * NOTE :: history back이 아닌 리스트로 돌아감.
+                     */
+                    goList: function () {
+                        history.back();
+                    },
+
+                    updateDictation: function() {
+
+                        if (!confirm("전사데이터를 수정하시겠습니까?")) {
+                            return;
+                        }
+
+                        var wavFileName = $("#wavFileNameInput").data('textField').value;
+                        var usageType = $("#usageTypeSelector").data('select').value;
+                        var usageList = [];
+
+                        if (usageType === 'VERIFY_DATA') {
+
+                            var checkboxList = $("input.chk-verify-dataset");
+                            for (var checkbox of checkboxList) {
+
+                                var datasetId = $(checkbox).val();
+                                var checked = $(checkbox).is(":checked");
+
+                                if(checked) {
+                                    usageList.push({
+                                        dictationId: this.dictationId,
+                                        wavFileName: wavFileName,
+                                        verifyDatasetId: datasetId,
+                                        type: 'VERIFY_DATA'
+                                    });
+                                }
+                            }
+                        }
+
+                        if (usageType === 'AM_TRAIN_DATA') {
+
+                            var amTrainDataDirectoryId = $("#amTrainDataDirectorySelector").data('select').value;
+
+                            if (amTrainDataDirectoryId !== 'NONE') {
+
+                                usageList.push({
+                                    dictationId: this.dictationId,
+                                    wavFileName: wavFileName,
+                                    amTrainDataDirectoryId: amTrainDataDirectoryId,
+                                    type: "AM_TRAIN_DATA"
+                                });
+
+                            }
+
+                        }
+
+                        var dictatedText = $("#dictatedTextInput").data('textField').value;
+
+                        var params = {
+                            id: this.dictationId,
+                            dictatedText: dictatedText,
+                            usageType: usageType,
+                            usageList: usageList
+                        };
+
+                        var self = this;
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/dictation/update",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    toastr.success("전사데이터 수정이 완료되었습니다.");
+                                    self.getDictation(self.dictationId);
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+
+                    },
+
+                    /**
+                     * 전사데이터를 삭제한다.
+                     */
+                    deleteDictation: function() {
+                        var self = this;
+
+                        if (!confirm("전사데이터를 삭제하시겠습니까?")) {
+                            return ;
+                        }
+
+                        var params = {
+                            targetIdList : [this.dictationId]
+                        };
+
+                        $.ajax({
+                            method: "POST",
+                            url: this.serviceUrlPrefix + "/api/dictation/delete",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(params),
+                            success: function (response, textStatus, jqXHR) {
+
+                                if (response.code === 200) {
+                                    toastr.success("전사데이터 삭제가 완료했습니다.");
+                                    self.goList();
+                                    return;
+                                }
+
+                                toastr.error(response.message);
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                toastr.error(LABEL.message.API_ERROR_MESSAGE);
+                            }
+                        });
+                    }
+                }
+            });
+        })();
+    </script>
+</th:block>
+</html>
