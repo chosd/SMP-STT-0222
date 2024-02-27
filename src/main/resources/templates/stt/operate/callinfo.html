@@ -15,7 +15,7 @@
 	</style>
     <div class="contentRoot">
         <div class="content-header">
-          <h2>재처리 결과 리스트</h2>
+          <h2>상담 내역 조회</h2>
         </div>
         <div class="content-body">
             <div class="card">
@@ -58,9 +58,8 @@
                             </div>
                         </div>
                         <!-- << 조회기간 -->
-                        <!--24.01.16 재처리 내역 페이지(상담청취) 검색식 select box 삭제-->
                         <!-- 서비스 모델 -->
-                        <!--<div id="searchServiceModelSelector"
+                        <div id="searchServiceModelSelector"
                              class="mdc-select mdc-select--outlined mdc-select--no-label">
                             <div class="mdc-select__anchor">
                                 <div class="mdc-notched-outline">
@@ -98,8 +97,8 @@
                                 </ul>
                             </div>
                         </div>
-                        서비스 모델
-                        콜상태
+                        <!-- 서비스 모델 -->
+                        <!-- 콜상태 -->
                         <div id="searchCallStatusSelector"
                              class="mdc-select mdc-select--outlined mdc-select--no-label">
                             <div class="mdc-select__anchor">
@@ -134,7 +133,6 @@
                                         <span class="mdc-deprecated-list-item__ripple"></span>
                                         <span class="mdc-deprecated-list-item__text">완료</span>
                                     </li>
-                                    24.01.16 재처리 select box 삭제
                                     <li class="mdc-deprecated-list-item" :data-value="4000"
                                         @click="searchCondition.callStatus = 4000">
                                         <span class="mdc-deprecated-list-item__ripple"></span>
@@ -143,7 +141,7 @@
                                 </ul>
                             </div>
                         </div>
-                         서비스 모델 -->
+                        <!-- 서비스 모델 -->
                     </div>
                     <div class="form-row md-size">
                         <!-- << 상담 번호/콜키, 고객번호 등 검색 -->
@@ -173,8 +171,8 @@
                                 <div class="mdc-radio__focus-ring"></div>
                             </div>
                             <label for="radio-callId">콜키</label>
-							<!--24.01.16 재처리 내역 페이지(상담청취) 검색식 radio 버튼 삭제-->
-                            <!--<div class="mdc-radio">
+
+                            <div class="mdc-radio">
                                 <input class="mdc-radio__native-control" type="radio" id="radio-applicationId"
                                        name="searchKeywordType" v-model="searchCondition.searchKeywordType"
                                        value="applicationId">
@@ -185,9 +183,9 @@
                                 <div class="mdc-radio__ripple"></div>
                                 <div class="mdc-radio__focus-ring"></div>
                             </div>
-                            <label for="radio-applicationId">어플리케이션 ID</label>
+                            <label for="radio-applicationId">녹취ID</label>
 
-                            <div class="mdc-radio">
+                            <!--<div class="mdc-radio">
                                 <input class="mdc-radio__native-control" type="radio" id="radio-recId"
                                        name="searchKeywordType"
                                        v-model="searchCondition.searchKeywordType" value="recId">
@@ -215,7 +213,7 @@
                         <div class="table-result-info flex-auto">
                             <h4>검색결과 : <span>{{ pageInfo.total }}</span>건</h4>
                         </div>
-						<!--24.01.16 스카이라이프 재처리 버튼 삭제-->
+
                         <!--<button class="mdc-button mdc-button--unelevated mdc-ripple-upgraded" @click="reprocess">
                             <span class="mdc-button__label">재처리</span>
                         </button>-->
@@ -282,15 +280,14 @@
                                             scope="col">
                                             No.
                                         </th>
-                                        <!--24.01.22 스카이 라이프 재처리 결과 페이지에서 항목 삭제-->
-                                        <!--<th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
                                             scope="col">
                                             서비스 모델
                                         </th>
                                         <th class="mdc-data-table__header-cell text-center" role="columnheader"
                                             scope="col">
-                                            어플리케이션 ID
-                                        </th>-->
+                                            녹취ID
+                                        </th>
                                         <th class="mdc-data-table__header-cell text-center" role="columnheader"
                                             scope="col">
                                             콜키
@@ -307,11 +304,10 @@
                                             scope="col">
                                             콜 상태
                                         </th>
-                                        <!--24.01.22 스카이 라이프 재처리 결과 페이지에서 항목 삭제-->
-                                        <!--<th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
                                             scope="col">
                                             재처리 상태
-                                        </th>-->
+                                        </th>
                                     </tr>
                                     </thead>
                                     <tbody class="mdc-data-table__content">
@@ -321,7 +317,7 @@
                                         <td class="mdc-data-table__cell text-center" colspan="9">검색된 결과가 없습니다.</td>
                                     </tr>
                                     <tr v-else v-for="(row, i) in searchResults"
-                                        :id="'row-' + row.callId"
+                                        :id="'row-' + row.applicationId"
                                         class="callinfo-detail-row mdc-data-table__row is-non-clickable"
                                         aria-selected="false">
                                         <td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
@@ -342,13 +338,12 @@
                                         <td class="mdc-data-table__cell text-center">
                                             {{ pageInfo.total - ( (currentPage - 1) * searchCondition.pageSize + i) }}
                                         </td>
-                                        <!--24.01.22 스카이 라이프 재처리 결과 페이지에서 항목 삭제-->
-                                        <!--<td class="mdc-data-table__cell text-center">
+                                        <td class="mdc-data-table__cell text-center">
                                             {{ row.serviceModelName }}
 										</td>
 										<td class="mdc-data-table__cell text-center">
 											{{ row.applicationId }}
-										</td>-->
+										</td>
                                         <td class="mdc-data-table__cell text-center">
                                             {{ row.callId }}
                                         </td>
@@ -357,15 +352,12 @@
                                         </td>
 
                                         <td class="mdc-data-table__cell text-center">
-                                            <!--24.01.23 stt_status 필드값으로 재처리 완료 여부 판단-->
-                                            <!--<div v-if="row.callStatus === 3000 || row.callStatus === 4000 ">-->
-                                            <div v-if="row.sttStatus === 'E'">
+                                            <div v-if="row.callStatus === 3000 || row.callStatus === 4000 ">
                                                 <div class="callStatusBtn"
                                                      style="cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mdc-theme-primary);"
-                                                     :data-key="row.callId"
-                                                     @click="()=> moveToDetail(row.callId)"
+                                                     :data-key="row.applicationId"
+                                                     @click="()=> moveToDetail(row.applicationId)"
                                                      >
-                                                     <!--24.01.30 @click="()=> moveToDetail(row.applicationId) 으로 에러 발생시켜서 상세 페이지 막아둠-->
                                                     <i class="material-icons mdc-button__icon me-1">volume_up</i>
                                                     <span style="font-weight: bold;">재생</span>
                                                 </div>
@@ -375,12 +367,11 @@
                                             </div>
                                         </td>
                                         <td class="mdc-data-table__cell text-center">
-                                            <span v-if="row.sttStatus === 'R' || !row.sttStatus">진행중</span>
-                                            <span v-if="row.sttStatus === 'E'">완료</span>
-                                            <span v-if="row.sttStatus === 4000">재처리</span>
+                                            <span v-if="row.callStatus === 1000 || row.callStatus === 2000">진행중</span>
+                                            <span v-if="row.callStatus === 3000">완료</span>
+                                            <span v-if="row.callStatus === 4000">재처리</span>
                                         </td>
-                                        <!--24.01.22 스카이 라이프 재처리 결과 페이지에서 항목 삭제-->
-                                        <!--<td class="mdc-data-table__cell text-center">
+                                        <td class="mdc-data-table__cell text-center">
 										<div v-if="row.callStatus === 4000">
                                             <a class="table-icon-btn" :id="'reprocessLogBtn_' + row.applicationId"
                                                 @click="() => openReprocessLogDialog(row.applicationId)">
@@ -388,7 +379,6 @@
                                                 <span style="font-weight: bold;">이력조회</span>
                                             </a>
 										</div>
-										
 										<template v-else>
 											<span v-if="row.reprocessApplicationId == ' '">-</span>
 											<div v-else class="reprocessStatusBtn" :id="'reprocessStatus_'+row.applicationId" :data-key="row.applicationId" style="display: flex; align-items: center;justify-content: center;">
@@ -398,7 +388,7 @@
 												</div>
 											</div>
 										</template>
-										</td>-->
+										</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -540,7 +530,7 @@
     (function () {
 	  const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
 	  const isStreamMode = $("#isStreamMode").val();
-	  const DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/callinfo/{callId}";
+	  const DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/callinfo/{applicationId}";
 	  const LABEL = {
 			  message: {
 				  NO_SELECTION : "체크된 콜이 없습니다. 재처리를 위해 하나 이상 체크해주시길 바랍니다.",
@@ -847,9 +837,9 @@
             this.getReprocessLog(applicationId);
           },
           // 상세 화면으로 이동
-          moveToDetail: function(callId) {
+          moveToDetail: function(applicationId) {
 			  //const applicationId = ev.currentTarget.dataset.key;
-              window.index.movePage(DETAIL_PAGE_SERVICE_URI.replace("{callId}", callId));
+              window.index.movePage(DETAIL_PAGE_SERVICE_URI.replace("{applicationId}", applicationId));
 		  },
 		  // 모든 row 선택
 		  selectAllRows: function() {
