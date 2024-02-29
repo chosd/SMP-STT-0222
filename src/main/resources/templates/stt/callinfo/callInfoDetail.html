@@ -28,7 +28,7 @@
                 <div class="loadingBar">
 	                <!-- loading bar -->
 					<div v-show="searching" role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate"
-						style="opacity: 1;">
+						style="opacity: 0;">
 						<div class="mdc-linear-progress__buffering-dots"></div>
 						<div class="mdc-linear-progress__buffer"></div>
 						<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
@@ -82,12 +82,12 @@
                             <div class="call-info-detail flex-ratio-one content-item-row-stack">
                                 <h4 class="mb-0">콜 내용</h4>
 								<div class="visiableSpeakerTypeContainer">
-									<input type="checkbox" id="txChkbox" v-model="visiableSpeakerType" value="T" @change="changedChkbox()"/>
+									<input type="checkbox" id="txChkbox" v-model="visiableSpeakerType" value="tx" @change="changedChkbox()"/>
 									<label for="txChkbox">상담사</label>
-									<input type="checkbox" id="rxChkbox" v-model="visiableSpeakerType" value="R" @change="changedChkbox()"/>
+									<input type="checkbox" id="rxChkbox" v-model="visiableSpeakerType" value="rx" @change="changedChkbox()"/>
 									<label for="rxChkbox">고객</label>
 								</div>
-                                <div class="detailRoot">
+                                <div class="detailRoot" style="height: calc(100% - 10rem);">
                                     <!-- users-chat -->
                                     <div class="position-relative card-call-detail " id="users-chat">
                                         <div class="chat-conversation chat-record" id="chat-conversation">
@@ -101,40 +101,40 @@
                                             <ul class="chat-conversation-list" id="users-conversation">
                                                 <template v-for="(item, index) in conversationList"
                                                           ref="conversationListItems">
-                                                    <li v-if="item.rxtx === 'R'" class="chat-list left"  @click="onConversationClick(item)"
+                                                    <li v-if="item.speakerType === 'RX'" class="chat-list left"  @click="onConversationClick(item)"
                                                         id="chat-list-1">
                                                         <div class="conversation-list">
                                                             <div class="user-chat-content">
                                                                 <div class="ctext-wrap" v-bind:class="{ 'focus': item.isFocused}" :index="index">
                                                                     <div class="ctext-wrap-content">
                                                                         <p class="mb-0 ctext-content">
-                                                                            {{ item.sttSentence }}
+                                                                            {{ item.sttText }}
                                                                         </p>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="conversation-name">
-                                                                <small class="time">{{ item.regDts }}</small>
+                                                                <small class="time">{{ item.startTime }}</small>
                                                             </div>
                                                         </div>
                                                     </li>
-                                                    <li v-if="item.rxtx === 'T'" class="chat-list right" @click="onConversationClick(item)"
+                                                    <li v-if="item.speakerType === 'TX'" class="chat-list right" @click="onConversationClick(item)"
                                                         id="chat-list-1">
                                                         <div class="conversation-list">
                                                             <div class="conversation-name">
-                                                                <small class="time">{{ item.regDts }}</small>
+                                                                <small class="time">{{ item.startTime }}</small>
                                                             </div>
                                                             <div class="user-chat-content">
                                                                 <div class="ctext-wrap" v-bind:class="{ 'focus': item.isFocused}" :index="index">
                                                                     <div class="ctext-wrap-content">
-                                                                        <p class="mb-0 ctext-content"> {{ item.sttSentence }} </p>
+                                                                        <p class="mb-0 ctext-content"> {{ item.sttText }} </p>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="chat-avatar">
+                                                        <!--<div class="chat-avatar">
                                                                 <i class="rpi-callbot rpi-28px"></i>
-                                                        </div>
+                                                        </div>-->
                                                     </li>
                                                 </template>
 
@@ -201,7 +201,7 @@
 		const visiableSpeakerTypeContainer = new Vue({
 			el: ".visiableSpeakerTypeContainer",
 			data: {
-				visiableSpeakerType: ["T", "R"]
+				visiableSpeakerType: ["tx", "rx"]
 			},
 			methods: {
 				changedChkbox: function(e) {
@@ -209,13 +209,13 @@
 					
 					this.$nextTick(()=>{
 						
-						if (self.visiableSpeakerType.indexOf("T") === -1) {
+						if (self.visiableSpeakerType.indexOf("tx") === -1) {
 							$(".right").hide();
 						} else {
 							$(".right").show()
 						}
 						
-						if (self.visiableSpeakerType.indexOf("R") === -1) {
+						if (self.visiableSpeakerType.indexOf("rx") === -1) {
 							$(".left").hide();
 						} else {
 							$(".left").show()
@@ -245,7 +245,7 @@
           },
           mounted: function () {
 			console.log(">> callInfoDeatil page start");
-            if (_.isEmpty(this.callId)) {
+            if (_.isEmpty(this.applicationId)) {
               toastr.error(LABEL.message.NOT_EXIST_CALL_INFO, LABEL.message.API_ERROR_TITLE);
             }
           },
@@ -256,7 +256,7 @@
              */
             initPage: function (href) {
               // 현 URL에서 groupId를 추출함
-              this.callId = href.slice(href.lastIndexOf('/')+1);
+              this.applicationId = href.slice(href.lastIndexOf('/')+1);
             },
 
             /**
@@ -288,14 +288,12 @@
               const $serviceModelNameInput = $("#serviceModelName");
               const $startAtInput = $("#startAt");
               const $endAtInput = $("#endAt");
-              //24.01.22 callId
               const $recordFileName = $("#recordFileName");
 
               //초기값 설정
               $applicationIdInput.text(callinfo.applicationId);
               $statusInput.text(CALL_STATUS[callinfo.callStatus]);
               $serviceModelNameInput.text(callinfo.serviceModelName);
-              //24.01.22 callId
               $recordFileName.text(callinfo.callId);
               $startAtInput.text(moment(callinfo.callStartTime).format("YYYY-MM-DD HH:mm:ss"));
               $endAtInput.text(moment(callinfo.callEndTime).format("YYYY-MM-DD HH:mm:ss"));
@@ -345,8 +343,8 @@
             initPage: function (href) {
               var self = this;
               // 현 URL에서 applicationId를 추출함
-              this.callId = href.slice(href.lastIndexOf('/')+1);
-              this.getConversationDetail(this.callId);
+              this.applicationId = href.slice(href.lastIndexOf('/')+1);
+              this.getConversationDetail(this.applicationId);
               //24.01.22 스카이라이프 재처리 결과 음원재생 제거
             },
 
@@ -452,11 +450,11 @@
                 $(".focus")[0]?.scrollIntoView({ behavior: "smooth", block: "center"});
               }, 50)
             },
-            getConversationDetail: function (callId) {
+            getConversationDetail: function (applicationId) {
               var self = this;
               this.getConversationAjax = $.ajax({
                 method: "GET",
-                url: this.serviceUrlPrefix + "/api/callinfo2/" + callId,
+                url: this.serviceUrlPrefix + "/api/callinfo2/" + applicationId,
                 dataType: "json",
                 success: function (data, textCode, response) {
 					

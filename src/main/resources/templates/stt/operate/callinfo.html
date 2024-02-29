@@ -321,7 +321,7 @@
                                         <td class="mdc-data-table__cell text-center" colspan="9">검색된 결과가 없습니다.</td>
                                     </tr>
                                     <tr v-else v-for="(row, i) in searchResults"
-                                        :id="'row-' + row.callId"
+                                        :id="'row-' + row.applicationId"
                                         class="callinfo-detail-row mdc-data-table__row is-non-clickable"
                                         aria-selected="false">
                                         <td class="mdc-data-table__cell mdc-data-table__cell--checkbox">
@@ -357,17 +357,14 @@
                                         </td>
 
                                         <td class="mdc-data-table__cell text-center">
-                                            <!--24.01.23 stt_status 필드값으로 재처리 완료 여부 판단-->
-                                            <!--<div v-if="row.callStatus === 3000 || row.callStatus === 4000 ">-->
-                                            <div v-if="row.sttStatus === 'E'">
+                                            <div v-if="row.callStatus === 3000 || row.callStatus === 4000 ">
                                                 <div class="callStatusBtn"
                                                      style="cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mdc-theme-primary);"
-                                                     :data-key="row.callId"
-                                                     @click="()=> moveToDetail(row.callId)"
+                                                     :data-key="row.applicationId"
+                                                     @click="()=> moveToDetail(row.applicationId)"
                                                      >
-                                                     <!--24.01.30 @click="()=> moveToDetail(row.applicationId) 으로 에러 발생시켜서 상세 페이지 막아둠-->
                                                     <i class="material-icons mdc-button__icon me-1">volume_up</i>
-                                                    <span style="font-weight: bold;">재생</span>
+                                                    <span style="font-weight: bold;">상세</span>
                                                 </div>
                                             </div>
                                             <div v-else>
@@ -375,9 +372,9 @@
                                             </div>
                                         </td>
                                         <td class="mdc-data-table__cell text-center">
-                                            <span v-if="row.sttStatus === 'R' || !row.sttStatus">진행중</span>
-                                            <span v-if="row.sttStatus === 'E'">완료</span>
-                                            <span v-if="row.sttStatus === 4000">재처리</span>
+                                            <span v-if="row.callStatus === 1000 || row.callStatus === 2000">진행중</span>
+                                            <span v-if="row.callStatus === 3000">완료</span>
+                                            <span v-if="row.callStatus === 4000">재처리</span>
                                         </td>
                                         <!--24.01.22 스카이 라이프 재처리 결과 페이지에서 항목 삭제-->
                                         <!--<td class="mdc-data-table__cell text-center">
@@ -540,7 +537,7 @@
     (function () {
 	  const serviceUrlPrefix = $("#smpServiceUriPrefix").val();
 	  const isStreamMode = $("#isStreamMode").val();
-	  const DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/callinfo/{callId}";
+	  const DETAIL_PAGE_SERVICE_URI = location.origin + serviceUrlPrefix + "/callinfo/{applicationId}";
 	  const LABEL = {
 			  message: {
 				  NO_SELECTION : "체크된 콜이 없습니다. 재처리를 위해 하나 이상 체크해주시길 바랍니다.",
@@ -847,9 +844,9 @@
             this.getReprocessLog(applicationId);
           },
           // 상세 화면으로 이동
-          moveToDetail: function(callId) {
+          moveToDetail: function(applicationId) {
 			  //const applicationId = ev.currentTarget.dataset.key;
-              window.index.movePage(DETAIL_PAGE_SERVICE_URI.replace("{callId}", callId));
+              window.index.movePage(DETAIL_PAGE_SERVICE_URI.replace("{applicationId}", applicationId));
 		  },
 		  // 모든 row 선택
 		  selectAllRows: function() {
