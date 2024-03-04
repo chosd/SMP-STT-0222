@@ -1,7 +1,7 @@
 # default config
 spring:
   profiles:
-    active: dev
+    active: local
 
   devtools:
     livereload:
@@ -49,7 +49,7 @@ logging:
     file: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%-37.37logger{36}] [%-30.30M{29} - %-5.5L{4}] - %msg%n"
     console: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%-37.37logger{36}] [%-30.30M{29} - %-5.5L{4}] - %msg%n"
   file:
-    name: /sw/skylife/logs/SMP/stt-smp.log # 원하는 파일명으로 변경 가능
+    name: /sw/medicheck/logs/SMP/stt-smp.log # 원하는 파일명으로 변경 가능
   logback:
     rollingpolicy:
       clean-history-on-start: false
@@ -160,9 +160,9 @@ spring:
   datasource:
     master:
       driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-      url: jdbc:log4jdbc:oracle:thin:@localhost:1521:XE
-      username: c##stt
-      password: SmVvPIG6SyGuSa2cD0QmHg==
+      url: jdbc:log4jdbc:mariadb://218.36.72.120:3306/stt_master?characterEncoding=UTF-8&autoReconnect=true&allowMultiQueries=true
+      username: root
+      password: TMl5gSYTGLfR0qNf/i7maA==
 logging:
   level:
     jdbc:
@@ -172,7 +172,7 @@ logging:
       kt:
         smp: debug
 pagehelper:
-  helper-dialect: oracle		# resources/mapper/다음 폴더명과 일치 oracle, mysql, mariadb, sqlserver, sqlserver2012, postgresql, db2
+  helper-dialect: mariadb		# resources/mapper/다음 폴더명과 일치 oracle, mysql, mariadb, sqlserver, sqlserver2012, postgresql, db2
 ---
 spring:
   config:
