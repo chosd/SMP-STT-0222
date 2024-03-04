@@ -136,7 +136,12 @@
                                     <li class="mdc-deprecated-list-item" :data-value="4000"
                                         @click="searchCondition.callStatus = 4000">
                                         <span class="mdc-deprecated-list-item__ripple"></span>
-                                        <span class="mdc-deprecated-list-item__text">재처리</span>
+                                        <span class="mdc-deprecated-list-item__text">재처리 완료</span>
+                                    </li>
+                                    <li class="mdc-deprecated-list-item" :data-value="5000"
+                                        @click="searchCondition.callStatus = 5000">
+                                        <span class="mdc-deprecated-list-item__ripple"></span>
+                                        <span class="mdc-deprecated-list-item__text">재처리 실패</span>
                                     </li>
                                 </ul>
                             </div>
@@ -304,10 +309,11 @@
                                             scope="col">
                                             콜 상태
                                         </th>
-                                        <th class="mdc-data-table__header-cell text-center" role="columnheader"
+                                        <!--24.03.04 CSD 재처리 상태 컬럼 제거-->
+                                        <!--<th class="mdc-data-table__header-cell text-center" role="columnheader"
                                             scope="col">
                                             재처리 상태
-                                        </th>
+                                        </th>-->
                                     </tr>
                                     </thead>
                                     <tbody class="mdc-data-table__content">
@@ -358,8 +364,8 @@
                                                      :data-key="row.applicationId"
                                                      @click="()=> moveToDetail(row.applicationId)"
                                                      >
-                                                    <i class="material-icons mdc-button__icon me-1">volume_up</i>
-                                                    <span style="font-weight: bold;">재생</span>
+                                                    <!--<i class="material-icons mdc-button__icon me-1">volume_up</i>-->
+                                                    <span style="font-weight: bold;">확인</span>
                                                 </div>
                                             </div>
                                             <div v-else>
@@ -369,9 +375,11 @@
                                         <td class="mdc-data-table__cell text-center">
                                             <span v-if="row.callStatus === 1000 || row.callStatus === 2000">진행중</span>
                                             <span v-if="row.callStatus === 3000">완료</span>
-                                            <span v-if="row.callStatus === 4000">재처리</span>
+                                            <span v-if="row.callStatus === 4000">재처리 완료</span>
+                                            <span v-if="row.callStatus === 5000">재처리 실패</span>
                                         </td>
-                                        <td class="mdc-data-table__cell text-center">
+                                        <!--24.03.04 CSD 재처리 상태 컬럼 제거-->
+                                        <!--<td class="mdc-data-table__cell text-center">
 										<div v-if="row.callStatus === 4000">
                                             <a class="table-icon-btn" :id="'reprocessLogBtn_' + row.applicationId"
                                                 @click="() => openReprocessLogDialog(row.applicationId)">
@@ -388,7 +396,7 @@
 												</div>
 											</div>
 										</template>
-										</td>
+										</td>-->
                                     </tr>
                                     </tbody>
                                 </table>
@@ -549,7 +557,8 @@
 		  1000: "시작",
 		  2000: "진행중",
 		  3000: "완료",
-		  4000: "재처리"
+		  4000: "재처리 완료",
+		  5000: "재처리 실패"
 	  }
       new Vue({
         el: ".contentRoot",

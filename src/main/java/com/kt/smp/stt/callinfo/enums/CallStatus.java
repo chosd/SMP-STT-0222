@@ -22,7 +22,8 @@ public enum CallStatus {
 	START(1000, "시작", "Start"),
 	PROGRESS(2000, "진행중", "Progress"),
 	END(3000, "완료", "End"),
-	REPROCESS(4000, "재처리", "reprocess");
+	REPROCESS(4000, "재처리", "reprocess"),
+	FAIL(5000, "재처리 실패", "fail");
 	
 	@JsonValue  // 클라이언트로 코드가 리턴됨
 	private final Integer statusCode;
