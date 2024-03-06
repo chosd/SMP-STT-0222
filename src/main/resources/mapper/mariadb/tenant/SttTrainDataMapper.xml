@@ -449,7 +449,7 @@
             , USE_YN
             , FIRST_PATH_YN)
         VALUES(
-              NEXTVAL(SEQ_IAAP_STT_TRAIN_AMDATA)
+              NEXTVAL(SEQ_IAAP_STT_TRAIN_AM_DATA)
             , #{modelType}
             , #{serviceModelId}
             , #{datasetName}
@@ -494,7 +494,7 @@
           , USE_YN
           , FIRST_PATH_YN)
         VALUES(
-            NEXTVAL(SEQ_IAAP_STT_TRAIN_AMDATA)
+            NEXTVAL(SEQ_IAAP_STT_TRAIN_AM_DATA)
           , #{modelType}
           , #{serviceModelId}
           , #{datasetName}
