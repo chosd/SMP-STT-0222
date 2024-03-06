@@ -35,7 +35,7 @@ public class CallInfoLogExcelDownloadService{
 	@Autowired
 	private final SttCallInfoRepository sttCallInfoRepository;
 	
-	// 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화f
+	// 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
 	@Autowired
 	private final TextCrypto textCrypto;
 	
