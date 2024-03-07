@@ -11,7 +11,7 @@
 			A.ID verifyId
 			, A.DESCRIPTION verifyName
 			, A.END_AT endAt
-			, A.NAME datasetName
+			, A.DATASET_NAME datasetName
 			, A.DATASET_ID datasetId
 			, A.RESULT_MODEL_ID resultModelId
 			, A.CER avgCer
@@ -21,13 +21,12 @@
 				, H.DESCRIPTION
 				, H.END_AT
 				, H.DEPLOY_ID
-				, D.NAME
+				, H.DATASET_NAME
 				, H.DATASET_ID
 				, DATE_FORMAT(H.REG_DT, '%Y-%m-%d') RESULT_MODEL_ID
 				, H.CER
 				,ROW_NUMBER() over(PARTITION BY H.DATASET_ID,DATE_FORMAT(H.REG_DT, '%Y-%m-%d') ORDER BY H.ID desc) rn
 			FROM IAAP_STT_VERIFY_HISTORY H
-			LEFT OUTER JOIN IAAP_STT_VERIFY_DATASET D ON H.DATASET_ID = D.ID
 			WHERE 1=1 
 				AND H.SERVICE_MODEL_ID = #{serviceCode}
 				AND H.SAVE_YN = 'Y'
