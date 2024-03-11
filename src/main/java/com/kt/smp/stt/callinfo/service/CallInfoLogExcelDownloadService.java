@@ -13,6 +13,7 @@ import org.dhatim.fastexcel.Worksheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.github.pagehelper.PageHelper;
+import com.kt.smp.common.util.crypto.TextCrypto;
 import com.kt.smp.fileutil.constant.ExcelConstants;
 import com.kt.smp.stt.callinfo.dto.CallInfoLogVO;
 import com.kt.smp.stt.callinfo.repository.SttCallInfoRepository;
@@ -33,6 +34,10 @@ public class CallInfoLogExcelDownloadService{
 	
 	@Autowired
 	private final SttCallInfoRepository sttCallInfoRepository;
+	
+	// 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
+	@Autowired
+	private final TextCrypto textCrypto;
 	
     private final static int PAGE_SIZE = 10000;
 
@@ -117,7 +122,8 @@ public class CallInfoLogExcelDownloadService{
             ws.value(row, 4, callInfoDetail.getSttSeq().toString());
             ws.value(row, 5, callInfoDetail.getStartTimeStamp().toString());
             ws.value(row, 6, callInfoDetail.getEndTimeStamp().toString());
-            ws.value(row, 7, callInfoDetail.getSttText());
+            // 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
+            ws.value(row, 7, textCrypto.decrypt(callInfoDetail.getSttText()));
             ws.value(row, 8, callInfoDetail.getConfidence());
             ws.value(row, 9, callInfoDetail.getStartTime());
             ws.value(row, 10, callInfoDetail.getEndTime());
