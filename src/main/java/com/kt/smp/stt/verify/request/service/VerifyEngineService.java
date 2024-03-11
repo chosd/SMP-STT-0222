@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 
 import com.kt.smp.common.util.ExternalApiRequester;
 import com.kt.smp.common.util.JacksonUtil;
+import com.kt.smp.common.util.crypto.TextCrypto;
 import com.kt.smp.stt.comm.directory.service.DirectoryService;
 import com.kt.smp.stt.comm.serviceModel.domain.ServiceModelVO;
 import com.kt.smp.stt.comm.serviceModel.service.ServiceModelService;
@@ -56,6 +57,7 @@ public class VerifyEngineService {
     private final DirectoryService directoryService;
     private final VerifyDataRepository dataRepository;
     private final ExternalApiRequester externalRequestUtil;
+    private final TextCrypto textCrypto;
     
     @Value("${directory.home}")
     private String directoryHome;
@@ -222,7 +224,9 @@ public class VerifyEngineService {
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(answerSheetPath.toFile()))) {
             for (VerifyDataDto data : dataList) {
-                writer.write(data.getWavFileName() + "\t" + data.getDictatedText() + "\n");
+                //writer.write(data.getWavFileName() + "\t" + data.getDictatedText() + "\n");
+                //24.03.05 CSD 검증데이터 복호화
+                writer.write(data.getWavFileName() + "\t" + textCrypto.decrypt(data.getDictatedText()) + "\n");
             }
         } catch (IOException ex) {
             ex.printStackTrace();
