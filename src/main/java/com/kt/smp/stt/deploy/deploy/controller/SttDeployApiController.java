@@ -182,7 +182,7 @@ public class SttDeployApiController {
     	if (sttDeployMngVO.getDeployTarget().equals("host")) {
     		
     		String coreUrl = engineUrlResolver.resolve();
-    		
+    		sttDeployMngVO.setDeployTargetServer(coreUrl);
     		if ("Y".equals(agentConfig.getMultipartHostDeploy())) {
     	    	responseDto = insertDeployMultipart(request, sttDeployMngVO, coreUrl);
     	    	
@@ -193,7 +193,7 @@ public class SttDeployApiController {
     	} else {
     		
     		String coreUrl = engineUrlResolver.resolveSub();
-
+    		sttDeployMngVO.setDeployTargetServer(coreUrl);
     		if ("Y".equals(agentConfig.getMultipartSubDeploy())) {
     	    	responseDto = insertDeployMultipart(request, sttDeployMngVO, coreUrl);
     		} else {
@@ -311,7 +311,7 @@ public class SttDeployApiController {
     	if (sttDeployMngVO.getDeployTarget().equals("host")) {
     		
     		String coreUrl = engineUrlResolver.resolve();
-    		
+    		sttDeployMngVO.setDeployTargetServer(coreUrl);
     		if ("Y".equals(agentConfig.getMultipartHostDeploy())) {
     	    	responseDto = updateDeployMultipart(request, sttDeployMngVO, coreUrl);
 
@@ -322,7 +322,7 @@ public class SttDeployApiController {
     	} else {
     		
     		String coreUrl = engineUrlResolver.resolveSub();
-
+    		sttDeployMngVO.setDeployTargetServer(coreUrl);
     		if ("Y".equals(agentConfig.getMultipartSubDeploy())) {
     	    	responseDto = updateDeployMultipart(request, sttDeployMngVO, coreUrl);
     		} else {
