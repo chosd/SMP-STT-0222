@@ -42,7 +42,7 @@ public class RestTemplateConfig {
 
 	private final ObjectMapper objectMapper;
 
-	@Value("${cms.comm.ignoreSsl:false}")
+	@Value("${core.stt.allow-ssl}")
 	private boolean ignoreSsl;
 
 	/**

@@ -89,13 +89,14 @@ directory:
 
 core:
   stt:
-    protocol: http
+    protocol: http # https 통신 하려면 allow-ssl: true 적용해주기
     # API 통신서버
     host: 112.220.184.107:28182
     host-deploy: 112.220.184.107:28182
     multi-tenancy: false
     channel:
       delay: 3
+    allow-ssl: false
 
 cipher:
   secretKey: 4F8ABBD4EE68E655F42146E87D6E4022	# opaque(=> base64) else aes128 key
