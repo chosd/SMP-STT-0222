@@ -89,7 +89,7 @@ directory:
 
 core:
   stt:
-    protocol: http # https 통신 하려면 allow-ssl: true 적용해주기
+    protocol: http
     # API 통신서버
     host: 112.220.184.107:28182
     host-deploy: 112.220.184.107:28182

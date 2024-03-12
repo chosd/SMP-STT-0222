@@ -19,8 +19,13 @@ public class EngineUrlResolver {
     
     @Value("${core.stt.host-deploy}")
     private String hostDeploy;
+    
+    @Value("${core.stt.allow-ssl}")
+    private boolean useHttps;
 
     private final ConfigService configService;
+    
+    private static final String PROTOCOL_HTTPS = "https://";
 
     public String resolve() {
         return resolve(null);
@@ -31,8 +36,13 @@ public class EngineUrlResolver {
     }
     
     public String resolve(String projectCode) {
-
-        return protocol + "://" + host;
+    	String result = "";
+        if (useHttps) {
+        	result = PROTOCOL_HTTPS + host;
+        }else {
+        	result = protocol + "://" + host;
+        }
+        return result;
 
 //        if (StringUtils.isBlank(projectCode)) {
 //            return protocol + "://" + host;
@@ -42,8 +52,13 @@ public class EngineUrlResolver {
     }
     
     public String resolveSub(String projectCode) {
-    	
-    	return protocol + "://" + hostDeploy;
+    	String result = "";
+        if (useHttps) {
+        	result = PROTOCOL_HTTPS + hostDeploy;
+        }else {
+        	result = protocol + "://" + hostDeploy;
+        }
+        return result;
     }
 
     private String addParamToUrl(String projectCode) {
