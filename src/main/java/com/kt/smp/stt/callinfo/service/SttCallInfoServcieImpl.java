@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -73,6 +75,9 @@ public class SttCallInfoServcieImpl implements SttCallInfoService{
 	@Value("${callinfo.text.masking}")
     private boolean textMaskingRequired;
 	
+	@Value("${callinfo.text.masking_url}")
+    private String maskingRequestUrl;
+		
 	@Value("${callinfo.audio.ext}")
     private String AUDIO_EXT;
 	
@@ -137,9 +142,11 @@ public class SttCallInfoServcieImpl implements SttCallInfoService{
             decodeCallInfoLogText(callInfoLogList);
         }
 
-        // 문자열 마스킹
+        // 문자열 마스킹 ( 기존 masking -> restAPI masking 호출로 변경 2324.03.14 )
         if (textMaskingRequired) {
-            maskCallInfoLogText(callInfoLogList);
+//            maskCallInfoLogText(callInfoLogList);
+            maskingRequestAndResponse(callInfoLogList);
+            
         }
 
         return result;
@@ -172,9 +179,10 @@ public class SttCallInfoServcieImpl implements SttCallInfoService{
             decodeCallInfoLogText(callInfoLogList);
         }
 
-        // 문자열 마스킹
+        // 문자열 마스킹 ( 기존 masking -> restAPI masking 호출로 변경 2324.03.14 )
         if (textMaskingRequired) {
-            maskCallInfoLogText(callInfoLogList);
+//            maskCallInfoLogText(callInfoLogList);
+            maskingRequestAndResponse(callInfoLogList);
         }
 
         return result;
@@ -245,6 +253,45 @@ public class SttCallInfoServcieImpl implements SttCallInfoService{
 		for (CallInfoLogVO callInfoLog : callInfoLogList) {
 			String decodedText = CommUtil.maskPhoneNumberInText(callInfoLog.getSttText());
 			callInfoLog.setSttText(decodedText);
+		}
+	}
+	
+	/**
+	 * 인식결과 Text Masking 요청.
+	 * @author JangJoongHwan.
+	 * @param callInfoLogList iaap_stt_call_info 테이블 VO List
+	 * @see request masking 수신 규격 데이터.
+	 * ex) {"text":"2024년02월27일 테스트 데이터 입니다. 전화번호 010에1111에2222이고 생년월일은 001011이요."}
+	 * @see response masking 송신 규격 데이터.
+	 * ex) {"code": "0", "message": "normal_success", "text": "****년02월27일 테스트 데이터 입니다. 전화번호 ***에****에****이고 생년월일은 ******이요."}
+	 * */
+	@SuppressWarnings("unchecked")
+	private void maskingRequestAndResponse(List<CallInfoLogVO> callInfoLogList) {
+		String requestUrl = maskingRequestUrl;
+		
+		
+		for (CallInfoLogVO callInfoLog : callInfoLogList) {
+			JSONObject baseForm = null;  // request data form
+			JSONObject jsonObj = null;   // response data form
+			JSONParser jsonParse = null; // response passing form
+
+			baseForm = new JSONObject();
+			baseForm.put("text", callInfoLog.getSttText());
+			log.debug(">>> Request Api Masking Data Form : {}", baseForm);
+			
+			ResponseEntity<String> responseEntity = restTemplate.postForEntity(requestUrl, baseForm, String.class);
+	        String decodedText = responseEntity.getBody();
+	        log.debug(">>> Response Api Masking Data Form : {}", decodedText);
+	        
+	        jsonParse = new JSONParser();
+			try {
+				jsonObj = (JSONObject) jsonParse.parse(decodedText);
+				String maskingData = (String) jsonObj.get("text");
+				callInfoLog.setSttText(maskingData);
+				
+			} catch (org.json.simple.parser.ParseException e) {
+				callInfoLog.setSttText("Masking Api Reqeust failed : " + e.toString());
+			} 
 		}
 	}
 
