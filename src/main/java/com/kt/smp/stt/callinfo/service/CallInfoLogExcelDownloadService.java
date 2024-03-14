@@ -10,8 +10,14 @@ import java.util.List;
 import org.dhatim.fastexcel.Color;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
 import com.github.pagehelper.PageHelper;
 import com.kt.smp.common.util.crypto.TextCrypto;
 import com.kt.smp.fileutil.constant.ExcelConstants;
@@ -35,9 +41,14 @@ public class CallInfoLogExcelDownloadService{
 	@Autowired
 	private final SttCallInfoRepository sttCallInfoRepository;
 	
+	@Value("${callinfo.text.masking_url}")
+    private String maskingRequestUrl;
+	
 	// 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
 	@Autowired
 	private final TextCrypto textCrypto;
+	
+	private final RestTemplate restTemplate;
 	
     private final static int PAGE_SIZE = 10000;
 
@@ -105,7 +116,8 @@ public class CallInfoLogExcelDownloadService{
 		wb.finish();
 	}
 
-    public void makePage(Worksheet ws, int pageStartRowIdx, int sheetIndex, String applicationId) throws IOException {
+    @SuppressWarnings("unchecked")
+	public void makePage(Worksheet ws, int pageStartRowIdx, int sheetIndex, String applicationId) throws IOException {
         PageHelper.startPage(
                 pageStartRowIdx / getPageSize() + (sheetIndex * ExcelConstants.MAX_ROWS_PER_SHEET / getPageSize()) + 1,
                 getPageSize());
@@ -115,6 +127,11 @@ public class CallInfoLogExcelDownloadService{
         int row = pageStartRowIdx + 1;
 
         for (CallInfoLogVO callInfoDetail : results) {
+        	JSONObject baseForm = null;  // request data form
+			JSONObject jsonObj = null;   // response data form
+			JSONParser jsonParse = null; // response passing form
+			String maskingText = null;
+        	
             ws.value(row, 0, callInfoDetail.getSttResultIdx().toString());
             ws.value(row, 1, callInfoDetail.getSttId());
             ws.value(row, 2, callInfoDetail.getSpeakerType());
@@ -122,8 +139,27 @@ public class CallInfoLogExcelDownloadService{
             ws.value(row, 4, callInfoDetail.getSttSeq().toString());
             ws.value(row, 5, callInfoDetail.getStartTimeStamp().toString());
             ws.value(row, 6, callInfoDetail.getEndTimeStamp().toString());
+            
+            // 24.03.14 jjh: 엑셀 다운시 text 마스킹 처리 로직 추가.
+            String decText = textCrypto.decrypt(callInfoDetail.getSttText());
+            
+            baseForm = new JSONObject();
+			baseForm.put("text", decText);
+			
+			ResponseEntity<String> responseEntity = restTemplate.postForEntity(maskingRequestUrl, baseForm, String.class);
+	        String decodedText = responseEntity.getBody();
+	        
+	        jsonParse = new JSONParser();
+			try {
+				jsonObj = (JSONObject) jsonParse.parse(decodedText);
+				maskingText = (String) jsonObj.get("text");
+
+			} catch (org.json.simple.parser.ParseException e) {
+				maskingText = "Masking Api Reqeust failed : " + e.toString();
+			}
             // 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
-            ws.value(row, 7, textCrypto.decrypt(callInfoDetail.getSttText()));
+            ws.value(row, 7, maskingText);
+
             ws.value(row, 8, callInfoDetail.getConfidence());
             ws.value(row, 9, callInfoDetail.getStartTime());
             ws.value(row, 10, callInfoDetail.getEndTime());
