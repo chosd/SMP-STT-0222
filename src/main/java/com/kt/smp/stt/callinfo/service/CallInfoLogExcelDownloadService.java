@@ -23,6 +23,7 @@ import com.kt.smp.common.util.crypto.TextCrypto;
 import com.kt.smp.fileutil.constant.ExcelConstants;
 import com.kt.smp.stt.callinfo.dto.CallInfoLogVO;
 import com.kt.smp.stt.callinfo.repository.SttCallInfoRepository;
+import com.kt.smp.stt.callinfo.service.RestApiMaskingService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,6 +44,8 @@ public class CallInfoLogExcelDownloadService{
 	
 	@Value("${callinfo.text.masking_url}")
     private String maskingRequestUrl;
+	
+	private final RestApiMaskingService restMaskServie;
 	
 	// 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
 	@Autowired
@@ -139,25 +142,13 @@ public class CallInfoLogExcelDownloadService{
             ws.value(row, 4, callInfoDetail.getSttSeq().toString());
             ws.value(row, 5, callInfoDetail.getStartTimeStamp().toString());
             ws.value(row, 6, callInfoDetail.getEndTimeStamp().toString());
-            
-            // 24.03.14 jjh: 엑셀 다운시 text 마스킹 처리 로직 추가.
+
+            // 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
             String decText = textCrypto.decrypt(callInfoDetail.getSttText());
             
-            baseForm = new JSONObject();
-			baseForm.put("text", decText);
-			
-			ResponseEntity<String> responseEntity = restTemplate.postForEntity(maskingRequestUrl, baseForm, String.class);
-	        String decodedText = responseEntity.getBody();
-	        
-	        jsonParse = new JSONParser();
-			try {
-				jsonObj = (JSONObject) jsonParse.parse(decodedText);
-				maskingText = (String) jsonObj.get("text");
-
-			} catch (org.json.simple.parser.ParseException e) {
-				maskingText = "Masking Api Reqeust failed : " + e.toString();
-			}
-            // 24.03.03 lmh : 재처리 결과 엑셀 다운로드 시 stt 복호화
+            // 24.03.14 jjh: 엑셀 다운시 text 마스킹 처리 로직 추가.
+            maskingText = restMaskServie.requestMask(maskingRequestUrl, decText);
+            
             ws.value(row, 7, maskingText);
 
             ws.value(row, 8, callInfoDetail.getConfidence());
