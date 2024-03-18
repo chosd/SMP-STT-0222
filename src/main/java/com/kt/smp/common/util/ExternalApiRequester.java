@@ -3,6 +3,14 @@
  */
 package com.kt.smp.common.util;
 
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -70,7 +78,9 @@ public class ExternalApiRequester {
 	public BaseResultDto requestPostWithSavingError(String apiPath, String hostUrl, Object requestDto) {
 		
 		String requestUrl = hostUrl + apiPath;
-		
+		if(hostUrl.contains("https")) {
+		    ignoreSSL();
+		}
 		BaseResultDto responseDto = new BaseResultDto();
 		
 		try {
@@ -159,6 +169,38 @@ public class ExternalApiRequester {
 	private void setResponseDto(BaseResultDto responseDto, String code, String resultMsg) {
 		responseDto.setResultCode(code);
 		responseDto.setResultMsg(resultMsg);
+	}
+	private void ignoreSSL() {
+
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
 	}
 	
 }

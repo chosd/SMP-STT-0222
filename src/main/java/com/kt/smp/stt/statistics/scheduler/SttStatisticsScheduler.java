@@ -7,10 +7,17 @@ import static com.kt.smp.stt.comm.preference.PreferenceValueHolder.schedulerActi
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -372,7 +379,9 @@ public class SttStatisticsScheduler {
     	String url = engineUrlResolver.resolve(null);
         String statisticsUrl = url + CORE_STATISTICS_URL;
         ResponseEntity<SttStatisticsResponseDto> responseEntity = null;
-
+        if(url.contains("https")) {
+		    ignoreSSL();
+		}
         try {
             responseEntity = restTemplate.getForEntity(statisticsUrl
                     , SttStatisticsResponseDto.class
@@ -448,4 +457,37 @@ public class SttStatisticsScheduler {
 
         return prevMinute;
     }
+    
+    private void ignoreSSL() {
+
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
+	}
 }

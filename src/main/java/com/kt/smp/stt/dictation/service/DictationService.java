@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -26,6 +28,10 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -1058,7 +1064,9 @@ public class DictationService {
       String coreUrl = engineUrlResolver.resolve();
       if (depUrl) coreUrl = engineUrlResolver.resolveSub("");
       log.info("URL >>> {}", coreUrl + url + requestType);
-
+      if(coreUrl.contains("https")) {
+		    ignoreSSL();
+      }
       responseEntity = restTemplate.postForEntity(coreUrl + url + requestType, makeRequestData(dto, requestType), String.class);
       if (responseEntity == null) {
         throw new DictationException("반환값이 전달되지 않았습니다");
@@ -1320,4 +1328,37 @@ public class DictationService {
   public int findIdBySttLogId(Integer sttLogId) {
     return dictationRepository.findIdBySttLogId(sttLogId);
   }
+  
+  private void ignoreSSL() {
+
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
+	}
 }

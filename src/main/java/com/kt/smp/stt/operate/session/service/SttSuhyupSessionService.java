@@ -1,9 +1,16 @@
 package com.kt.smp.stt.operate.session.service;
 
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -166,6 +173,9 @@ public class SttSuhyupSessionService implements SttSessionService {
     	} else {
     		coreUrl = engineUrlResolver.resolveSub(null);	
     	}
+    	if(coreUrl.contains("https")) {
+		    ignoreSSL();
+		}
     	
         ResponseEntity<SttSessionResponseDto> responseEntity = null;
         List<SttServerInfoDto> array = new ArrayList<>();
@@ -351,6 +361,39 @@ public class SttSuhyupSessionService implements SttSessionService {
 				serverSessionInfo.setSessionMaxCnt(eachSessionMaxCount);
 			}
 		}
+	}
+	
+	private void ignoreSSL() {
+
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
 	}
 	
 }

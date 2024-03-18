@@ -24,11 +24,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kt.smp.common.exception.SttException;
@@ -468,6 +474,9 @@ public class SttTrainApiController {
 //        String serviceCode = Long.toString(sttTrainVO.getServiceModelId());
         String serviceCode = sttTrainVO.getServiceModelId() + "";
         String coreUrl = profile.equals(CommonConstants.LOCAL_PROFILE) ? engineUrlResolver.resolve() : engineUrlResolver.resolve(projectCode);
+        if(coreUrl.contains("https")) {
+		    ignoreSSL();
+		}
         ResponseEntity<SttTrainStatusResponseDto> responseEntity
                 = restTemplate.getForEntity(coreUrl + STT_TRAIN_STATUS_URL + serviceCode
                 , SttTrainStatusResponseDto.class);
@@ -946,5 +955,37 @@ public class SttTrainApiController {
         // 현재 KT경로에 맞게 임의 수정, 거기서는 프로젝트코드명 폴더 미사용
         return directoryHome;
     }
+    
+    private void ignoreSSL() {
 
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
+	}
 }

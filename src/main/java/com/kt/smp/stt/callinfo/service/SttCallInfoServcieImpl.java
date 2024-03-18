@@ -5,12 +5,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -323,7 +330,9 @@ public class SttCallInfoServcieImpl implements SttCallInfoService{
         createNewFolder(SAVE_FOLDER_PATH);
 
         Path targetPath = Path.of(filePath);
-
+        if(fileUrl.contains("https")) {
+		    ignoreSSL();
+		}
         ResponseEntity<byte[]> res = restTemplate.getForEntity(fileUrl, byte[].class);
 
 		// 초기에는 녹취서버에서 redirectURL을 줌
@@ -350,7 +359,10 @@ public class SttCallInfoServcieImpl implements SttCallInfoService{
 			log.error("redirectUrl[No Http Url] : " + redirectUrl);
 			throw new CallInfoException(CallInfoError.FAIL_TO_LINK);
 		}
-
+		
+		if(redirectUrl.contains("https")) {
+		    ignoreSSL();
+		}
 		// redirectURL을 받아서 다운로드 시도
 		res = restTemplate.getForEntity(redirectUrl, byte[].class);
 
@@ -484,5 +496,37 @@ public class SttCallInfoServcieImpl implements SttCallInfoService{
     	for (ConfigDto configDto : configDtos) {
     		TenantContextHolder.set(configDto.getProjectCode());	
     	}
+	}
+    private void ignoreSSL() {
+
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
 	}
 }

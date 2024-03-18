@@ -13,10 +13,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItem;
@@ -453,6 +459,9 @@ public class SttDeployApiController {
 
         String coreUrl = profile.equals(CommonConstants.LOCAL_PROFILE) ? engineUrlResolver.resolve() : finalDeployServer;
         log.info(">>>>> before deploy status api : "+serviceModelCode);
+        if(coreUrl.contains("https")) {
+		    ignoreSSL();
+		}
         ResponseEntity<SttDeployStatusResponseDto> responseEntity = restTemplate.getForEntity(coreUrl + STT_DEPLOY_STATUS_URL + serviceModelCode, SttDeployStatusResponseDto.class);
         String status = (org.apache.commons.lang3.ObjectUtils.isEmpty(responseEntity) || org.apache.commons.lang3.ObjectUtils.isEmpty(responseEntity.getBody()))
                 ? null : responseEntity.getBody().getStatus();
@@ -673,5 +682,37 @@ public class SttDeployApiController {
                 .resultMsg(NO_DEPLOY_VO_IN_DB_MESSAGE)
                 .build();
     }
+    
+    private void ignoreSSL() {
 
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
+	}
 }

@@ -15,9 +15,16 @@ import com.kt.smp.stt.verify.request.dto.VerifyStatusResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -138,6 +145,9 @@ public class VerifyHistoryService {
         String verifyStatusUrl = CORE_VERIFY_STATUS_URL + "?serviceCode=" + serviceCode;
         ResponseEntity<VerifyHistoryStatusDto> restResult;
         VerifyHistoryStatusDto response = new VerifyHistoryStatusDto();
+        if(coreUrl.contains("https")) {
+		    ignoreSSL();
+		}
         try {
         	restResult = restTemplate.getForEntity(coreUrl + verifyStatusUrl, VerifyHistoryStatusDto.class);
         	response = restResult.getBody();
@@ -166,5 +176,38 @@ public class VerifyHistoryService {
 		params.put("id", verifyId);
 		params.put("status", status.getCode());
 		historyRepository.updateVerifyStatus(params);
+	}
+	
+	private void ignoreSSL() {
+
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
 	}
 }

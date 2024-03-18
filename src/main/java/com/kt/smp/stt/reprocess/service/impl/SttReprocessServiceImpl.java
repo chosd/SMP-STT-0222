@@ -3,7 +3,14 @@
  */
 package com.kt.smp.stt.reprocess.service.impl;
 
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.LinkedMultiValueMap;
@@ -53,7 +60,9 @@ public class SttReprocessServiceImpl implements SttReprocessService {
 		Integer fileSendType = isMultipart ? 0 : 1;
 		
 		String coreUrl = engineUrlResolver.resolve();
-		
+		if(coreUrl.contains("https")) {
+		    ignoreSSL();
+		}
 		for (SttReprocessRequestDto dto : sttReprocessRequestDto) {
 			
 			Integer txRxType = dto.getSpeakerType().equals("TX") ? 0 : dto.getSpeakerType().equals("RX") ? 1 : 2;
@@ -89,5 +98,37 @@ public class SttReprocessServiceImpl implements SttReprocessService {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	private void ignoreSSL() {
 
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
+	}
 }

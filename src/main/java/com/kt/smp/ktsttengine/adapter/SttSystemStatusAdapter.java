@@ -17,6 +17,14 @@ import com.kt.smp.stt.statistics.dto.SttSystemStatusResponseDto;
 
 import static com.kt.smp.stt.common.component.SttCmsResultStatus.*;
 
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +49,9 @@ public class SttSystemStatusAdapter {
 		String coreUrl = engineUrlResolver.resolve(null); 
 		ResponseEntity<SttSystemStatusResponseDto> serverListApiResponseEntity = null;
 		SttSystemStatusResponseDto serverListApiResult = null;
-		
+		if(coreUrl.contains("https")) {
+		    ignoreSSL();
+		}
 		try {
 			serverListApiResponseEntity = restTemplate.getForEntity(coreUrl + CORE_STT_HW_RESOURCE_URL, SttSystemStatusResponseDto.class);
 			} catch(RestClientException e) {
@@ -77,5 +87,38 @@ public class SttSystemStatusAdapter {
 		dummyServerInfo.setLastCheckTime(sdf.format(System.currentTimeMillis()));
 		
 		return dummyServerInfo;
+	}
+	
+	private void ignoreSSL() {
+
+	    TrustManager[] trustAllCerts = new TrustManager[] {
+	        new X509TrustManager() {
+
+	            @Override
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+
+	            }
+
+	            @Override
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        }
+	    };
+
+	    try {
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	    } catch (Exception e) {
+	        log.error("[ERROR] ignoreSSL : {}", e.getMessage());
+	    }
+
 	}
 }
