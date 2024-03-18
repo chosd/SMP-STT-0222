@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -233,11 +234,14 @@ public class SttDeployApiController {
             
             responseDto.setResultCode(sttDeployResponseDto.getResultCode());
             responseDto.setResultMsg(resultDescription);
-            
-            if(!sttDeployResponseDto.getResultCode().equals(ResultCode.SUCCESS.getCode())) {
-                insertSttDeployMngVO(request, sttDeployMngVO);
+            if (ObjectUtils.isEmpty(sttDeployResponseDto)) {
+            	responseDto.setResultCode(sttDeployResponseDto.getResultCode());
+                responseDto.setResultMsg(resultDescription);	
+            }else if(!sttDeployResponseDto.getResultCode().equals(ResultCode.SUCCESS.getCode())) {
+            	responseDto.setResultCode(sttDeployResponseDto.getResultCode());
+                responseDto.setResultMsg(resultDescription);
             }
-            
+            insertSttDeployMngVO(request, sttDeployMngVO);
         } else {
             insertSttDeployMngVO(request, sttDeployMngVO);
             SttDeployMngVO newSttDeployMngVO = sttDeployMngService.detailByResultModelId(sttDeployMngVO.getResultModelId());
