@@ -247,7 +247,7 @@ public class SttResultModelIdApiController {
         jsonObject.addProperty("serviceModel", org.springframework.util.ObjectUtils.isEmpty(sttTrainVO)
                 ? serviceModelService.detailS(sttDeployModelVO.getServiceModelId() + "").getServiceModelName() 
                 		: serviceModelService.detailS(sttTrainVO.getServiceModelId() + "").getServiceModelName());
-        if(sttTrainVO.getModelType().equals("CALSS")||sttTrainVO.getModelType().equals("SERVICE")||sttTrainVO.getModelType().equals("E2ELM")) {
+        if(sttTrainVO.getModelType().equals("CLASS")||sttTrainVO.getModelType().equals("SERVICE")||sttTrainVO.getModelType().equals("E2ELM")) {
         	jsonObject.addProperty("dataNum", ObjectUtils.isEmpty(sttTrainVO)? sttDeployModelVO.getDataNum() : sttTrainVO.getDataNum());	
         }else {
         	jsonObject.addProperty("dataTime", ObjectUtils.isEmpty(sttTrainVO)? sttDeployModelVO.getDataTime() : sttTrainVO.getDataTime());
