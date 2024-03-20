@@ -228,8 +228,8 @@ public class SttDeployApiController {
             responseDto.setResultCode(sttDeployResponseDto.getResultCode());
             responseDto.setResultMsg(resultDescription);
             if (ObjectUtils.isEmpty(sttDeployResponseDto)) {
-            	responseDto.setResultCode(sttDeployResponseDto.getResultCode());
-                responseDto.setResultMsg(resultDescription);	
+            	responseDto.setResultCode(ResultCode.INTERNAL_SERVER_ERROR.getCode());
+                responseDto.setResultMsg(ResultCode.INTERNAL_SERVER_ERROR.getDescription());
             }else if(!sttDeployResponseDto.getResultCode().equals(ResultCode.SUCCESS.getCode())) {
             	responseDto.setResultCode(sttDeployResponseDto.getResultCode());
                 responseDto.setResultMsg(resultDescription);
