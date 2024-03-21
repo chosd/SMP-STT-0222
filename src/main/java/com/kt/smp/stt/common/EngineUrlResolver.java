@@ -54,7 +54,9 @@ public class EngineUrlResolver {
     public String resolveSub(String projectCode) {
     	String result = "";
         if (useHttps) {
-        	result = PROTOCOL_HTTPS + hostDeploy;
+        	//24.03.20 CSD 스카이라이프 host-deploy 통신은 http로
+        	//result = PROTOCOL_HTTPS + hostDeploy;
+        	result = protocol + "://" + hostDeploy;
         }else {
         	result = protocol + "://" + hostDeploy;
         }
