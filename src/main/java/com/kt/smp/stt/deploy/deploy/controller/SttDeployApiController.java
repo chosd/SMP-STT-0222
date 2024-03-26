@@ -276,13 +276,16 @@ public class SttDeployApiController {
         		BaseResultDto apiDeployMultipartResult = callCoreDeployApiMultipart(request, sttDeployMngVO, resultModelVO.getModelType(), file, hostUrl);;
         		String resultDescription = ResultCode.findByCode(apiDeployMultipartResult.getResultCode()).getDescription();
                 
-                responseDto.setResultCode(apiDeployMultipartResult.getResultCode());
+        		responseDto.setResultCode(apiDeployMultipartResult.getResultCode());
                 responseDto.setResultMsg(resultDescription);
-                
-                if(apiDeployMultipartResult.getResultCode().equals(ResultCode.SUCCESS.getCode())) {
-                    insertSttDeployMngVO(request, sttDeployMngVO);
+                if (ObjectUtils.isEmpty(apiDeployMultipartResult)) {
+                    responseDto.setResultCode(ResultCode.INTERNAL_SERVER_ERROR.getCode());
+                    responseDto.setResultMsg(ResultCode.INTERNAL_SERVER_ERROR.getDescription());
+                }else if(!apiDeployMultipartResult.getResultCode().equals(ResultCode.SUCCESS.getCode())) {
+                	responseDto.setResultCode(apiDeployMultipartResult.getResultCode());
+                    responseDto.setResultMsg(resultDescription);
                 }
-                
+                insertSttDeployMngVO(request, sttDeployMngVO);
         	} catch(IOException e) {
         		responseDto.setResultCode(SttCmsResultStatus.NO_FILE.getResultCode());
         		responseDto.setResultMsg(SttCmsResultStatus.NO_FILE.getDescription());
