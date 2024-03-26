@@ -3,10 +3,13 @@ package com.kt.smp.stt.common;
 import com.kt.smp.multitenancy.dto.ConfigDto;
 import com.kt.smp.multitenancy.service.ConfigService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class EngineUrlResolver {
@@ -42,6 +45,7 @@ public class EngineUrlResolver {
         }else {
         	result = protocol + "://" + host;
         }
+        log.info(">>>>> REQEST resolveURL(host) : "+result);
         return result;
 
 //        if (StringUtils.isBlank(projectCode)) {
@@ -60,6 +64,7 @@ public class EngineUrlResolver {
         }else {
         	result = protocol + "://" + hostDeploy;
         }
+        log.info(">>>>> REQEST resolveURL(hostDeploy) : "+result);
         return result;
     }
 

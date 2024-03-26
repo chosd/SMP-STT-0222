@@ -46,7 +46,7 @@ public class SttSystemStatusAdapter {
 	private static final String CORE_STT_HW_RESOURCE_URL = "/stt/systemStatus";
 	
 	public SttSystemStatusResponseDto getSystemStatus() {
-		String coreUrl = engineUrlResolver.resolve(null); 
+		String coreUrl = engineUrlResolver.resolveSub(null); 
 		ResponseEntity<SttSystemStatusResponseDto> serverListApiResponseEntity = null;
 		SttSystemStatusResponseDto serverListApiResult = null;
 		if(coreUrl.contains("https")) {
