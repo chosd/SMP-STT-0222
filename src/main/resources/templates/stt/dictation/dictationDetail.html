@@ -382,7 +382,8 @@
 		                var transcriptInput = $("#transcriptInput");
 		                var dictatedTextInput = $("#dictatedTextInput");
 		
-		                if (ev.keyCode === KEYCODE.LEFT) {
+						//24.03.26 CSD <- -> 키 이벤트 제거
+		                /*if (ev.keyCode === KEYCODE.LEFT) {
 		
 		                    if (!goPrevBtn.prop('disabled')) {
 		                        goPrevBtn.click();
@@ -396,7 +397,7 @@
 		                        goNextBtn.click();
 		                    }
 		                    return;
-		                }
+		                }*/
 		
 		                if (ev.keyCode === KEYCODE.DOWN) {
 		                    dictatedTextInput.data('textField').value = transcriptInput.data('textField').value;
